@@ -30,11 +30,11 @@ rna_complete <- rna %>%
   
 temp <- rna_complete %>%
   filter(cond != "ctrl_leg") %>%
-  filter(time != "post1w", 
-         rna/tissue_weight < 1200) %>%
+  filter(time != "post1w") %>%
   
-  group_by(participant,leg, time,time.c, cond, tissue_weight) %>%
-  summarise(rna = mean(rna, na.rm = TRUE)) %>%
+  group_by(participant,leg, time,time.c, cond, ) %>%
+  summarise(rna = mean(rna, na.rm = TRUE), 
+            tissue_weight = mean(tissue_weight, na.rm = TRUE)) %>%
   ungroup() %>%
   mutate(participant = factor(participant), 
          cond = factor(cond), 
@@ -43,24 +43,21 @@ temp <- rna_complete %>%
          time.c.cent = time.c - 4) %>%
   print()
  
+
+temp %>%
+  ggplot(aes(time.c, rna.tissue, 
+             color = cond,
+             group = paste0(participant, leg))) + geom_line() +
+  facet_wrap(~ participant)
+
+
+
+
+
+
 library(gamm4); library(gamm4.test); 
 library(ggeffects); library(brms)
 
-
-
-
-
-
-
-
-
-m0.gamm <- gamm4(rna.tissue ~  s(time.c, k = 7), 
-                 random = ~ (1|participant), 
-                 data = temp)
-
-m1.gamm <- gamm4(rna.tissue ~ s(time.c.cent, k = 7, by = cond), 
-            random = ~ (1|participant), 
-            data = temp)
 
 
 
@@ -70,19 +67,86 @@ f1 <- lme(rna ~ tw + time * cond, random = list(participant = ~ 1, leg = ~ 1),
 
 plot(f1)
 
-
-
-m1 <- gam(rna ~  tw + s(time.c, by = cond, k = 7) +  s(participant, bs = "re"), 
-          data = temp)
-
-m2 <- gam(rna ~ tw +  s(time.c, by = cond, k = 7) +  s(participant, bs = "re"), 
+m0 <- gam(rna ~ tw + cond + time.c +  s(participant, bs = "re"), 
           data = temp, method = "REML")
 
+m1 <- gam(rna ~ tw + cond +  s(time.c,  k = 7) +  s(participant, bs = "re"), 
+          data = temp, method = "ML", select = TRUE)
 
-m1.brm <- brm(bf(rna ~ tw +  s(time.c, by = cond, k = 7) +  s(participant, bs = "re")), 
+m2 <- gam(rna ~ tw +  s(time.c, bs = "ds",  by = cond, k = 7) +  s(participant, bs = "re"), 
+          data = temp, method = "ML", select = TRUE)
+
+m3 <- gam(rna ~ tw +  s(time.c, bs = "tp", k = 7,  by = cond) + cond +  s(participant, bs = "re"), 
+          data = temp, method = "ML", select = TRUE)
+
+
+pr <- ggpredict(m3, c("time.c", "cond"), type = "re")
+
+plot(pr)
+
+summary(m3)
+
+dev.off()
+?s
+anova(m0, m1, test = "F")
+
+summary(m2)
+
+
+predict(m1, newdata = data.frame(time.c = c(0, seq(1:12), 0, seq(1:12)), 
+                                 cond = rep(c("var", "const"), each = 13)), 
+        type = "response")
+
+
+
+plot(m1, pages = 1)
+gam.check(m1)
+
+
+
+
+m0.brm <- brm(rna ~ tw +  s(time.c, k = 7) +  s(participant, bs = "re"),
+              control = list(adapt_delta = 0.99),
+              cores = 16,
+              chains = 4,
+              data = temp)
+m1.brm <- brm(rna ~ tw +  s(time.c, by = cond, k = 7) +  s(participant, bs = "re"),
+              control = list(adapt_delta = 0.99),
+              cores = 16,
+              chains = 4,
               data = temp)
 
 
+
+
+AIC(m0, m1)
+
+
+
+summary(m1)
+summary(m1.brm)
+
+pp_check(m1.brm)
+
+plot(conditional_effects(m1.brm), points = TRUE)
+
+
+mx <- brm(rna ~ tw + time*cond +  (1|participant), 
+          chains = 2, silent = FALSE,
+          cores = 12, data = temp)
+
+
+loo(m0.brm, m1.brm)
+
+
+library(brms)
+bprior1 <- prior(student_t(5,0,10), class = b) +
+  prior(cauchy(0,2), class = sd)
+fit1 <- brm(count ~ zAge + zBase * Trt + (1|patient),
+            chains = 1,
+            data = epilepsy, family = poisson(), prior = bprior1)
+
+summary(fit1)
 
 
 anova(m1, m2, test = "Chisq")
@@ -91,9 +155,9 @@ gam.check(m2)
 
 
 
-plot(m2, pages = 1, unconditional = FALSE)
+plot(m1, pages = 1, unconditional = FALSE)
 
-pr <- ggpredict(m2, c("time.c", "cond"), type = "fe")
+pr <- ggpredict(m1, c("time.c", "cond"), type = "re")
 
 plot(pr)
 
@@ -142,6 +206,91 @@ temp %>%
   geom_text_repel(data = . %>%
                     filter(rna/tissue_weight > 1200), 
                   aes(label = paste(participant, sample)))
+  
+  
+  ############### Time as factor expr vs. control #################
+
+  temp <- rna_complete %>%
+    filter(time %in% c("S0", "S1", "S1c",  "S12", "postctrl", "post1w")) %>%
+    mutate(Time = if_else(time == "S1c", "S1", 
+                          if_else(time %in% c("post1w", "postctrl", "S12"), 
+                                  "post", as.character(time))), 
+           tw = tissue_weight - mean(tissue_weight), 
+           Time = factor(Time, levels = c("S0", "S1", "post"))) %>%
+   # group_by(participant, Time, detrain, cond) %>%
+   # summarise(rna = mean(rna), 
+   #           tw = mean(tw)) %>%
+    mutate(Cond = paste(Time, cond, detrain, sep = ":"), 
+           participant = factor(participant),
+           detrain = factor(detrain, levels = c("train", "detrain")), 
+           sample = paste0(participant, leg, time)) %>%
+    filter(time != "post1w") %>%
+    mutate(grp = if_else(cond == "ctrl_leg", "ctrl", "expr")) %>%
+
+    print()
+    
+    
+  m1 <- lme(log(rna) ~ tw + Time * grp, 
+            random = list(participant = ~ 1, leg = ~ 1, sample = ~ 1), 
+            data = temp)  
+  
+  
+  summary(m1)
+  
+  
+  mx <- gam(rna ~ tw + Time * cond + detrain + detrain:cond + s(participant, bs = "re"), 
+            method = "REML", data = temp)
+  
+  summary(mx)
+  
+  plot(m1)
+  summary(m1)
+  
+
+  temp %>%
+    filter(cond == "ctrl_leg") %>%
+    group_by(participant, time) %>%
+    summarise(rna = mean(rna), 
+              tissue_weight = mean(tissue_weight)) %>%
+    ggplot(aes(time, rna/tissue_weight, group = paste(participant), 
+               label = participant)) + geom_line() + geom_text() + 
+    geom_point()
+  
+  
+  
+  
+  mean(temp$tissue_weight)
+  
+  
+  emmeans(m1, specs = ~ "Time|grp") %>%
+    data.frame() %>%
+
+    mutate(time = factor(Time, levels = c("S0", "S1", "post"))) %>%
+    ggplot(aes(time, exp(emmean)/ mean(temp$tissue_weight), fill = grp)) + 
+    
+    
+    geom_errorbar(aes(ymin = exp(lower.CL)/ mean(temp$tissue_weight),  ymax = exp(upper.CL)/ mean(temp$tissue_weight)), 
+                  width = 0.15, 
+                  position = position_dodge(width = 0.1)) +
+    geom_point(size = 3, position = position_dodge(width = 0.1)) + 
+    
+    scale_shape_manual(values = c(21,22))
+  
+  
+  filter(cond != "ctrl_leg") %>%
+    filter(time != "post1w") %>%
+    
+    group_by(participant,leg, time,time.c, cond, ) %>%
+    summarise(rna = mean(rna, na.rm = TRUE), 
+              tissue_weight = mean(tissue_weight, na.rm = TRUE)) %>%
+    ungroup() %>%
+    mutate(participant = factor(participant), 
+           cond = factor(cond), 
+           rna.tissue = log(rna/tissue_weight), 
+           tw = tissue_weight - mean(tissue_weight), 
+           time.c.cent = time.c - 4) %>%
+    print()
+  
   
   
   
