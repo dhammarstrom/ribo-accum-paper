@@ -18,10 +18,15 @@ qdat <- readRDS("./data/derivedData/qpcr/qpcr_compiled.RDS")
 nf <- qdat %>%
   filter(target == "Lambda KIT") %>%
   filter(cq > 5) %>% # Removes bad reactions
-  mutate(nf.w = (eff ^ -cq) * tissue_weight) %>%
+  mutate(nf.w = (eff ^ -cq) * tissue_weight,
+        time = factor(time, levels = c("S0", "S1","S1c", 
+                                 "S4", "S5", "S8", 
+                                 "S9", "S12", "post1w", "postctrl"))) %>%
   dplyr::select(participant, leg, time, cdna, nf.w) %>%
   print()
   
+
+
 
 
 #### rRNA per tissue weight analysis #### 
@@ -45,10 +50,11 @@ qdat.rrna  <- qdat %>%
          time = factor(time, levels = c("S0", "S1","S1c", 
                                         "S4", "S5", "S8", 
                                         "S9", "S12", "post1w", "postctrl"))) %>%
-  inner_join(nf) %>%
+  #print()
+  ungroup() %>%
+  semi_join(nf, by = c("participant", "leg", "time", "cdna")) %>%
   print()
   
-
 
 # Remove bad reaction prior to modelling. 
 # Bad reactions are no amplification or estimatyed to cq < 5
@@ -75,7 +81,7 @@ qdat.rrna %>%
 qdat.rrna %>%
   group_by(target, participant, cdna) %>%
   summarise(n = n()) %>%
-  filter(participant == "P5") %>%
+  filter(participant == "P19") %>%
   print()
 
 

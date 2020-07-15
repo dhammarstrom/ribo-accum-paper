@@ -278,6 +278,8 @@ qdat1 <- qpcrdat1 %>%
   print()
 
 
+
+
 ################## qPCR dat 2 ###############
 
 
@@ -295,7 +297,9 @@ qdat2 <- qpcrdat2 %>%
   separate(sample_series, into = c("sample", "series"), convert = TRUE) %>% 
   dplyr::select(participant, sample, series, target, cq, eff) 
 
-
+qdat2 %>%
+  filter(participant == "P19", target == "rRNA18S F2R2") %>%
+  print()
 
   ### Join sample information 
   # Subject 19, 21-23  
@@ -337,8 +341,7 @@ qdat2 <- qpcrdat2 %>%
   dplyr::select(participant, leg, time, sample, series, sex, cond, tissue_weight) %>%
   print()
 
-str(sample_info)
-str(qdat2)
+
 
 qdat2_complete <-  qdat2 %>%
   mutate(sample = as.character(sample), 
@@ -347,7 +350,6 @@ qdat2_complete <-  qdat2 %>%
   mutate(cdna = paste0("cDNA", series)) %>%
    dplyr::select(participant, leg, time, sex, cond, target, cq, eff, cdna, tissue_weight) %>%
   print()
-
 
 
 qdat <- rbind(qdat1, qdat2_complete) %>%
