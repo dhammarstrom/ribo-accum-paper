@@ -1,7 +1,7 @@
 #### qPCR import and data cleaning #######
 
 
-source("./R/libs.R")
+source("./R/libs.R"); library(parallel)
 
 
 #### 2018-1 import #####
@@ -26,26 +26,25 @@ targets <- c("UBTF F4R4",
              "MyHC2X F5R5",
              "Lambda KIT")  
 
-batch.filtered <- batch %>%
+batch.filtered<- batch %>%
   filter(target %in% targets) %>%
   print()
 
 # Preliminary models 
 
-models <- model_qpcr(batch.filtered)
-
+models <- model_qpcr(batch.filtered, replicate = FALSE)
+models[1]
 # Model tests
-model.tests <- test_models(models)
+model.tests <- test_models(models, targetID = 5, sep = "_")
 
 
-# Plot best model per target
-data.frame(table(model.tests$best.model, model.tests$target)) %>%
-  ggplot(aes(Var2, Freq, fill = Var1)) + geom_bar(stat="identity") + coord_flip()
+model.tests$figure
 
-# Best model per target are stored for modeling with best model
-best.models <- data.frame(target = names(apply(table(model.tests$best.model, model.tests$target), 2, which.max)),
-                          model = as.character(row.names(table(model.tests$best.model, model.tests$target))[apply(table(model.tests$best.model, model.tests$target), 2, which.max)]))
-
+best.models <- model.tests$results %>%
+  group_by(target) %>%
+  slice(which.max(n)) %>%
+  data.frame() %>%
+  print()
 
 
 
@@ -57,16 +56,21 @@ for(i in 1:nrow(best.models)){
   
   results[[i]] <- batch.filtered %>%
     filter(target == best.models[i,1]) %>%
-    model_qpcr(model = eval(parse(text = as.character(best.models[i,2]))), replicate = FALSE) %>% # use the best model in each model_qpcr
+    model_qpcr(model = get(best.models[i,2]), replicate = FALSE) %>% # use the best model in each model_qpcr
     analyze_models() # analyze models for cpD2
+  
+  message("Target ", best.models[i,1], " done!")
   
 }
 
 # combine all results and str split id variables
 qpcrdat <- bind_rows(results) 
 
+
+
+
 id.var <- str_split_fixed(qpcrdat$ID, "_", 5) 
-colnames(id.var) <- c("subject", "sample", "x", "target", "cDNA")  
+colnames(id.var) <- c("participant", "sample", "x", "cdna", "target")  
 qpcrdat <- cbind(id.var, qpcrdat[,-1])
 
 
@@ -79,15 +83,20 @@ for(i in 1:nrow(best.models)){
   
   efficiencies[[i]] <- batch.filtered %>%
     filter(target == best.models[i,1]) %>%
-    model_qpcr(model = eval(parse(text = as.character(best.models[i,2])))) %>%
-    analyze_efficiency(method = "cpD2", model = "linexp")
+    model_qpcr(model = get(best.models[i,2]), replicate = FALSE) %>%
+    analyze_efficiency(method = "cpD2", model = "linexp", cores = 1)
+  
+  message("Target ", best.models[i,1], " done!")
   
 }
 
+
+
+
 # combine results and use str split to extract id variables
 efficiencies <- bind_rows(efficiencies) 
-id.var <- str_split_fixed(efficiencies$ID, "_", 4) 
-colnames(id.var) <- c("subject", "sample", "x", "target")  
+id.var <- str_split_fixed(efficiencies$ID, "_", 5) 
+colnames(id.var) <- c("participant", "sample", "x","cdna", "target")  
 efficiencies <- cbind(id.var, efficiencies[,-1])
 
 
@@ -113,7 +122,7 @@ effs <- efficiencies %>%
 qpcrdat1 <- qpcrdat %>%
   dplyr::select(-eff) %>% # remove prelimin efficiencies
   inner_join(effs, by = "target") %>%
-  dplyr::select(participant = subject, sample, target, cDNA, cq = cpD2, eff = mean.eff) %>%
+  dplyr::select(participant, sample, target, cdna, cq = cpD2, eff = mean.eff) %>%
   print()
 
 
@@ -144,22 +153,22 @@ batch.filtered <- batch %>%
 
 # Preliminary models 
 
-models <- model_qpcr(batch.filtered)
+models <- model_qpcr(batch.filtered, replicate = FALSE)
 
 # Model tests
-model.tests <- test_models(models)
+model.tests <- test_models(models, targetID = 5, cores = "max")
+
+model.tests$figure
+
+best.models <- model.tests$results %>%
+  group_by(target) %>%
+  slice(which.max(n)) %>%
+  data.frame() %>%
+  print()
 
 
-# Plot best model per target
-data.frame(table(model.tests$best.model, model.tests$target)) %>%
-  ggplot(aes(Var2, Freq, fill = Var1)) + geom_bar(stat="identity") + coord_flip()
 
-# Best model per target are stored for modeling with best model
-best.models <- data.frame(target = names(apply(table(model.tests$best.model, model.tests$target), 2, which.max)),
-                          model = as.character(row.names(table(model.tests$best.model, model.tests$target))[apply(table(model.tests$best.model, model.tests$target), 2, which.max)]))
-
-
-
+  
 
 ## load data with best model
 results <- list()
@@ -169,8 +178,8 @@ for(i in 1:nrow(best.models)){
   
   results[[i]] <- batch.filtered %>%
     filter(target == best.models[i,1]) %>%
-    model_qpcr(model = eval(parse(text = as.character(best.models[i,2]))), replicate = FALSE) %>% # use the best model in each model_qpcr
-    analyze_models() # analyze models for cpD2
+    model_qpcr(model = get(best.models[i,2]), replicate = FALSE) %>% # use the best model in each model_qpcr
+    analyze_models(cores = 1) # analyze models for cpD2
   
 }
 
@@ -178,8 +187,20 @@ for(i in 1:nrow(best.models)){
 qpcrdat <- bind_rows(results) 
 
 id.var <- str_split_fixed(qpcrdat$ID, "_", 5) 
-colnames(id.var) <- c("subject", "sample", "x", "target", "cDNA")  
+colnames(id.var) <- c("participant", "sample", "x", "cdna", "target")  
 qpcrdat <- cbind(id.var, qpcrdat[,-1])
+
+
+## A subset is used to estimate efficiencies from targets without estimates. 
+# New preps seems to affect baseline readings in qPCR reactions leading to 
+# errors in efficiency estimates
+best.models <- model.tests$results %>%
+  group_by(target) %>%
+  slice(which.max(n)) %>%
+  data.frame() %>%
+  filter(target %in% c("rRNA5S F3R3", "rRNA47S F1R1", "rRNA45SITS F12R12", 
+                       "rRNA45S F5R5")) %>%
+  print()
 
 
 
@@ -190,9 +211,11 @@ efficiencies <- list()
 for(i in 1:nrow(best.models)){
   
   efficiencies[[i]] <- batch.filtered %>%
+    filter(ID %in% c("P1", "P2", "P3", "P4", "P5", "P6", 
+                     "P7", "P9", "P10", "P11", "P12", "P13", "P14", "P15")) %>%
     filter(target == best.models[i,1]) %>%
-    model_qpcr(model = eval(parse(text = as.character(best.models[i,2]))), replicate = FALSE) %>%
-    analyze_efficiency(method = "cpD2", model = "linexp")
+    model_qpcr(model = get(best.models[i,2]), replicate = FALSE) %>%
+    analyze_efficiency(method = "cpD2", model = "linexp", cores = 1)
   
 }
 
@@ -201,12 +224,12 @@ for(i in 1:nrow(best.models)){
 
 efficiencies.df <- bind_rows(efficiencies)
 id.var <- str_split_fixed(efficiencies.df$ID, "_", 5) 
-colnames(id.var) <- c("subject", "sample", "x", "target", "cDNA")  
+colnames(id.var) <- c("subject", "sample", "x", "cDNA", "target")  
 efficiencies.df <- cbind(id.var, efficiencies.df[,-1])
 
 
 efficiencies.df %>%
-  filter(eff > 1.5 & eff < 2.5)%>% # remove outliers from efficiency estimation
+  filter(eff > 1 & eff < 2.5)%>% # remove outliers from efficiency estimation
   group_by(target)%>%
   summarise(efficiency = mean(eff, na.rm = TRUE),
             max.eff = max(eff, na.rm = TRUE),
@@ -231,12 +254,10 @@ effs <- qpcrdat1 %>%
  
 
 ### Combine and save data 
-
-
 qpcrdat2 <- qpcrdat %>%
   dplyr::select(-eff) %>% # remove prelimin efficiencies
   inner_join(effs, by = "target") %>%
-  dplyr::select(participant = subject, sample, target, cDNA, cq = cpD2, eff = mean.eff) %>%
+  dplyr::select(participant, sample, target, cdna, cq = cpD2, eff = mean.eff) %>%
   print()
 
 
@@ -274,7 +295,7 @@ samples <-  read_excel("./data/tr010_mRNASamples.xlsx", na = "NA") %>%
 qdat1 <- qpcrdat1 %>%
   inner_join(samples) %>%
   inner_join(read_excel("./data/leg_randomization.xlsx")) %>%
-  dplyr::select(participant, leg, time, sex, cond, target, cq, eff, cdna = cDNA, tissue_weight) %>%
+  dplyr::select(participant, leg, time, sex, cond, target, cq, eff, cdna, tissue_weight) %>%
   print()
 
 
@@ -285,9 +306,9 @@ qdat1 <- qpcrdat1 %>%
 
 
 qdat2 <- qpcrdat2 %>%
-  filter(cDNA %in% c("cDNA1", "cDNA2")) %>%
+  filter(cdna %in% c("cDNA1", "cDNA2")) %>%
   mutate(sample = gsub("S", "", sample), 
-         series = gsub("cDNA", "", cDNA)) %>%
+         series = gsub("cDNA", "", cdna)) %>%
   unite(col = "sample_series", c(sample, series)) %>%
   
   mutate(sample_series = if_else(participant == "P19" & sample_series == "1_1", 
@@ -297,9 +318,7 @@ qdat2 <- qpcrdat2 %>%
   separate(sample_series, into = c("sample", "series"), convert = TRUE) %>% 
   dplyr::select(participant, sample, series, target, cq, eff) 
 
-qdat2 %>%
-  filter(participant == "P19", target == "rRNA18S F2R2") %>%
-  print()
+
 
   ### Join sample information 
   # Subject 19, 21-23  

@@ -73,12 +73,19 @@ m0 <- gam(rna ~ tw + cond + time.c +  s(participant, bs = "re"),
 m1 <- gam(rna ~ tw + cond +  s(time.c,  k = 7) +  s(participant, bs = "re"), 
           data = temp, method = "ML", select = TRUE)
 
-m2 <- gam(rna ~ tw +  s(time.c, bs = "ds",  by = cond, k = 7) +  s(participant, bs = "re"), 
+m2 <- gam(rna ~ tw +  s(time.c, k = 7) + cond +  s(participant, bs = "re"), 
           data = temp, method = "ML", select = TRUE)
 
-m3 <- gam(rna ~ tw +  s(time.c, bs = "tp", k = 7,  by = cond) + cond +  s(participant, bs = "re"), 
+m3 <- gam(rna ~ tw +  s(time.c, k = 7,  by = cond) + cond +  s(participant, bs = "re"), 
           data = temp, method = "ML", select = TRUE)
 
+
+AIC(m2, m3)
+
+
+pr <- ggpredict(m2, c("time.c"), type = "re")
+
+plot(pr)
 
 pr <- ggpredict(m3, c("time.c", "cond"), type = "re")
 
@@ -224,7 +231,7 @@ temp %>%
            participant = factor(participant),
            detrain = factor(detrain, levels = c("train", "detrain")), 
            sample = paste0(participant, leg, time)) %>%
-    filter(time != "post1w") %>%
+    filter(time != "S12") %>%
     mutate(grp = if_else(cond == "ctrl_leg", "ctrl", "expr")) %>%
 
     print()
@@ -258,15 +265,14 @@ temp %>%
   
   
   
-  
-  mean(temp$tissue_weight)
-  
+  summary(m1)
+  plot(m1)
   
   emmeans(m1, specs = ~ "Time|grp") %>%
     data.frame() %>%
 
     mutate(time = factor(Time, levels = c("S0", "S1", "post"))) %>%
-    ggplot(aes(time, exp(emmean)/ mean(temp$tissue_weight), fill = grp)) + 
+    ggplot(aes(time, exp(emmean)/ mean(temp$tissue_weight), shape = grp)) + 
     
     
     geom_errorbar(aes(ymin = exp(lower.CL)/ mean(temp$tissue_weight),  ymax = exp(upper.CL)/ mean(temp$tissue_weight)), 
