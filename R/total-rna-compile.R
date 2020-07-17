@@ -31,10 +31,7 @@ for(i in 1:length(files)){
 }
 
 
-tot_rna <- bind_rows(results) %>%
-  filter(!is.na(`Dilution factor`)) %>%
-  dplyr::select(Sample, concentration = `...7`) %>%
-  print()
+
 
 
 
@@ -64,7 +61,14 @@ tot_rna_round2 <- tot_rna %>%
   inner_join(read.csv("./data/written/extraction_numbers_round2.csv", sep = ";") %>%
                separate(extraction_nr, into = c("series", "sample"), convert = TRUE) %>%
                mutate(series = if_else(series == "I", 1, 2))) %>%
-  mutate(rna = concentration * 25) %>%
+  
+  # Change concentration as this was estimated with the wrong factor in nanodrop
+  # Calculations:
+  # RNA = Absorbance * 40 * (10/0.51) * dilutionfactor (= 3)
+  # [The above was mistakenly calculated as DNA in raw data:
+  # DNA = Absorbance * 50 * (10/0.51)]
+  mutate(concentration = ((concentration/3)/(50*(10/0.51))) * (40 *(10/0.51)) * 3,
+         rna = concentration * 25) %>%
   dplyr::select(participant, series, sample, leg, time, tissue_weight, rna) %>%
   print()
 
