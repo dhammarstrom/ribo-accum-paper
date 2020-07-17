@@ -18,11 +18,11 @@ qdat <- readRDS("./data/derivedData/qpcr/qpcr_compiled.RDS")
 nf <- qdat %>%
   filter(target == "Lambda KIT") %>%
   filter(cq > 5) %>% # Removes bad reactions
-  mutate(nf.w = (eff ^ -cq) * tissue_weight,
-        time = factor(time, levels = c("S0", "S1","S1c", 
-                                 "S4", "S5", "S8", 
-                                 "S9", "S12", "post1w", "postctrl"))) %>%
+  mutate(nf.w = (eff ^ -cq) * tissue_weight) %>%
   dplyr::select(participant, leg, time, cdna, nf.w) %>%
+  group_by(participant, leg, time, cdna) %>%
+  summarise(nf.w = mean(nf.w, na.rm = TRUE)) %>%
+  ungroup() %>%
   print()
   
 
@@ -31,7 +31,13 @@ nf <- qdat %>%
 
 #### rRNA per tissue weight analysis #### 
 
+
 qdat.rrna  <- qdat %>%
+  group_by(participant, leg, time, sex, cond, cdna, target) %>%
+  summarise(cq = mean(cq, na.rm = TRUE), 
+            eff = mean(eff, na.rm = TRUE), 
+            tissue_weight = mean(tissue_weight, na.rm = TRUE)) %>%
+
   filter(target %in% c("rRNA18S F2R2",      "rRNA28S F2R2",     
                       "rRNA5.8S F2R2",       
                        "rRNA45S F5R5",      "rRNA45SITS F12R12", 
@@ -52,7 +58,7 @@ qdat.rrna  <- qdat %>%
                                         "S9", "S12", "post1w", "postctrl"))) %>%
   #print()
   ungroup() %>%
-  semi_join(nf, by = c("participant", "leg", "time", "cdna")) %>%
+  inner_join(nf, by = c("participant", "leg", "time", "cdna")) %>%
   print()
   
 
@@ -72,20 +78,10 @@ qdat.rrna %>%
                              cq < mean(cq, na.rm = TRUE) - 5 * sd(cq, na.rm = TRUE), 
                            "outlier", "in")) %>%
   
-  ggplot(aes(technical, cq, color = target, size = outlier)) + 
-    geom_point() +
-    scale_size_manual(values = c(1, 2))
+  ggplot(aes(technical, cq, color = target, shape = outlier)) + 
+  geom_point() + theme_minimal() 
 
 # 5 sd's away from target mean seems to capture the worst reactions.. 
-
-qdat.rrna %>%
-  group_by(target, participant, cdna) %>%
-  summarise(n = n()) %>%
-  filter(participant == "P19") %>%
-  print()
-
-
-
 
 
 temp <- qdat.rrna %>%
@@ -110,8 +106,6 @@ temp %>%
   geom_smooth()
 
 
-unique(qdat.rrna$time)
-
 
 temp <- qdat.rrna %>%
   group_by(target) %>%
@@ -129,23 +123,14 @@ temp <- qdat.rrna %>%
                         if_else(time == "postctrl", "S12", time))) %>%
   filter(time %in% c("S0", "S1", "S12")) %>%
   ungroup() %>%
-  mutate(nf.w.centered = nf.w - mean(nf.w, na.rm = TRUE)) %>%
+  mutate(nf.w.centered = nf.w - mean(nf.w, na.rm = TRUE), 
+         ra.tissue = Ra - log(nf.w)) %>%
   print()        
 
-temp %>%
-  filter(participant == "P21", 
-         target == "rRNA18S F2R2") %>%
-  dplyr::select(time, cond, target, cq) %>%
-  print()
-
-  group_by(participant, target) %>%
-  summarise(n = n()) %>%
-  filter(participant == "P19") %>%
-  print()
 
 
 
-fxd <- Ra ~ 0 + target + target:time + target:cond + target:time:cond
+fxd <- ra.tissue ~ 0 + target + target:time + target:cond + target:time:cond
 rand <- list(participant = ~ 1, technical = ~ 1)  
 
 
@@ -169,15 +154,15 @@ anova(m1,m2, m3, m4)
 m5 <- update(m4, random = list(participant = pdDiag(~ 1 + target), technical = ~ 1))
 
 anova(m4, m5)
+intervals(m2)
+
+plot(m2, resid(., type = "n") ~ fitted(.)|target)
+qqnorm(m2, ~ resid(., type = "n")|target, abline = c(0,1))
+
+intervals(m1)
 
 
-plot(m4, resid(., type = "n") ~ fitted(.)|target)
-qqnorm(m4, ~ resid(., type = "n")|target, abline = c(0,1))
-
-intervals(m4)
-
-
-rna.interaction <- data.frame(coef(summary(m4))) %>%
+rna.interaction <- data.frame(coef(summary(m2))) %>%
   mutate(coef = rownames(.)) %>%
 
   separate(coef, into = c("target", "time", "cond"), sep = ":") %>%
@@ -185,14 +170,14 @@ rna.interaction <- data.frame(coef(summary(m4))) %>%
   
 
 
-emmeans(m4, specs = ~ "target|time+cond") %>%
+emmeans(m1, specs = ~ "target|time+cond") %>%
   data.frame() %>%
   mutate(time = factor(time, levels = c("S0", "S1", "S12"))) %>%
   ggplot(aes(time, emmean, fill = cond)) + 
     geom_errorbar(aes(ymin = lower.CL, ymax = upper.CL), 
                   position = position_dodge(width = 0.1), 
                   width = 0.05) +
-    geom_point(shape = 21, position = position_dodge(width = 0.1)) +
+    geom_point(shape = 21, position = position_dodge(width = 0.1), size = 2.5) +
     facet_wrap(~ target, scales = "free")
 
 
