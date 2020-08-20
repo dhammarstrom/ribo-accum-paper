@@ -27,8 +27,12 @@ rna_complete <- rna %>%
 
 
 
+
+
+# Time course data in experimental group #
+
   
-temp <- rna_complete %>%
+time_course <- rna_complete %>%
   filter(cond != "ctrl_leg") %>%
   filter(time != "post1w") %>%
   
@@ -43,51 +47,77 @@ temp <- rna_complete %>%
          time.c.cent = time.c - 4) %>%
   print()
  
+# Exploratory plot for each participant
 
-temp %>%
+time_course %>%
   ggplot(aes(time.c, rna.tissue, 
              color = cond,
              group = paste0(participant, leg))) + geom_line() +
   facet_wrap(~ participant)
 
 
+# Polynomial effects -- is the relation curve linear? 
+f0 <- lme(rna ~ tw + time.c * cond, random = list(participant = ~ 1, leg = ~ 1), 
+          data = time_course, method = "ML")
+
+f1 <- lme(rna ~ tw + poly(time.c, 2) * cond, random = list(participant = ~ 1, leg = ~ 1), 
+    data = time_course, method = "ML")
+
+f2 <- lme(rna ~ tw + poly(time.c, 3) * cond, random = list(participant = ~ 1, leg = ~ 1), 
+          data = time_course, method = "ML")
+
+
+anova(f0, f1, f2)
+# Evidence for curvelinear relationship but 3rd degree does not fit better than 2nd. 
+
+# Predicted values divided by mean tissue weight to get RNA / tissue weight (ng/mg)
+pr <- ggpredict(f2, c("time.c [all]", "cond"), type = "fe") %>%
+  data.frame() %>%
+  mutate(predicted = predicted / mean(time_course$tissue_weight), 
+         conf.low = conf.low / mean(time_course$tissue_weight), 
+        conf.high = conf.high / mean(time_course$tissue_weight)) %>%
+  print()
 
 
 
+# For plotting th e
+pr %>%
+  ggplot(aes(x, predicted, color = group)) + geom_line() 
+  
 
-library(gamm4); library(gamm4.test); 
-library(ggeffects); library(brms)
+# More accurate predictions with gam models
 
+# Is there an effect of splines (curvature)?
+# Effect of condition in curvature?
 
-
-
-f1 <- lme(rna ~ tw + time * cond, random = list(participant = ~ 1, leg = ~ 1), 
-    data = temp)
-
-
-plot(f1)
-
+# No splines
 m0 <- gam(rna ~ tw + cond + time.c +  s(participant, bs = "re"), 
-          data = temp, method = "REML")
-
+          data = temp, method = "ML")
+# Splines but not per group
 m1 <- gam(rna ~ tw + cond +  s(time.c,  k = 7) +  s(participant, bs = "re"), 
-          data = temp, method = "ML", select = TRUE)
+          data = temp, method = "ML")
+# Splines per group
+m2 <- gam(rna ~ tw + cond + s(time.c, by = cond,  k = 7) +  s(participant, bs = "re"), 
+          data = temp, method = "ML")
 
-m2 <- gam(rna ~ tw +  s(time.c, k = 7) + cond +  s(participant, bs = "re"), 
-          data = temp, method = "ML", select = TRUE)
+# Splines improves fit (as with polynomials above)
+anova(m0, m1, m2, test = "Chisq")
 
+# AIC does not improve when splines are fitted per group -- indication of no "interaction"
+AIC(m1, m2)
+
+# REML estimation full model
 m3 <- gam(rna ~ tw +  s(time.c, k = 7,  by = cond) + cond +  s(participant, bs = "re"), 
-          data = temp, method = "ML", select = TRUE)
+          data = temp, method = "REML", select = TRUE)
 
 
-AIC(m2, m3)
-
-
-pr <- ggpredict(m2, c("time.c"), type = "re")
+## Prediction from the full model 
+pr <- ggpredict(m3, c("time.c", "cond"), type = "re")
 
 plot(pr)
 
-pr <- ggpredict(m3, c("time.c", "cond"), type = "re")
+# Prediction from the reduced model 
+pr <- ggpredict(m2, c("time.c"), type = "re")
 
 plot(pr)
 
