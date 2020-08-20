@@ -1,0 +1,99 @@
+---
+title: "Ribosome accumulation during early phase resistance training"
+author: Daniel Hammarström^1,2,£^&ast;,Sjur Øfsteng^2,£^  Bent R. Rønnestad^2^, Stian Ellefsen^1,3^
+date: ""
+header-includes:
+  - \usepackage{wasysym}
+csl: resources/experimental-physiology.csl
+bibliography: resources/bibliography.bib
+output:
+  word_document:
+    reference_docx: resources/manuscript_word_template.docx
+editor_options: 
+  chunk_output_type: console
+---
+<!-- This is a comment  -->
+<!-- Add comments after each reference for tracking (eg[@RN2364]<!-- comment -->
+<!-- After references, add a row break without space (this will put the reference on the end on the line). -->
+
+<!-- The formatting of the manuscript is based on faseb journal, find csl-files at https://github.com/citation-style-language/styles -->
+
+<!-- Figure texts are included in the end of the manuscript file -->
+<!-- Tables in a separate file -->
+
+```{r, include = FALSE}
+
+source("./R/libs.R")
+# Settings for chunk options
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+
+```
+
+
+^1^ Section for Health and Exercise Physiology, Department of Public Health and Sport Sciences, Inland Norway University of Applied Sciences, Lillehammer, Norway. 
+
+^2^ Swedish School of Sport and Health Sciences, Stockholm, Sweden.
+
+^3^ Innlandet Hospital Trust, Lillehammer, Norway. </div>
+
+^£^ These authors contributed equally to this work
+
+
+
+
+<div custom-style="correspondence_style">
+&ast; Correspondance
+
+Daniel Hammarström, Section for Health and Exercise Physiology, Department of Public Health and Sport Sciences, Inland Norway University of Applied Sciences, Lillehammer, Norway. Email: daniel.hammarstrom@inn.no  </div>
+
+
+
+<div custom-style="runningtitle_style">**Running title:** Ribosome biogenesis in early phase resistace training</div>
+
+
+\pagebreak
+
+
+# Abstract
+<div custom-style="abstract_style">
+<!-- Word limit 200 -->
+Abstract...
+
+
+**Keywords:** Resistance training, ribosome biogenesis
+
+
+</div>
+
+\pagebreak
+
+# Introduction
+
+# Methods
+
+## Study overview
+
+## Muscle strength and thickness
+
+## Muscle biopsy sampling 
+
+## RNA and protein extraction
+
+## Quantitative polymerase chain reaction (qPCR)
+
+## Immunoblotting
+
+## Immunohistochemistry
+
+## Statistics and data analysis
+
+
+# Results
+
+# Discussion
+
+# References
+<div id="refs"></div>
+
+
+
