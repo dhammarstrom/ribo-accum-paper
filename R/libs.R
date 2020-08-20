@@ -4,6 +4,8 @@
 library(tidyverse)
 library(readxl)
 library(qpcR)
+
+# devtools::install_github("dhammarstrom/qpcrpal")
 library(qpcrpal)
 library(ggrepel)
 
