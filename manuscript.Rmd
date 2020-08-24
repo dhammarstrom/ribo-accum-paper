@@ -94,11 +94,20 @@ Formation of new ribosomes is a complex and energy demanding process involving t
 In skeletal muscle, a single bout of resistance exercise elevates markers of ribosome biogenesis in skeletal muscle evident from studies investigating immature forms of rRNA in response to exercise in the untrained state
 [@REFNEEDED<!-- References on acute 45S changes -->;
 @RN1037<!-- Nader 2014 45S up in response to 4 h after acute exercise -->].
-Studies examining repeated bouts of resistance exercise suggests that RT leads to accumulation of ribosomes. Bickel *et al*. showed that two subsequent bouts of a hypertrophic stimulus increased total RNA at 72 h after a second bout of RT
-[@RN1520]<!-- Total RNA increase 72 h after a secound bout -->.
-Following three weeks of RT, Brook et al. reported an increase in total RNA with no further increase after three additional weeks of training
-[@RN1642]<!-- Brook 2015 6 week time-course -->.
-The findings of Brook et al. fits with observations from our laboratory where we saw a ~30% increase in total RNA per tissue weight after two weeks of RT. Following an additional 10 weeks of RT the RNA content tended to normalized without reaching baseline values (Hammarström et al. 2017 unpublished observation). These data suggests that ribosome accumulation per tissue weight, reaches a plateau in the early phase of RT. Interestingly, in the study by Figueiredo and colleagues, acute exercise in the trained state (after eight weeks of RT), rRNA and pre-rRNA rapidly decreases in response to acute exercise [@RN1644]. 
+Studies examining repeated bouts of resistance exercise suggests that RT leads to accumulation of ribosomes, measured as total RNA, with increased number of completed sessions
+[@RN1656;<!-- Stec2015 A single session ns ~ 9% increase in young, -4% in old -->
+@RN1520;<!-- Bickel 2005 Two bouts electric stimulation, young ~ 30% incr-->
+@Hammarstrom2020; <!-- Four sessions ~29 and 18 % in mod vs. low volume|31 sessions 18/12% young-->
+@RN1755<!-- Stec 2016 12 sessions 26, 9 and 6% increase in high, mod and low responders OLD-->;
+@RN1644;<!-- Figuieredo 2015 16 sessions 49% increase young -->
+@RN1809; <!-- Brook 18 sessions 8 and 40% (9 sessions) and 15,22% (18 sessions) old and young-->
+@RN1897<!-- 11% 36 sessions young -->].
+Time-course data is however sparse as only a limited number of studies have investigated exercise induced accumulation over multiple time-points.
+Bickel *et al*. showed that two subsequent bouts of a hypertrophic stimulus increased total RNA to the highest levels at 72 h after a second bout of RT [@RN1520]<!-- Total RNA increase 72 h after a second bout -->. We have previously reported peak RNA levels 48 h after the fourth training session with a tendency towards normalization after 31 sessions
+[@Hammarstrom2020].
+This is similar to what was reported by Brook *et al.* who reported peak values after nine sessions followed by a slight decrease to after 18 sessions
+[@RN1809].
+These data suggests that ribosome accumulation per tissue weight, reaches a plateau in the early phase of RT. Interestingly, in the study by Figueiredo and colleagues, acute exercise in the trained state (after eight weeks of RT), rRNA and pre-rRNA rapidly decreases in response to acute exercise [@RN1644]. 
 Based on these observations we are hypothesizing that (1) ribosome accumulation occurs in the early phase (3-4 weeks) of RT and (2) reaches a plateau during this phase in response to constant volume RT and finally (3) that fluctuations in ribosome abundance occurs in response to altered training volume and training cessation. Subsequently the aim of this study is to characterize fluctuations in ribosomal biogenesis during the initial phase of RT, in response to altered training volumes and in response to a short-term de-training period.
 
 # Methods
