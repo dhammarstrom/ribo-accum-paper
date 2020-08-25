@@ -1,0 +1,60 @@
+---
+title: "tables"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+
+source("./R/libs.R")
+
+```
+
+
+
+```{r table1-characteristics}
+
+# Read dxa data
+
+dxa_whole <- read_excel("./data/tr010_dxa_standarddefinitions.xlsx") %>%
+  dplyr::select(Etternavn, Kjønn,Målingsdato,Alder, Vekt:`HeleVev%fett`) %>%
+  pivot_longer(names_to = "variable", values_to = "value", cols = Vekt:`HeleVev%fett`) %>%
+  mutate(value = gsub("kg", "", value), 
+         value = gsub("[[:space:]]", "", value, fixed = FALSE), 
+         value = as.numeric(value)) %>%
+
+  separate(Etternavn, into = c("Study", "participant")) %>%
+  dplyr::select(participant, Date = Målingsdato, variable, value) %>%
+  filter(!(participant %in% c("P08", "P20", "P17"))) %>%
+  group_by(participant) %>%
+  mutate(time = if_else(Date == min(Date), "S0", 
+                        if_else(Date == max(Date), "post1w", 
+                                "S12")), 
+         leg = if_else(variable == "BeinhøyreMagermasse", "R", "L")) %>%
+  print()
+
+# DXA weight stature
+
+read_excel("./data/tr010_dxa.xlsx") %>%
+    inner_join(read_excel("./data/leg_randomization.xlsx") %>%
+               dplyr::select(participant, sex)) %>%
+
+  group_by(participant, sex, group) %>%
+  summarise(mass = mean(bodymass_manual.weight, na.rm = TRUE), 
+            stature = mean(height, na.rm = TRUE)) %>%
+  group_by(group, sex) %>%
+  summarise(mass = mean(stature), 
+            stature = mean(stature), 
+            n = n()) %>%
+
+  print()
+
+
+
+
+```
+
+
+
