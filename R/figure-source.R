@@ -6,8 +6,13 @@
 
 library(tidyverse)
 library(cowplot)
+library(ggpattern)
 
 # Color scale 
+color.scale <- c("#000000", "#E69F00", "#56B4E9", "#009E73", 
+                 "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+
 
 multiple.color <- "#636363"
 single.color <- "#bdbdbd"
