@@ -1,6 +1,6 @@
 ---
-title: "tables"
-output: html_document
+title: "Tables"
+output: rmarkdown::word_document
 editor_options: 
   chunk_output_type: console
 ---
@@ -9,6 +9,7 @@ editor_options:
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 
 source("./R/libs.R")
+library(flextable)
 
 ```
 
@@ -33,28 +34,134 @@ dxa_whole <- read_excel("./data/tr010_dxa_standarddefinitions.xlsx") %>%
                         if_else(Date == max(Date), "post1w", 
                                 "S12")), 
          leg = if_else(variable == "BeinhøyreMagermasse", "R", "L")) %>%
-  print()
+  filter(variable %in% c("HeleBeinmasse", 
+                         "HeleFettmasse", 
+                         "HeleVevmasse", 
+                         "HeleMagermasse" ,
+                         "Vekt", 
+                         "HeleTotalmasse")) %>%
+  pivot_wider(names_from = variable, values_from = value) %>%
+  mutate(fat_rel = 100*(HeleFettmasse/HeleTotalmasse)) %>%
+  dplyr::select(participant, time, Vekt,HeleTotalmasse, fat_rel) %>%
+  filter(time == "S0") 
 
 # DXA weight stature
 
-read_excel("./data/tr010_dxa.xlsx") %>%
-    inner_join(read_excel("./data/leg_randomization.xlsx") %>%
-               dplyr::select(participant, sex)) %>%
+read_excel("./data/tr010_age_participant.xlsx") %>%
+  inner_join(dxa_whole) %>%
+  mutate(age = difftime(recruited, dob)/365.2425, 
+         bmi = weight/(height/100)^2) %>%
+  dplyr::select(participant, group, height, weight,age, sex,bmi, fat_rel) %>%
 
-  group_by(participant, sex, group) %>%
-  summarise(mass = mean(bodymass_manual.weight, na.rm = TRUE), 
-            stature = mean(height, na.rm = TRUE)) %>%
   group_by(group, sex) %>%
-  summarise(mass = mean(stature), 
-            stature = mean(stature), 
-            n = n()) %>%
-
-  print()
-
+  summarise(n = n(), 
+            Age = mean(age, na.rm = TRUE), 
+            age.sd = sd(age, na.rm = TRUE),
+            mass = mean(weight), 
+            mass.sd = sd(weight),
+            stature = mean(height),
+            stature.sd = sd(height), 
+            BMI = mean(bmi), 
+            bmi.sd = sd(bmi), 
+            relfat = mean(fat_rel), 
+            relfat.sd = mean(fat_rel) ) %>%
+  ungroup() %>%
+  mutate(n = as.character(n), 
+         age = paste0(sprintf("%.1f", round(Age, 1)), " (", sprintf("%.1f", round(age.sd, 1)), ")"),
+         mass = paste0(sprintf("%.1f", round(mass, 1)), " (", sprintf("%.1f", round(mass.sd, 1)), ")"),
+         stature = paste0(sprintf("%.1f", round(stature, 1)), " (", sprintf("%.1f", round(stature.sd, 1)), ")"),
+         BMI = paste0(sprintf("%.1f", round(BMI, 1)), " (", sprintf("%.1f", round(bmi.sd, 1)), ")"),
+         fat = paste0(sprintf("%.1f", round(relfat, 1)), " (", sprintf("%.1f", round(relfat.sd, 1)), ")"))%>%
+  dplyr::select(group, sex, n, age, mass, stature, BMI, fat) %>%
+  pivot_longer(names_to = "variable", values_to = "values", n:fat) %>%
+  pivot_wider(names_from = c(sex,group), values_from = values) %>%
+  
+  mutate(variable =  factor(variable,
+                          levels = c("n", "age", "mass", "stature", "BMI", "fat"), 
+                          labels = c("n", "Age (yrs)", "Body mass, (kg)", "Stature (cm)", "Body mass index (kg/m<sup>2</sup>)", "Body fat (%)"))) %>%
+  
+  dplyr::select(variable, F_experiment, M_experiment, F_control, M_control) %>%
+  flextable() %>% 
+  italic(i = ~variable == "n", j = 1, italic = TRUE) %>%
+  compose(part = "body", i = 5, j = 1,
+         value = as_paragraph("Body mass index (kg m",
+                              as_sup("-2"), ")")) %>%
+  
+  set_header_labels(variable = "",
+    F_experiment = "Female", M_experiment = "Male",
+    F_control = "Female", M_control = "Male") %>%
+  
+  
+   add_header_row(values = c("", "Experimental group", "Experimental group", "Control group", "Control group"), top = TRUE) %>%
+  merge_at(i = 1, j = 2:3, part = "header") %>%
+  merge_at(i = 1, j = 4:5, part = "header") %>%
+  align(align = "center", part = "header") %>%
+    fontsize(size = 8, part = "body") %>%
+    fontsize(size = 10, part = "header") %>%
+  add_header_lines(values = "Table 1. Participant characteristics.") %>%
+  autofit()
 
 
 
 ```
+
+
+
+<br>
+<br>
+
+
+
+```{r table-2-primers}
+
+# Read qpcr data
+qdat <- readRDS("./data/derivedData/qpcr/qpcr_compiled.RDS")
+
+primer_performance <- qdat %>%
+  group_by(target) %>%
+  summarise(mean.cq = mean(cq, na.rm = TRUE), 
+            sd.cq = sd(cq, na.rm = TRUE), 
+            mean.eff = mean(eff)) 
+
+
+merge_custom <- function(ft, x, columns){
+  z <- rle(x)
+  rows_at <- cumsum(z$lengths) - z$lengths + 1
+
+  for(i in seq_along(rows_at)){
+    for(j in columns)
+      ft <- merge_at(x = ft, i = seq( rows_at[i], rows_at[i] + z$lengths[i] - 1), j = j)
+  }
+
+  ft
+}
+
+# Read primer data 
+primer_table <- read_excel("./data/tr010_primers.xlsx", sheet = 1) %>%
+  dplyr::select(target = primer_id, forward, reverse, full_name, symbol_ext) %>%
+  inner_join(primer_performance) %>%
+  mutate(performance = paste0(sprintf("%.1f", round(mean.cq,1)), " (", sprintf("%.1f",        round(sd.cq,1)), "), E = ", sprintf("%.2f", round(mean.eff,2))), 
+         forward = paste0("F: 5'-", forward, "-3'"), 
+         reverse = paste0("R: 3'-", reverse, "-5'")) %>% 
+  
+  
+  
+  dplyr::select(symbol_ext, full_name, forward, reverse, performance) %>%
+  pivot_longer(names_to = "primer", values_to = "seq", forward:reverse) %>%
+dplyr::select(Symbol = symbol_ext, 'Transcript name' = full_name, Sequence = seq, 'Mean Cq (SD) and efficiency' = performance) 
+
+primer_table %>%
+  flextable() %>%
+  merge_custom(x = primer_table$Symbol, columns = c(1, 2, 4)) %>%
+  add_header_lines(values = "Table 2. Primer sequences and average performance.") %>%
+      fontsize(size = 8, part = "body") %>%
+    fontsize(size = 10, part = "header") %>%
+  autofit()
+
+
+
+```
+
 
 
 
