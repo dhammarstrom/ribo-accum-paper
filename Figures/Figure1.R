@@ -8,7 +8,7 @@
 
 
 source("./R/figure-source.R")
-
+source("./R/libs.R")
 
 
 
@@ -207,7 +207,95 @@ design_full_biopsies <- plot_grid(design_exp,
                                   rel_heights = c(1, 0.6)) 
 
 
-# Panel B #############################
+# Panel X. Training data plot ##########################
+
+
+
+### Exploratory graphs #
+training_sum <-  read_excel("./data/tr010_training.xlsx", sheet = 1, na = "NA") %>%
+
+  inner_join(read_excel("./data/leg_randomization.xlsx")) %>%
+  filter(exercise == "legext") %>%
+ 
+  mutate(set.load = repetitions * load) %>%
+  group_by(participant, leg, cond, session) %>%
+  summarise(total.load = sum(set.load)) %>%
+  group_by(cond, session) %>%
+  summarise(total.load = mean(total.load)) 
+
+
+
+training_load <- read_excel("./data/tr010_training.xlsx", sheet = 1, na = "NA") %>%
+  inner_join(read_excel("./data/leg_randomization.xlsx")) %>%
+  filter(exercise == "legext") %>%
+  mutate(set.load = repetitions * load) %>%
+  group_by(participant, leg, cond, session) %>%
+  summarise(total.load = sum(set.load)) %>%
+  ggplot(aes(session, total.load, group = paste0(participant, leg), color = cond)) + 
+  geom_line(alpha = 0.6) + 
+  geom_line(data = training_sum, 
+            aes(session, total.load, group = cond, color = cond), 
+            size = 1.5) +
+  scale_color_manual(values = c(color.scale[2], color.scale[3], color.scale[4])) +
+  geom_text(data = data.frame(session = c(1, 1),
+                              total.load = c(5000, 5000), 
+                              
+                              lab = c("Constant\nvolume","Variable\nvolume"),
+                              cond = factor(c("const", "var"), 
+                                            levels = c("const", "var"))), 
+            aes(label = lab, group = NULL, color = NULL), 
+            size = textsize + 0.5, 
+            hjust = 0) +
+  
+  scale_y_continuous(limits = c(0, 6000), breaks = c(0, 2000, 4000, 6000), expand = c(0, 0)) +
+  scale_x_continuous(limits = c(0, 12), 
+                     breaks = c(0,seq(1:12)),
+                     labels = c(0, "", "", 3, "", "", 6, "", "", 9, "", "",12),
+                     expand = c(0.1, 0.1)) +
+  ylab("Training load (kg \U00D7 repetitions)") +
+  xlab("Session") +
+  facet_grid(. ~ cond) +
+  plot_theme() +
+  theme(panel.spacing = unit(1, "lines"),
+        strip.background = element_blank(),
+        strip.text.x = element_blank(), 
+        legend.position = "none")
+
+
+
+
+average_intensity <- load.stats %>%
+  group_by(cond, week) %>%
+  summarise(m = mean(load, na.rm = TRUE), 
+            s = sd(load, na.rm = TRUE)) %>%
+  mutate(week = factor(week, levels = c("W1", "W2", "W3"), labels = c("Week 1", "Week 2", "Week 3"))) %>%
+  ggplot(aes(week, m, fill = cond)) +
+  geom_errorbar(aes(ymin = m - s, ymax = m + s), position = position_dodge(width = 0.6), width = 0.2) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.6), width = 0.5, color = "black", size = 0.2) +
+  geom_segment(aes(x = 1, xend = 1.95, y = 50, yend = 50), size = line_size) +
+  geom_segment(aes(x = 2.05, xend = 3, y = 56, yend = 56), size = line_size) +
+  geom_segment(aes(x = 0.8, xend = 1.2, y = 42.5, yend = 42.5), size = line_size) +
+  geom_segment(aes(x = 1.8, xend = 2.2, y = 47.5, yend = 47.5), size = line_size) +
+  geom_segment(aes(x = 2.8, xend = 3.2, y = 53.2, yend = 53.2), size = line_size) +
+  geom_segment(aes(x = 3, xend = 3, y = 56, yend = 53.2), size = line_size) +
+  geom_segment(aes(x = 2.05, xend = 2.05, y = 56, yend = 47.5), size = line_size) +
+  geom_segment(aes(x = 1.95, xend = 1.95, y = 50, yend = 47.5), size = line_size) +
+  geom_segment(aes(x = 1, xend = 1, y = 50, yend = 42.5), size = line_size) +
+
+  
+  
+  
+
+  scale_y_continuous(breaks = c(0, 20, 40, 60), expand = c(0, 0), limits = c(0, 60)) + 
+  scale_fill_manual(values = c(const_color, var_color)) +
+  ylab("Average 10RM (kg)") +
+  theme(axis.title.x = element_blank(), 
+        legend.position = "none") +
+  plot_theme() +
+  labs(caption = "Mean + SD")
+
+
+
 
 
 
@@ -554,7 +642,7 @@ ul_results <- plot_grid(raw_scores, comp_panel, nrow = 2, align = "v")
 
 
 figure1 <- plot_grid(design_full_biopsies,
-                     plot_grid(NULL, strength_results,  ul_results, ncol = 3, rel_widths = c(0.5, 0.25, 0.25)), 
+                     plot_grid(training_load, strength_results,  ul_results, ncol = 3, rel_widths = c(0.5, 0.25, 0.25)), 
                      rel_heights = c(2, 1),
                      ncol = 1) +
   

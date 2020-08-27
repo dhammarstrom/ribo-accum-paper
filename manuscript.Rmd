@@ -1,6 +1,6 @@
 ---
 title: "Ribosome accumulation during early phase resistance training"
-author: Daniel Hammarström^1,2,£^&ast;,Sjur Øfsteng^2,£^  Bent R. Rønnestad^2^, Stian Ellefsen^1,3^
+author: Daniel Hammarström^1,2,£^&ast;,Sjur Øfsteng^2,£^, Lise Koll^3^,   Bent R. Rønnestad^2^, Stian Ellefsen^1,3^
 date: ""
 header-includes:
   - \usepackage{wasysym}
@@ -190,6 +190,49 @@ Protein samples (20 &#956;g) were separated on 4-20% Tris-Glycin gels (Criterion
 
 
 # Results
+```{r training-data}
+
+load.stats <- read_excel("./data/tr010_training.xlsx", sheet = 1, na = "NA") %>%
+  inner_join(read_excel("./data/leg_randomization.xlsx")) %>%
+  filter(exercise == "legext") %>%
+  mutate(set.load = repetitions * load, 
+         week = if_else(session %in% c(1:4), "W1", if_else(session %in% c(5:8), "W2", "W3"))) %>%
+  group_by(participant, cond, session, week) %>%
+  summarise(load = mean(load, na.rm = TRUE)) %>%
+  mutate(week = factor(week, levels = c("W1", "W2", "W3"))) %>%
+  print()
+
+load.m1 <- lme(log(load) ~ week + week:cond, random = list(participant = ~1), 
+               data = load.stats, method = "ML")
+load.m0 <- lme(log(load) ~ week, random = list(participant = ~1), 
+               data = load.stats, method = "ML")
+
+load.anova <- anova(load.m0, load.m1)
+
+load.intervals <- data.frame(exp(intervals(load.m0)$fixed) - 1) 
+
+load.inr.w2 <- paste0(sprintf("%.0f",load.intervals[2, 2]*100), 
+                      "%, 95% CI: [",
+                      sprintf("%.0f",load.intervals[2, 1]*100), 
+                      ", ",
+                      sprintf("%.0f",load.intervals[2, 3]*100), 
+                      "]")
+load.inr.w3 <- paste0(sprintf("%.0f",load.intervals[3, 2]*100), 
+                      "%, 95% CI: [",
+                      sprintf("%.0f",load.intervals[3, 1]*100), 
+                      ", ",
+                      sprintf("%.0f",load.intervals[3, 3]*100), 
+                      "]")
+
+
+```
+
+
+All participants successfully completed their prescribed sessions. The different training protocols resulted in diverging loading profiles (load &#215; repetitions) over the course of the study (Figure 1B). The intensity of exercise (load at 10RM) increased similarly in both conditions from the first to the second (`r load.inr.w2`) and third (`r load.inr.w3`)  four-session block, respectively. Compared to the non-training control group, isokinetic strength increased to Session 12 in the experimental group, with an attenuated difference seen after de-training (Figure 1C). Average isometric strength showed the same general pattern although with considerable more uncertainty indicated by wider 95% CI (Figure 1C). Muscle thickness of the *m. vastus lateralis* increased in the experimental group compared to the control group both after Session 12 and after eight days of de-training (Figure 1D). There were no indications of differences between training conditions in strength or muscle thickness changes.
+
+
+
+
 
 # Discussion
 
