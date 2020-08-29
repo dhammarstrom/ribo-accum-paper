@@ -415,7 +415,7 @@ summary(rePCA(m1))
 # the fit is singular, most of the variance is contained in the 
 # intercept, simplify by removing correlation
 
-m2 <- lmer(torque ~  time_pp * group  + group:time_pp:detrain + (time_pp||participant), 
+m2 <- lmer(torque ~  time_pp * group  + group:time_pp:detrain + (dummy(time_pp, "post")||participant), 
            data = strength_long2[strength_long2$type == "isok", ])
 
 
@@ -429,6 +429,40 @@ m3 <- lmer(torque ~  time_pp * group + group:time_pp:detrain + (1|participant),
 
 # Check if random effects structure matters
 anova(m1, m2, m3) # No, the simplest model is the best
+plot(m3)
+
+## Isometric models 
+
+m1.isom <- lmer(log(torque) ~  time_pp * group + group:time_pp:detrain  + (1 + time_pp|participant), 
+           data = strength_long2[strength_long2$type == "isom", ])
+
+summary(rePCA(m1.isom)) 
+plot(m1.isom)
+# Not a singular fit, seeing if simplification may improve the model.
+
+m2.isom <- lmer(log(torque) ~  time_pp * group  + group:time_pp:detrain + (dummy(time_pp, "post")||participant), 
+           data = strength_long2[strength_long2$type == "isom", ])
+
+
+summary(rePCA(m2.isom)) # Some of the variance is contained in the uncorrelated random slope
+# Fitting a simpler model
+m3.isom <- lmer(torque ~  time_pp * group + group:time_pp:detrain + (1|participant), 
+           data = strength_long2[strength_long2$type == "isom", ])
+
+# The model is rank deficient (not all combinations of coefficients exists in the data)
+# it is OK.
+
+# Check if random effects structure matters to model fit
+anova(m1.isom, m2.isom, m3.isom) 
+# No, more elaborate models does not improve fit but som of the variance could be allocated to 
+# random slopes. 
+
+plot(m3.isom)
+
+summary(m1.isom)
+# The random effects structure does not change the inference, but the simplest model has the lowest AIC
+# and no improvement in fit with more elaborate models. The simplest model is preferred.
+
 
 
 # Combine data for plotting 
@@ -438,7 +472,6 @@ anova(m1, m2, m3) # No, the simplest model is the best
 # This can be specified using the multcomp package as custom contrasts.
 
 # Custom contrasts are defined from the model matrix, to access it:
-head(model.matrix(m3))
 
 
 con.post <- matrix(c(1, 1, 0, 0, 0),1) - matrix(c(1, 0, 0, 0, 0),1) 
@@ -454,35 +487,21 @@ k <-  rbind(con.post,
 rownames(k) <- c("post_con", "post_int", "post1w_int", "inter:post_int", "inter:post1w_int") 
   
 
-ci <- confint(glht(m3, linfct = k))
+ci.isok <- confint(glht(m3, linfct = k))
+ci.isom <- confint(glht(m3.isom, linfct = k))
 
 
-em.isok <- confint(glht(m3, linfct = k))$confint %>%
+em <- rbind(ci.isok$confint %>%
   data.frame() %>% 
-  mutate(time_group = rownames(.)) %>%
+  mutate(time_group = rownames(.), 
+         type = "isok"),
+  ci.isom$confint %>%
+    data.frame() %>% 
+    mutate(time_group = rownames(.), 
+           type = "isom"))
 
   print()
   
-
-model.matrix(m3)
-
-con.post <- c(1, 1, 0, 0, 0) - c(1, 0, 0, 0, 0)
-detrain.post <- c(1, 1, 1, 1, 1) - c(1, 1, 1, 1, 0) 
-
-#################### THIS IS WHERE IM AT ###########################
-emm1 <- emmeans(m3, specs =  ~ time_pp * group + time_pp:detrain)
-
-pairs(emm1, reverse = TRUE)
-   
-summary(m3)
-
-
-contrast(emm1), method = list("A" = detrain.post - con.post))
-
-        
-ref_grid(m3) %>%
-  data.frame()
-
 
 strength <- read_excel("./data/tr010_humac.xlsx") %>%
   inner_join(read_excel("./data/leg_randomization.xlsx")) %>%
@@ -519,19 +538,20 @@ raw_scores <- strength %>%
              shape = 21, size = 1.2, alpha = 0.4) + 
   
   # Isokinetic strength
-  geom_errorbar(data = em.isok, 
-                aes(time_group, estimate, ymin = lower.CL, ymax = upper.CL, fill = NULL), 
+  geom_errorbar(data = em[1:3,], 
+                aes(time_group, Estimate, ymin = lwr, ymax = upr, fill = NULL), 
                 position = position_nudge(x = - 0.25), width = 0) +
  
-   geom_point(data = marginal.means[marginal.means$type == "isok",], 
-             aes(time_group, emmean), 
+   geom_point(data = em[1:3,], 
+              aes(time_group, Estimate, fill = NULL), 
              position = position_nudge(x = -0.25), color = "white", size = 0.5, shape = 15) + 
   # Isometric strength
-  geom_errorbar(data = marginal.means[marginal.means$type == "isom",], 
-                aes(time_group, emmean, ymin = lower.CL, ymax = upper.CL), 
-                position = position_nudge(x = 0.25), width = 0) +
-  geom_point(data = marginal.means[marginal.means$type == "isom",], 
-             aes(time_group, emmean), 
+  geom_errorbar(data = em[6:8,], 
+                aes(time_group, Estimate, ymin = lwr, ymax = upr, fill = NULL), 
+                position = position_nudge(x =  0.25), width = 0) +
+  
+  geom_point(data = em[6:8,], 
+             aes(time_group, Estimate, fill = NULL), 
              position = position_nudge(x = 0.25), color = "white", size = 0.5, shape = 15) + 
   
   
