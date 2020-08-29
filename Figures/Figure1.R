@@ -264,41 +264,6 @@ training_load <- read_excel("./data/tr010_training.xlsx", sheet = 1, na = "NA") 
 
 
 
-average_intensity <- load.stats %>%
-  group_by(cond, week) %>%
-  summarise(m = mean(load, na.rm = TRUE), 
-            s = sd(load, na.rm = TRUE)) %>%
-  mutate(week = factor(week, levels = c("W1", "W2", "W3"), labels = c("Week 1", "Week 2", "Week 3"))) %>%
-  ggplot(aes(week, m, fill = cond)) +
-  geom_errorbar(aes(ymin = m - s, ymax = m + s), position = position_dodge(width = 0.6), width = 0.2) +
-  geom_bar(stat = "identity", position = position_dodge(width = 0.6), width = 0.5, color = "black", size = 0.2) +
-  geom_segment(aes(x = 1, xend = 1.95, y = 50, yend = 50), size = line_size) +
-  geom_segment(aes(x = 2.05, xend = 3, y = 56, yend = 56), size = line_size) +
-  geom_segment(aes(x = 0.8, xend = 1.2, y = 42.5, yend = 42.5), size = line_size) +
-  geom_segment(aes(x = 1.8, xend = 2.2, y = 47.5, yend = 47.5), size = line_size) +
-  geom_segment(aes(x = 2.8, xend = 3.2, y = 53.2, yend = 53.2), size = line_size) +
-  geom_segment(aes(x = 3, xend = 3, y = 56, yend = 53.2), size = line_size) +
-  geom_segment(aes(x = 2.05, xend = 2.05, y = 56, yend = 47.5), size = line_size) +
-  geom_segment(aes(x = 1.95, xend = 1.95, y = 50, yend = 47.5), size = line_size) +
-  geom_segment(aes(x = 1, xend = 1, y = 50, yend = 42.5), size = line_size) +
-
-  
-  
-  
-
-  scale_y_continuous(breaks = c(0, 20, 40, 60), expand = c(0, 0), limits = c(0, 60)) + 
-  scale_fill_manual(values = c(const_color, var_color)) +
-  ylab("Average 10RM (kg)") +
-  theme(axis.title.x = element_blank(), 
-        legend.position = "none") +
-  plot_theme() +
-  labs(caption = "Mean + SD")
-
-
-
-
-
-
 
 # Panel X: Strength tests -- ######################################
 
@@ -323,9 +288,13 @@ strength_long <- read_excel("./data/tr010_humac.xlsx") %>%
 
   dplyr::select(participant, sex, time, leg, group,cond, isokinetic_torque, isometric_torque) %>%
 
-  group_by(participant,sex,leg, time, group, cond) %>%
-  summarise(isok = mean(isokinetic_torque, na.rm = TRUE), 
-            isom = mean(isometric_torque, na.rm = TRUE)) %>%
+ # group_by(participant,sex,leg, time, group, cond) %>%
+ # summarise(isok = mean(isokinetic_torque, na.rm = TRUE), 
+ #           isom = mean(isometric_torque, na.rm = TRUE)) %>%
+  
+  mutate(isok = isokinetic_torque, 
+         isom = isometric_torque) %>%
+  
   pivot_longer(names_to = "type", values_to= "torque", cols = isok:isom) %>%
   pivot_wider(names_from = time, values_from = torque) %>%
   mutate(post1w = if_else(group == "con", post, post1w)) %>%
@@ -385,7 +354,7 @@ anova(m1, m2, m3)
 # fit. m2 for isom is the preferred model. 
 
 #  confint(m2) 
-#  summary(m2)
+ summary(m2)
 # Symmetrical confidence intervals gives little evidence for condition effects on strength changes. 
 
 # Between group comparisons Strength ##########################
@@ -412,14 +381,14 @@ m1 <- lmer(torque ~  time_pp * group + group:time_pp:detrain  + (1 + time_pp|par
                data = strength_long2[strength_long2$type == "isok", ])
 
 summary(rePCA(m1)) 
-# the fit is singular, most of the variance is contained in the 
+# the fit is not singular, but most of the variance is contained in the 
 # intercept, simplify by removing correlation
 
 m2 <- lmer(torque ~  time_pp * group  + group:time_pp:detrain + (dummy(time_pp, "post")||participant), 
            data = strength_long2[strength_long2$type == "isok", ])
 
 
-summary(rePCA(m2)) # No partition of the variances
+summary(rePCA(m2)) # Sligthly more partition in the simpler model
 # Fitting a simpler model
 m3 <- lmer(torque ~  time_pp * group + group:time_pp:detrain + (1|participant), 
            data = strength_long2[strength_long2$type == "isok", ])
@@ -428,25 +397,25 @@ m3 <- lmer(torque ~  time_pp * group + group:time_pp:detrain + (1|participant),
 # it is OK.
 
 # Check if random effects structure matters
-anova(m1, m2, m3) # No, the simplest model is the best
+anova(m1, m2, m3) # No, the simplest model is preferred
 plot(m3)
 
 ## Isometric models 
 
-m1.isom <- lmer(log(torque) ~  time_pp * group + group:time_pp:detrain  + (1 + time_pp|participant), 
+m1.isom <- lmer(torque ~  time_pp * group + group:time_pp:detrain  + (1 + time_pp|participant), 
            data = strength_long2[strength_long2$type == "isom", ])
 
 summary(rePCA(m1.isom)) 
 plot(m1.isom)
 # Not a singular fit, seeing if simplification may improve the model.
 
-m2.isom <- lmer(log(torque) ~  time_pp * group  + group:time_pp:detrain + (dummy(time_pp, "post")||participant), 
+m2.isom <- lmer(torque ~  time_pp * group  + group:time_pp:detrain + (dummy(time_pp, "post")||participant), 
            data = strength_long2[strength_long2$type == "isom", ])
 
 
 summary(rePCA(m2.isom)) # Some of the variance is contained in the uncorrelated random slope
 # Fitting a simpler model
-m3.isom <- lmer(torque ~  time_pp * group + group:time_pp:detrain + (1|participant), 
+m3.isom <- lmer(torque ~   time_pp * group + group:time_pp:detrain + (1|participant), 
            data = strength_long2[strength_long2$type == "isom", ])
 
 # The model is rank deficient (not all combinations of coefficients exists in the data)
@@ -454,12 +423,11 @@ m3.isom <- lmer(torque ~  time_pp * group + group:time_pp:detrain + (1|participa
 
 # Check if random effects structure matters to model fit
 anova(m1.isom, m2.isom, m3.isom) 
-# No, more elaborate models does not improve fit but som of the variance could be allocated to 
-# random slopes. 
+# An uncorrelated random slope improves the fit of the model, model 2 is preferred
 
-plot(m3.isom)
+plot(m2.isom)
 
-summary(m1.isom)
+summary(m2.isom)
 # The random effects structure does not change the inference, but the simplest model has the lowest AIC
 # and no improvement in fit with more elaborate models. The simplest model is preferred.
 
@@ -486,10 +454,9 @@ k <-  rbind(con.post,
 # Set rownames
 rownames(k) <- c("post_con", "post_int", "post1w_int", "inter:post_int", "inter:post1w_int") 
   
-
-ci.isok <- confint(glht(m3, linfct = k))
-ci.isom <- confint(glht(m3.isom, linfct = k))
-
+## These confidence intervals are not adjusted. 
+ci.isok <- confint(glht(m3, linfct = k), calpha = univariate_calpha())
+ci.isom <- confint(glht(m3.isom, linfct = k), calpha = univariate_calpha())
 
 em <- rbind(ci.isok$confint %>%
   data.frame() %>% 
@@ -500,7 +467,7 @@ em <- rbind(ci.isok$confint %>%
     mutate(time_group = rownames(.), 
            type = "isom"))
 
-  print()
+
   
 
 strength <- read_excel("./data/tr010_humac.xlsx") %>%
@@ -510,6 +477,9 @@ strength <- read_excel("./data/tr010_humac.xlsx") %>%
          cond = if_else(cond == "ctrl_leg", "ctrl", cond)) %>%
   dplyr::select(participant, sex, time, leg, group,cond, isokinetic_torque, isometric_torque) %>%
   group_by(participant,sex,leg, time, group, cond) %>%
+  
+  # For plotting purposes, the baseline averaged over all attempts
+  
   summarise(isok = mean(isokinetic_torque, na.rm = TRUE), 
             isom = mean(isometric_torque, na.rm = TRUE)) %>%
   pivot_longer(names_to = "type", values_to= "torque", cols = isok:isom) %>%
@@ -567,156 +537,20 @@ raw_scores <- strength %>%
 
 
 
-
-
-
-
-
-# 
-m0 <- lme(torque ~ group * time, 
-          random = list(participant = ~ 1), 
-          data = strength_long[strength_long$time != "post1w" & strength_long$type != "isok", ])
-
-
-summary(m1)
-
-emmeans(m1, specs = ~ time|group) %>%
-  data.frame() %>%
-  ggplot(aes(time, emmean, fill = group, group = group)) + geom_point(shape = 21) + geom_line()
-
-
-
-# differences between conditions 
-m0.isom <- lme(change ~ sex + baseline + time*cond, 
-          random = list(participant = ~ 1, leg = ~ 1), 
-          data = strength[strength$group == "int" & strength$type == "isom",])
-m0.isok <- lme(change ~ sex + baseline + time*cond, 
-               random = list(participant = ~ 1, leg = ~ 1), 
- 
-               data = strength[strength$group == "int" & strength$type == "isok",])
-
-plot(m0.isok)
-
-
-summary(m0.isom)
-summary(m0.isok)
-# No differences between conditions, subsequently analyzed together against control
-
-
-temp <- strength %>%
-  filter(type == "isok") %>%
-  group_by(participant, sex, time_group) %>%
-  summarise(baseline = mean(baseline), 
-            change = mean(change)) %>%
-  print()
-
-
-
-m1.isom <- lme(change ~ sex + baseline + time_group, 
-               random = list(participant = ~ 1, leg = ~ 1), 
-               data = strength[strength$type == "isom",])
-
-m1.isok <- lme(change ~ sex + baseline + time_group, 
-               random = list(participant = ~ 0 + time_group), 
-               control = list(msMaxIter = 120, 
-                              opt = "nloptwrap", 
-                              msVerbose = TRUE), 
-               data = strength[strength$type == "isok",])
-
-
-
-
-m2.isok <- lme(change ~ sex + baseline + time_group, 
-               random = list(participant = ~ 1), 
-               
-               data = temp)
-
-
-summary(m1.isok)
-
-mx <- gls(change ~ sex + baseline + time_group,
-         # correlation = corSymm(form = ~1 | participant),
-          data = strength[strength$type == "isok",])
-?gls
-summary(mx)
-plot(mx)
-
-m1.isok <- lme4::lmer(change ~ sex + baseline + time_group + (1|participant), 
-                      data = strength[strength$type == "isok",])
-
-
-summary(m1.isok)
-?isSingular
-
-intervals(m1.isok)
-summary(m1.isok)
-
-m1.isok
-
-
-
-marginal.means <- rbind(data.frame(emmeans(m1.isom, specs = ~ time_group)) %>%
-                          mutate(type = "isom"),
-                        
-                        data.frame(emmeans(m1.isok, specs = ~ time_group)) %>%
-                          mutate(type = "isok")) %>%
-  print()
-
-
-raw_scores <- strength %>%
-  ggplot(aes(time_group, change, fill = type)) + 
-  
-  geom_hline(yintercept = 0, color = "gray90") +
-  
-  geom_point(position = position_jitterdodge(jitter.width = 0.05, dodge.width = 0.25), 
-             shape = 21, size = 1.2, alpha = 0.4) + 
-  
-  # Isokinetic strength
-  geom_errorbar(data = marginal.means[marginal.means$type == "isok",], 
-                aes(time_group, emmean, ymin = lower.CL, ymax = upper.CL), 
-                position = position_nudge(x = - 0.25), width = 0) +
-  geom_point(data = marginal.means[marginal.means$type == "isok",], 
-             aes(time_group, emmean), 
-             position = position_nudge(x = -0.25), color = "white", size = 0.5, shape = 15) + 
-  # Isometric strength
-  geom_errorbar(data = marginal.means[marginal.means$type == "isom",], 
-                aes(time_group, emmean, ymin = lower.CL, ymax = upper.CL), 
-                position = position_nudge(x = 0.25), width = 0) +
-  geom_point(data = marginal.means[marginal.means$type == "isom",], 
-             aes(time_group, emmean), 
-             position = position_nudge(x = 0.25), color = "white", size = 0.5, shape = 15) + 
-  
-  
-  
-  labs(y = "\U0394 Torque (Nm)") +
-  
-  plot_theme() +
-  theme(axis.line.x = element_blank(), 
-        axis.text.x = element_blank(), 
-        axis.title.x = element_blank(), 
-        axis.ticks.x = element_blank(), 
-        legend.position = "none")
- 
-
-
 # Strength compare plot
 
-comp_panel <- rbind(intervals(m1.isom)$fixed %>%
-        data.frame() %>%
-        mutate(coef = rownames(.)) %>%
-        mutate(type = "isom"), 
-      intervals(m1.isok, which = "fixed")$fixed %>%
-        data.frame() %>%
-        mutate(coef = rownames(.)) %>%
-        mutate(type = "isok")) %>%
 
-  filter(coef %in% c("time_grouppost_int", "time_grouppost1w_int")) %>%
+
+
+comp_panel <- em %>%
+
+  filter(time_group %in% c("inter:post_int", "inter:post1w_int")) %>%
   
-  mutate(time_group = gsub("time_group", "", coef)) %>%
-  dplyr::select(-coef) %>%
-  rbind(data.frame(lower = NA, est. = NA, upper = NA, type = c("isom", "isok"),
+  mutate(time_group = gsub("inter:", "", time_group)) %>%
+
+  rbind(data.frame(Estimate = NA, lwr = NA, upr = NA, type = c("isom", "isok"),
                    time_group = "post_con")) %>%
-  
+
   mutate(time_group = factor(time_group,  
                              levels = c("post_con", 
                                         "post_int", 
@@ -726,11 +560,11 @@ comp_panel <- rbind(intervals(m1.isom)$fixed %>%
                        labels = c("Isokinetic",
                                   "Isometric"))) %>%
   
-  ggplot(aes(time_group, est., fill = type, color = type)) + 
+  ggplot(aes(time_group, Estimate, fill = type)) + 
   
   geom_hline(yintercept = 0, color = "gray90") +
   
-  geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1, 
+  geom_errorbar(aes(ymin = lwr, ymax = upr, color = type), width = 0.1, 
                 position = position_dodge(width = 0.25)) + 
   geom_point(size = 1.5, 
              shape = 21,
@@ -746,8 +580,11 @@ comp_panel <- rbind(intervals(m1.isom)$fixed %>%
   plot_theme() +
   
   theme(axis.title.x = element_blank(), 
-        legend.position = c(0.12, 0.7), 
-        legend.text = element_text(size = 8))
+        legend.position = c(0.25, 0.85), 
+        legend.spacing.y = unit(-0.5, 'cm'),
+        legend.key.size = unit(0.2, "cm"),
+        legend.text = element_text(margin = margin(t = 0, r = 0, b = 0, l = 0.3), size = 7))
+
 
 
 ### Save UL results as graph
@@ -759,101 +596,154 @@ strength_results <- plot_grid(raw_scores, comp_panel, nrow = 2, align = "v")
 
 # Panel X: Ultra sound -- muscle thickness ########################
 
+# Principally the same model is used for US data. Lesser data points are 
+# available in this data set as pre testing is only done once. 
 
 
-us_data <- read_excel("./data/ultrasound/ultrasound_data.xlsx") %>%
-  inner_join(read_csv("./data/ultrasound/ultrasound_codekey.csv")) %>%
-  mutate(leg = gsub("VL", "", leg)) %>%
-  inner_join(read_excel("./data/leg_randomization.xlsx")) %>%
-  dplyr::select(participant, time, leg, sex, cond, code, length) %>%
-  mutate(group = if_else(participant %in% paste("P", 1:7, sep = ""), "experiment", "control")) %>%
-  group_by(participant, time, leg, sex, cond, group) %>%
-  summarise(thickness = mean(length, na.rm = TRUE)) %>%
-  ungroup() %>%
-  mutate(time = factor(time, levels = c("pre", "post", "post1w")),
-         time.pp = factor(gsub("1w", "", time), levels = c("pre", "post")),
-         detrain = if_else(time == "post1w", "detrain", "train")) %>%
+# Combine data sets 
+us_data <- rbind(read_excel("./data/ultrasound/ultrasound_data.xlsx") %>%
+    inner_join(read_csv("./data/ultrasound/ultrasound_codekey.csv")) %>%
+    mutate(leg = gsub("VL", "", leg)) %>%
+    inner_join(read_excel("./data/leg_randomization.xlsx")) %>%
+    dplyr::select(participant, time, leg, sex, cond, code, length) %>%
+    mutate(group = if_else(participant %in% paste("P", 1:7, sep = ""), "experiment", "control")) %>%
+    group_by(participant, time, leg, sex, cond, group) %>%
+    summarise(thickness = mean(length, na.rm = TRUE)) %>%
+    ungroup(), 
+    read_excel("./data/ultrasound/ultrasound_data_2019.xlsx") %>%
+    inner_join(read_csv("./data/ultrasound/ultrasound_codekey_2019.csv")) %>%
+    mutate(leg = gsub("VL", "", leg)) %>%
+    inner_join(read_excel("./data/leg_randomization.xlsx")) %>%
+    dplyr::select(participant, time, leg, sex, cond, code, length) %>%
+    mutate(group = if_else(participant %in% paste("P", c(1:7, 19:23), sep = ""), "experiment", "control")) %>%
+    group_by(participant, time, leg, sex, cond, group) %>%
+    summarise(thickness = mean(length, na.rm = TRUE)) %>%
+    ungroup()) %>%
+  
+  mutate(time_pp = if_else(time == "post1w", "post", time),
+         # The de-training period get its own coefficient
+         detrain = if_else(time == "post1w" & group == "experiment", "detrain", "train"),
+         # The effect of de training will be added to the model --within-- the intervention group 
+         detrain = factor(detrain, levels = c("train", "detrain")), 
+         time = factor(time, levels = c("pre", "post", "post1w")), 
+         time_pp = factor(time_pp, levels = c("pre", "post"))) %>%
+
   print()
-
-
-
-us_data_2019 <- read_excel("./data/ultrasound/ultrasound_data_2019.xlsx") %>%
-  inner_join(read_csv("./data/ultrasound/ultrasound_codekey_2019.csv")) %>%
-  mutate(leg = gsub("VL", "", leg)) %>%
-  inner_join(read_excel("./data/leg_randomization.xlsx")) %>%
-  dplyr::select(participant, time, leg, sex, cond, code, length) %>%
-  mutate(group = if_else(participant %in% paste("P", c(1:7, 19:23), sep = ""), "experiment", "control")) %>%
-  group_by(participant, time, leg, sex, cond, group) %>%
-  summarise(thickness = mean(length, na.rm = TRUE)) %>%
-  ungroup() %>%
-  mutate(time = factor(time, levels = c("pre", "post", "post1w")),
-         time.pp = factor(gsub("1w", "", time), levels = c("pre", "post")),
-         detrain = if_else(time == "post1w", "detrain", "train")) %>%
-  print()
+  
+  
+us_data %>%
+  ggplot(aes(thickness, ))
 
 
 
 
-#### Mean center pre 
+## Model between conditions differences 
+
+m1 <- lmer(thickness ~ time + time:cond + (time|participant), 
+           data = us_data[us_data$group == "experiment",])
+
+summary(rePCA(m1))
+# Singular, all variation is explained at the intercept, removing correlation reducing slopes
+
+m2 <- lmer(thickness ~ time + time:cond + (dummy(time, "post1w")||participant), 
+           data = us_data[us_data$group == "experiment",])
+
+summary(rePCA(m2))
+
+anova(m1, m2)
+# Does not improve fit, simplify further, removing random slopes
+m3 <-  lmer(thickness ~ time + time:cond + (1|participant), 
+            data = us_data[us_data$group == "experiment",])
+
+anova(m1, m2, m3)
+# Lowest AIC and non-significant improvement in models containing more complicated 
+# random effects structures. m3 is the preferred model.
+plot(m3)
+
+
+summary(m3) 
+confint(m3)
+# There is no evidence for between condition differences in muscle thickness changes. This group is 
+# subsequently analyzed as a whole against the control group. 
+
+
+
+m1 <- lmer(thickness ~  time_pp * group + group:time_pp:detrain  + (1 + time_pp|participant), 
+           data = us_data)
+
+summary(rePCA(m1)) 
+# the fit is not singular, but most of the variance is contained in the 
+# intercept, simplify by removing correlation
+
+m2 <- lmer(thickness ~  time_pp * group + group:time_pp:detrain  +(dummy(time_pp, "post")||participant), 
+           data = us_data)
+
+
+summary(rePCA(m1)) # Sligthly more partition in the simpler model
+
+# Fitting a simpler model
+m3 <- lmer(thickness ~  time_pp * group + group:time_pp:detrain  + (1|participant), 
+           data = us_data)
+
+m4 <- lmer(thickness ~  time_pp * group + group:time_pp:detrain  + (1|participant/leg), 
+           data = us_data)
+
+
+# The model is rank deficient (not all combinations of coefficients exists in the data)
+# it is OK.
+
+# Check if random effects structure matters
+anova(m1, m2, m3, m4) # No, the simplest model is preferred, but adding an intercept per leg improves fit
+plot(m4)
+
+summary(m4)
+
+# Calculate contrasts, using the same contrast matrix as in strength assessments #
+
+
+## These confidence intervals are not adjusted. 
+ci.us <- confint(glht(m4, linfct = k), calpha = univariate_calpha())
+
+
+em <- ci.us$confint %>%
+              data.frame() %>% 
+              mutate(time_group = rownames(.))
+
+# Plotting the resulting data ############
+
+# Make a data frame with raw scores
+
 
 us_temp <- us_data %>%
-  rbind(us_data_2019) %>%
-  dplyr::select(participant, time, leg, sex, cond, group, thickness) %>%
-  
+  dplyr::select(participant:sex, group, thickness) %>%
   pivot_wider(names_from = time, values_from = thickness) %>%
-  
-  mutate(post   = post -  pre, 
-         post1w = post1w -  pre, 
-         pre    = pre - mean(pre)) %>%
-  
-  pivot_longer(names_to = "time", values_to = "change", post:post1w) %>%
+  mutate(post = post - pre, 
+         post1w = post1w - pre) %>%
+  pivot_longer(names_to = "time", values_to = "change", cols = post:post1w) %>%
   filter(!is.na(change)) %>%
-  mutate(cond = if_else(cond == "ctrl_leg", "ctrl", cond),
-         group_time = paste0(group, "_", time), 
-         group_time = factor(group_time, levels = c("control_post", 
-                                                    "experiment_post", 
-                                                    "experiment_post1w"))) %>%
-  #      group_time = factor(group_time, levels = c("ctrl_post", 
-  #                                                 "var_post", 
-  #                                                 "const_post", 
-  #                                                 "var_post1w", 
-  #                                                 "const_post1w"))) %>%
+  mutate(group = if_else(group == "experiment", "int", "con"), 
+         time_group = paste0(time, "_", group)) %>%
+  
   print()
 
 
 
 
 
-
-
-
-## CONST vs. VAR 
-
-m1 <- lme(change ~  sex + pre + group_time,
-          random = list(participant = ~ 1),
-          na.action = na.omit,
-          control = list(msMaxIter = 120, 
-                         opt = "nloptwrap", 
-                         msVerbose = TRUE), 
-          data = us_temp)
-
-
-marginal.means <- emmeans(m1, specs = ~group_time) %>%
-  data.frame()
 
 
 raw_scores <- us_temp %>%
-  ggplot(aes(group_time, change)) + 
+  ggplot(aes(time_group, change)) + 
   
   geom_hline(yintercept = 0, color = "gray90") +
   
   geom_jitter(width = 0.05, size = 1.2, alpha = 0.4) + 
-  geom_errorbar(data = marginal.means, 
-                aes(group_time, emmean, ymin = lower.CL, ymax = upper.CL), 
-                position = position_nudge(x = 0.1), width = 0) +
-  geom_point(data = marginal.means, 
-             aes(group_time, emmean), 
-             position = position_nudge(x = 0.1), color = "white", size = 0.5, shape = 15) + 
+  geom_errorbar(data = em[1:3,], 
+                aes(time_group, Estimate, ymin = lwr, ymax = upr), 
+                position = position_nudge(x = 0.25), width = 0) +
+  geom_point(data = em[1:3,], 
+             aes(time_group, Estimate), 
+             position = position_nudge(x = 0.25), color = "white", size = 0.5, shape = 15) + 
   
   labs(y = "\U0394 Muscle thickness (mm)") +
   
@@ -870,27 +760,28 @@ raw_scores <- us_temp %>%
 
 
 
-comp_panel <- intervals(m1)$fixed %>%
-  data.frame() %>%
-  mutate(coef = rownames(.)) %>%
-  filter(coef %in% c("group_timeexperiment_post", "group_timeexperiment_post1w")) %>%
+comp_panel <- em %>%
   
-  mutate(group_time = gsub("group_time", "", coef)) %>%
-  dplyr::select(-coef) %>%
-  rbind(data.frame(lower = NA, est. = NA, upper = NA, group_time = "control_post")) %>%
+  filter(time_group %in% c("inter:post_int", "inter:post1w_int")) %>%
   
-  mutate(group_time = factor(group_time,  
-                             levels = c("control_post", 
-                                        "experiment_post", 
-                                        "experiment_post1w"), 
+  mutate(time_group = gsub("inter:", "", time_group)) %>%
+  
+  rbind(data.frame(Estimate = NA, lwr = NA, upr = NA,
+                   time_group = "post_con")) %>%
+  
+  mutate(time_group = factor(time_group,  
+                             levels = c("post_con", 
+                                        "post_int", 
+                                        "post1w_int"), 
                              labels = c("CON", "EXP S12", "EXP De-train"))) %>%
   
-  ggplot(aes(group_time, est.)) + 
+  ggplot(aes(time_group, Estimate)) + 
+
   
   geom_hline(yintercept = 0, color = "gray90") +
   
-  geom_errorbar(aes(ymin = lower, ymax = upper), width = 0.1) + 
-  geom_point(size = 2) + 
+  geom_errorbar(aes(ymin = lwr, ymax = upr), width = 0.1) + 
+  geom_point(size = 2, shape = 21, fill = "white") + 
   
   scale_y_continuous(limits = c(-0.5, 2.5), 
                      breaks = c(-0.5, 0, 0.5, 1, 1.5, 2, 2.5), 

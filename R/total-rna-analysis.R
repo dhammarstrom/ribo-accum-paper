@@ -92,13 +92,13 @@ pr %>%
 
 # No splines
 m0 <- gam(rna ~ tw + cond + time.c +  s(participant, bs = "re"), 
-          data = temp, method = "ML")
+          data = time_course, method = "ML")
 # Splines but not per group
 m1 <- gam(rna ~ tw + cond +  s(time.c,  k = 7) +  s(participant, bs = "re"), 
-          data = temp, method = "ML")
+          data = time_course, method = "ML")
 # Splines per group
 m2 <- gam(rna ~ tw + cond + s(time.c, by = cond,  k = 7) +  s(participant, bs = "re"), 
-          data = temp, method = "ML")
+          data = time_course, method = "ML")
 
 # Splines improves fit (as with polynomials above)
 anova(m0, m1, m2, test = "Chisq")
@@ -108,13 +108,14 @@ AIC(m1, m2)
 
 # REML estimation full model
 m3 <- gam(rna ~ tw +  s(time.c, k = 7,  by = cond) + cond +  s(participant, bs = "re"), 
-          data = temp, method = "REML", select = TRUE)
+          data = time_course, method = "REML", select = TRUE)
 
 
+library(ggeffects)
 ## Prediction from the full model 
 pr <- ggpredict(m3, c("time.c", "cond"), type = "re")
 
-plot(pr)
+str(pr)
 
 # Prediction from the reduced model 
 pr <- ggpredict(m2, c("time.c"), type = "re")
@@ -194,7 +195,7 @@ gam.check(m2)
 
 plot(m1, pages = 1, unconditional = FALSE)
 
-pr <- ggpredict(m1, c("time.c", "cond"), type = "re")
+pr <- ggpredict(m2, c("time.c", "cond"), type = "re")
 
 plot(pr)
 
