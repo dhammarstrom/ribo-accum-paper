@@ -31,7 +31,10 @@ for(i in 1:length(files)){
 }
 
 
-
+tot_rna <- bind_rows(results) %>%
+  dplyr::select(Sample, dilution = `Dilution factor`, concentration = ...7) %>%
+  mutate(concentration = concentration * dilution) %>%
+  dplyr::select(-dilution)
 
 
 
@@ -45,7 +48,8 @@ p18_samples <- tot_rna %>%
                         sample = c("mRNA1","mRNA1", "mRNA2", "mRNA2", "mRNA2", "mRNA1" ),
                         time = c("postctrl", "S0", "S0", "postctrl", "S0", "S0"), 
                         leg = c("L", "R", "L", "L", "R", "L"))) %>%
-  mutate(rna = concentration * 20) %>%
+  mutate(concentration = ((concentration/3)/(50*(10/0.51))) * (40 *(10/0.51)) ,
+         rna = concentration * 20) %>%
   inner_join(read_excel("./data/tissue/tr010_tissue.xlsx", na = "NA") %>%
                filter(participant == "P18", sample != "prot")) %>%
   mutate(series = 1) %>%
@@ -67,7 +71,7 @@ tot_rna_round2 <- tot_rna %>%
   # RNA = Absorbance * 40 * (10/0.51) * dilutionfactor (= 3)
   # [The above was mistakenly calculated as DNA in raw data:
   # DNA = Absorbance * 50 * (10/0.51)]
-  mutate(concentration = ((concentration/3)/(50*(10/0.51))) * (40 *(10/0.51)) * 3,
+  mutate(concentration = ((concentration/3)/(50*(10/0.51))) * (40 *(10/0.51)) ,
          rna = concentration * 25) %>%
   dplyr::select(participant, series, sample, leg, time, tissue_weight, rna) %>%
   print()
@@ -137,16 +141,16 @@ rna$pred<- predict(l.mod)
 
 # plot predicted vs. standardized residuals
 rna %>%
-  mutate(outlier = if_else(resid < -2.5| resid > 2.5, "out", "in")) %>%
+  mutate(outlier = if_else(resid < -2| resid > 2, "out", "in")) %>%
   # filter(resid > 3) %>%
-  ggplot(aes(log(tissue_weight), log(rna), color = outlier)) + geom_point() 
+  ggplot(aes(log(tissue_weight), log(rna), color = time)) + geom_point() 
 
 
 
 ### Save data 
 
 rna.save <- rna %>%
-  mutate(outlier = if_else(resid < -2.5| resid > 2.5, "out", "in")) %>%
+#  mutate(outlier = if_else(resid < -2.5| resid > 2.5, "out", "in")) %>%
   inner_join(read_excel("./data/leg_randomization.xlsx")) %>%
   print()
   
