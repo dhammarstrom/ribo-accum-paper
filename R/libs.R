@@ -13,6 +13,8 @@ library(ggrepel)
 # Modeling 
 library(nlme)
 library(lme4)
+library(brms)
+library(ggmcmc)
 library(emmeans)
 library(mgcv)
 library(multcomp)
