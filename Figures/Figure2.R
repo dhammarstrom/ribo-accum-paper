@@ -1,10 +1,8 @@
-############# Figure 1 ##################################
+############# Figure 2 ##################################
 
 
 ## Panels
-# A: Study design
-# B: Performed volume per condition
-# C/D: Strength and body composition changes. 
+
 
 
 source("./R/figure-source.R")
@@ -112,11 +110,7 @@ gam2 <- gamm(rna ~ tw +  s(time.c,  k = 7, by = cond),
           data = time_course, method = "ML")
 
 
-
-
 # Control vs. experimental group 
-
-
 
 rna_control <- rna_complete %>%
   filter(time %in% c("S0","S1", "S1c", "S12", "postctrl", "post1w")) %>%
@@ -128,9 +122,10 @@ rna_control <- rna_complete %>%
   
   filter(!(participant == "P10" & time_pp == "S1")) %>%
 
-  group_by(participant, leg, time, time_pp, group, detrain) %>%
-  summarise(rna = mean(rna, na.rm = TRUE), 
-            tissue_weight = mean(tissue_weight, na.rm = TRUE)) %>%
+ # group_by(participant, leg, time, time_pp, group, detrain) %>%
+ # summarise(rna = mean(rna, na.rm = TRUE), 
+ #           tissue_weight = mean(tissue_weight, na.rm = TRUE)) %>%
+  mutate(sample = paste(participant, leg, time, sep = "_")) %>%
   ungroup() %>%
   mutate(tw = tissue_weight - mean(tissue_weight), 
          detrain = factor(detrain, levels = c("train", "detrain")), 
@@ -158,74 +153,114 @@ ggplot(aes(tissue_weight, rna, label = paste(participant, time))) + geom_point()
 
 # Testing random effects in the control vs. experimental group model.
 
-m1 <- lmer(rna ~ tw + time_pp * group + time_pp:group:detrain + (time_pp|participant), 
+m1 <- lmer(log(rna) ~ tw + time_pp * group + time_pp:group:detrain + 
+             (time_pp|participant) + 
+             (1|sample), 
            data = rna_control)
-
+plot(m1)
 summary(rePCA(m1))
 # Basically no variation in slope terms, removing correlation
-m2 <- lmer(rna ~ tw + time_pp * group + time_pp:group:detrain + (dummy(time_pp, "post")||participant), 
+m2 <- lmer(log(rna) ~ tw + time_pp * group + time_pp:group:detrain + 
+             (1 + dummy(time_pp, "post")||participant) +
+             (1|sample), 
            data = rna_control)
 
 summary(rePCA(m2))
 
 # Results in singular fit, no information in the slope... A simpler model 
-m3 <- lmer(rna ~ tw + time_pp * group + time_pp:group:detrain + (1|participant), 
+m3 <- lmer(log(rna) ~ tw + time_pp * group + time_pp:group:detrain + 
+             (1|participant) + (1|sample), 
            data = rna_control)
 
 
 anova(m1, m2, m3)
-# Adding the slope term givs additional fit to the model, model 2 is preferred. 
+# Adding the slope term givs additional fit to the model, model 2 is preferred, however model
+# 2 is probably to complex borderline singular fit. 
 
-summary(m2)
+summary(m3)
 
 
-control_em <- emmeans(m2, specs = ~ time_pp |  group + detrain) %>%
+# Get percentage change in each time-point compared to control using a custom 
+
+# Custom contrast matrix k
+
+head(model.matrix(m3))
+
+
+con.s1 <- matrix(c(1, 0, 1, 0, 0, 0, 0, 0),1) - matrix(c(1, 0, 0, 0, 0, 0, 0, 0),1)
+con.post <- matrix(c(1, 0, 0, 1, 0, 0, 0, 0),1) - matrix(c(1, 0, 0, 0, 0, 0, 0, 0),1)
+
+int.s1       <- matrix(c(1, 0, 1, 0, 1, 1, 0, 0),1) - matrix(c(1, 0, 0, 0, 1, 0, 0, 0),1)
+int.post     <- matrix(c(1, 0, 0, 1, 1, 0, 1, 0),1) - matrix(c(1, 0, 0, 0, 1, 0, 0, 0),1) 
+int.detrain  <- matrix(c(1, 0, 0, 1, 1, 0, 1, 1),1) - matrix(c(1, 0, 0, 0, 1, 0, 0, 0),1) 
+
+summary(m3)
+
+k <-  rbind(con.s1, 
+            con.post,
+            int.s1,     
+            int.post,   
+            int.detrain,
+            int.s1 - con.s1, 
+            int.post - con.post, 
+            int.detrain - con.post) 
+# Set rownames
+rownames(k) <- c("con_s1", 
+                 "con_post", 
+                 "int_s1", 
+                 "int_post", 
+                 "int_detrain", 
+                 "inter:int_s1",
+                 "inter:int_post",
+                 "inter:int_detrain") 
+
+## These confidence intervals are not adjusted. 
+ci <- confint(glht(m3, linfct = k), calpha = univariate_calpha())
+
+
+# Calculate average change scores per participant
+
+
+ci$confint %>%
   data.frame() %>%
-  mutate(emmean = emmean / mean(rna_control$tissue_weight), 
-         lower.CL = lower.CL / mean(rna_control$tissue_weight), 
-         upper.CL = upper.CL / mean(rna_control$tissue_weight), 
-         time.c = if_else(time_pp == "pre", 0, 
-                          if_else(time_pp == "S1", 1, 
-                                  if_else(time_pp == "post", 12, 0))), 
-         time.c = if_else(detrain == "detrain", 14, time.c)) %>%
   print()
 
 
+rna_control %>%
+
+  group_by(participant, leg, time_pp, group, detrain) %>%
+  summarise(rna.weight = mean(rna, na.rm = TRUE) / mean(tissue_weight, na.rm = TRUE)) %>%
+  
+  mutate(time = paste0(time_pp, "_", detrain)) %>%
+  ungroup() %>%
+  dplyr::select(participant, leg, time,group, rna.weight) %>%
+
+  
+  pivot_wider(names_from = time, values_from = rna.weight) %>%
+
+  mutate(S1 = 100 * ((S1_train/pre_train) -1), 
+         post = 100 * ((post_train/pre_train) -1), 
+         detrain = 100 * ((post_detrain/pre_train) -1)) %>%
+  
+  dplyr::select(participant, leg, group, S1:detrain) %>%
+  pivot_longer(names_to = "time", 
+               values_to = "rel_change", 
+               cols = S1:detrain) %>%
+  filter(!(is.na(rel_change))) %>%
+  mutate(time_group = paste0(group, "_", time)) %>%
+  
+
+  
+  ggplot(aes(time_group, rel_change)) + geom_point()
 
 
-## Predicted values from 
-total_rna_fig <- emmeans(gam2, specs =  ~ cond|time.c, at = list(time.c = c(0, 1,2, 3,4, 5,6,7, 8, 9,10, 11, 12)), 
-        data = data.frame(time_course)) %>%
-  data.frame() %>%
-  mutate(emmean   = emmean   / mean(time_course$tissue_weight), 
-         lower.CL = lower.CL / mean(time_course$tissue_weight),
-         upper.CL = upper.CL / mean(time_course$tissue_weight)) %>%
-  ggplot(aes(time.c, emmean, group = cond, fill = cond, color = cond)) + 
-  
-  geom_ribbon(aes(ymin = lower.CL, ymax = upper.CL, color = NULL), alpha = 0.2) +
-  
 
-  geom_errorbar(data = control_em, 
-                aes(time.c, emmean, ymin = lower.CL, ymax = upper.CL, 
-                    fill = NULL,
-                    color = NULL, 
-                    group = group), 
-                position = position_dodge(width =  0.2), 
-                width = 0.2, 
-                color = "gray50") +
-  
-  geom_point(data = control_em, 
-             aes(time.c, emmean, fill = group, color = NULL, group = NULL), 
-             shape = 21, 
-          
-             position = position_dodge(width = 0.2)) +
-                
-  
-  
-  geom_line()  +
-  
-  plot_theme() + 
-  theme(legend.position = c(0.2, 0.8))
+
+
+
+
+
+
 
 
 
