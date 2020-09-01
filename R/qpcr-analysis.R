@@ -92,16 +92,9 @@ qdat.rrna  <- qdat %>%
 
 
 ## Control vs. intervention group #
-# In comparing control vs. intervention there is an issue with rank deficiency
-# nlme:lme does not handle rank deficiency but do handle variance functions 
-# which would allow for multi-target modeling further accounting for 
-# technical variation through random effects with each technical replicate. 
+# Due to rank deficiency in comparing ctrl vs. interv a new factor variable is formed 
+# and comparisons are made post-hoc. This is similar to what is done in other analyses.
 
-# lme4::lmer does not handle variance componenets per strata (gene/target)
-# mcmc.qpcr is a possibility which uses mcmcglmm, however post-hoc comparisons
-# are not straight-forward. 
-
-# A possible solution is 
 
 qdat.ctrl <- qdat.rrna %>%
   filter(time %in% c("S0", "S1c", "S1", "S12", "postctrl", "post1w")) %>%
@@ -110,240 +103,91 @@ qdat.ctrl <- qdat.rrna %>%
          time = if_else(time == "S0", "pre", 
                         if_else(time == "S1c", "S1", 
                                 if_else(time %in% c("postctrl", "post1w", "S12"), "post", time))), 
-         time = factor(time, levels = c("pre", "S1", "post")))  %>%
-  
-  
+         time = factor(time, levels = c("pre", "S1", "post")), 
+         tx = paste(time, group, detrain, sep = "_"))  %>%
   
   print()
 
 
-# brms solution ########################
 
-# THIS IS WHERE IM AT ! #################
 
 
-library(brms)
 
-
-m1 <- brm(counts ~ 0 + target + target:time + target:group + 
-            target:time:group + target:time:group:detrain +
-            (target||participant) + (1|technical) + (1|biological), 
-          data = qdat.ctrl, 
-          family = poisson, 
-          iter = 50000, 
-          cores = 16)
-
-
-h <- hypothesis(m1, "targetrRNA18SF2R2:timepost:groupint - targetrRNA18SF2R2:groupint= targetrRNA18SF2R2:timepost - targetrRNA18SF2R2")
-
-
-h$hypothesis
-summary(m1)
-
-
-### mcmcglmm solution #############
-
-library(MCMCglmm); library(parallel)
-
-### The first model is specified with random effects as in the basic mixed linear-model implementation. 
-# A random intercept for the participant and for the technical replicate. 
-#
-# The mcmc.qpcr approach adds slopes by random factor for the gene effect. First we ignore this to get a model formulation 
-# more like the one in the lme-approach.
-
-
-# The priors for the variance components are set with the limit (V) set to 1 and the 
-# belief parameter (nu) set to 0.002. The course notes (p. 13) says this is a common
-# use for variance components.
-# A  This prior is specified in the R part. 
-# We set this to nu = 4.002 to make as similar to as possible mcmc.qpcr 
-
-# Random effects allow for random intercepts by subject, technical sample and biological sample
-# and random gene slopes by subject.
-
-# Library parallel needed for parallel fitting of models
-library(parallel)
-
-
-prior1 <- list(R = list(V = diag(7), nu = 4.002),
-               G = list(G1 = list(nu = 0.002, V = 1), 
-                        G2 = list(nu = 0.002, V = 1),
-                        G3 = list(nu = 0.002, V = 1),
-                        G4 = list(nu = 0.002, V = diag(7))))
-
-
-setCores<-round(detectCores()*1) # use detectCores() by itself if you want all CPUs
-
-# make the cluster
-cl <- makeCluster(getOption("cl.cores",setCores))
-
-
-# load the MCMCglmm package within the cluster
-cl.pkg <- clusterEvalQ(cl,library(MCMCglmm)) 
-
-clusterExport(cl,"prior1")
-clusterExport(cl,"qdat.ctrl")
-
-
-model2_10runs <- parLapply(cl=cl,1:10, function(i) {
-  MCMCglmm(fixed = counts ~ 0 + target + target:time + target:group + target:time:group + target:time:group:detrain ,
-           random = ~participant + technical + biological + idh(target):participant, 
-           prior = prior1, 
-           family = "poisson", 
-           data = qdat.ctrl, 
-           rcov = ~idh(target):units,
-           thin = 20,
-           burnin = 5000,
-           nitt = 55000)}
-)
-
-# once it's finished, use stopCluster() to stop running the parallel cluster
-stopCluster(cl)
-
-
-
-
-
-mc1.models.diagn <- do.call(mcmc.list, lapply(model2_10runs, function(m) m$VCV))
-
-par(mfrow=c(4,2), mar=c(2,2,1,2))
-gelman.plot(mc1.models.diagn, auto.layout=F)
-
-
-summary(model2_10runs[[1]])
-
-## Examining the gelman plots and scale reduction factors suggests that the model is ok. 
-# The model converges. 
-
-mc1 <- model2_10runs[[1]]
-
-
-mc1$
-
-model2_10runs[[1]]
-
-
-con.post <- matrix(c(1, 1, 0, 0, 0),1) - matrix(c(1, 0, 0, 0, 0),1) 
-int.post <- (matrix(c(1, 1, 1, 1, 0),1) - matrix(c(1, 0, 1, 0, 0),1))
-int.post.detrain <- (matrix(c(1, 1, 1, 1, 1),1) - matrix(c(1, 0, 1, 0, 0),1)) 
-
-k <-  rbind(con.post, 
-            int.post, 
-            int.post.detrain,
-            int.post - con.post, 
-            int.post.detrain - con.post) 
-# Set rownames
-rownames(k) <- c("post_con", "post_int", "post1w_int", "inter:post_int", "inter:post1w_int") 
-
-## These confidence intervals are not adjusted. 
-ci.isok <- confint(glht(m3, linfct = k), calpha = univariate_calpha())
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## MCMC diagnostics 
-# First we plot traces and density-plots for all parameters
-
-
-  mcmc_trace(mc1$VCV)
-  mcmc_hist(mc1$VCV)
+m1 <- lme(log(Ra.nf) ~ 0 + target + target:tx, 
+          random = list(participant = ~ 1, 
+                        technical = ~ 1), 
+          weights = varIdent(form = ~ 1|target), 
+          control = list(msMaxIter = 120, 
+                         opt = "nloptwrap", 
+                         msVerbose = TRUE), 
+          method = "REML", 
+          na.action = na.exclude,
+          data = qdat.ctrl)
+
+# In model 1, residual variances are modeled per target. To test if more ellaborate 
+# modelling is needed.
+
+
+varfun2 <- varPower(form = ~ cq|target)
+varfun3 <- varExp(form = ~ cq|target)
+# 
+# 
+ m2 <- update(m1, weights = varfun2)
+ m3 <- update(m1, weights = varfun3)
+
+ # Check all models for pos def vcov using intervals. 
+ intervals(m3)
+ 
+ # m2 does not give a pos def vcov. Comapre m1 and m3
+ 
+ anova(m1, m3)
+ 
+ # m3 gives a better fit, try more elaborate random effects
+ 
+ m4 <- update(m3, random = list(participant = pdDiag(~ 1 + target), technical = ~ 1))
+ m5 <- update(m3, random = list(participant = ~ 1, biological = ~ 1, technical = ~ 1))
+ intervals(m5)
+
+ # m3 keeps beeing stabel, check model diagnostics
+ 
+
+# Residual plots looks good enough
+plot(m3, resid(., type = "n") ~ fitted(.)|target)
+qqnorm(m3, ~ resid(., type = "n")|target, abline = c(0,1))
+
+# Looks good!
+
+
+# Using emmeans to get coefficients of interest.
+
+em.m3 <- emmeans(m3, specs = ~ tx|target)
+em <- em.m3
+
+# A function to produce contrasts 
+
+contr.fun <- function(em, tx, target) {
+  # convert to data frame
+  em <- data.frame(em)
+  # count number of rows
+  rows <- nrow(em)
+  # create a vector of zeros
+  vec <- rep(0, rows)
+  # Specify what indicator should be 1
+  vec[which(em$tx == tx & em$target == target)] <- 1
+  return(vec)
   
-  mcmc_trace(mc1$Sol)
-  mcmc_hist(mc1$Sol)
-  
-  # These looks good, traces stationary and seems to converge. How about autocorrelations?
-  
-  mcmc_acf(mc1$VCV)
-  mcmc_acf(mc1$Sol)
-
-
-
-
-# No autocorrelation at lag >~10... A good sign!
-
-# How about the variance components?
-vcv_sum(mc1$VCV)
-
-# The variance components are well above zero (95% credible interval), this is indication 
-# to keep them. 
-
-# In the second model we replicate the "full" model 5 in the nlme approach. We include random slopes on the 
-# subject level and biological sample level.
-
-prior2 <- list(R = list(V = diag(4), nu = 4.002),
-               G = list(G1 = list(nu = 0.002, V = 1), 
-                        G2 = list(nu = 0.002, V = 1),
-                        G3 = list(V = diag(4), nu = 0.002),
-                        G4 = list(V = diag(4), nu = 0.002),
-                        G5 = list(V = 1, nu = 0.002)))
-
-
-mc2.models <- mclapply(1:4, function(i) {
-  MCMCglmm(fixed = count ~ 0 + gene + gene:timepoint + gene:sets + gene:timepoint:sets,
-           random = ~subject + technical + idh(gene):subject + idh(gene):biological + biological, 
-           prior = prior2, 
-           family = "poisson", 
-           data = qs, 
-           rcov = ~idh(gene):units,
-           thin = 20,
-           burnin = 5000,
-           nitt = 55000)
-}, mc.cores=1)
-
-
-mc2.models.diagn <- do.call(mcmc.list, lapply(mc2.models, function(m) m$Sol))
-
-par(mfrow=c(4,2), mar=c(2,2,1,2))
-# gelman.plot(mc2.models.diagn, auto.layout=F)
-if(USE_mcmcPLOTS == TRUE){
-  gelman.diag(mc2.models.diagn)
 }
-## Examining the gelman plots and scale reduction factors suggests that the model is ok. 
-# The model converges. 
-mc2 <-mc2.models[[1]]
 
-# Assessing the model fit by DIC
-DIC(list(mc1 = mc1, mc2 = mc2))
+c1 <- (contr.fun(em.m3, "post_int_train", "rRNA18S F2R2") - contr.fun(em.m3, "pre_int_train", "rRNA18S F2R2") ) -
+  (contr.fun(em.m3, "post_con_train", "rRNA18S F2R2") - contr.fun(em.m3, "pre_con_train", "rRNA18S F2R2") )
 
-# Suggests that model mc 2 is better
-
-## Looking at the diagnostics for the second model
-# Traces
-
-if(USE_mcmcPLOTS == TRUE){
-  mcmc_trace(mc2$VCV) + geom_smooth(color = "black")
-  mcmc_hist(mc2$VCV)
-  
-  ## The variance components are small, but all traces seems ok.
-  
-  # We can also look at effective samples
-  effectiveSize(mc2$VCV);effectiveSize(mc2$Sol)
-  
-  # Effective size looks alright even though some VCV-components seems to be sampled less effective. Increse
-  # iterations in the next modeling (nitt = 55000, burning = 5000, thin = 20)
-  
-  # Looking at autocorrelations
-  mcmc_acf(mc2$Sol)
-  mcmc_acf(mc2$VCV)}
-# Also autocorr looks ok.
+contrast(em.m3, 
+         method = list("rRNA18S:inter:post_int" = c1)) %>%
+  print()
 
 
 
-
-
+###########################
 
 
 
