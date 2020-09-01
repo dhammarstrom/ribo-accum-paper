@@ -286,82 +286,82 @@ strength_long <- read_excel("./data/tr010_humac.xlsx") %>%
          time = if_else(time == "post_ctrl", "post", time),
          cond = if_else(cond == "ctrl_leg", "ctrl", cond)) %>%
 
-  dplyr::select(participant, sex, time, leg, group,cond, isokinetic_torque, isometric_torque) %>%
-
- # group_by(participant,sex,leg, time, group, cond) %>%
- # summarise(isok = mean(isokinetic_torque, na.rm = TRUE), 
- #           isom = mean(isometric_torque, na.rm = TRUE)) %>%
-  
-  mutate(isok = isokinetic_torque, 
-         isom = isometric_torque) %>%
-  
-  pivot_longer(names_to = "type", values_to= "torque", cols = isok:isom) %>%
-  pivot_wider(names_from = time, values_from = torque) %>%
-  mutate(post1w = if_else(group == "con", post, post1w)) %>%
-  pivot_longer(names_to = "time", values_to = "torque", cols = baseline:post1w) %>%
+  dplyr::select(participant, 
+                sex, 
+                time,
+                leg, 
+                group,
+                cond, 
+                isok = isokinetic_torque,
+                isom = isometric_torque) %>%
   print()
+
+
 
 # Between condition differences in strength increases ######
 
 # Isokinetic data 
 
 
- m1 <- lmer(torque ~ time + time:cond + (time|participant), 
-            data = strength_long[strength_long$type == "isok" & strength_long$group == "int",])
+ m1 <- lmer(isok ~ time + time:cond + (time|participant), 
+            data = strength_long[strength_long$group == "int",])
  
  summary(rePCA(m1))
 # Singular, all variation is explained at the intercept, removing correlation reducing slopes
 
- m2 <- lmer(torque ~ time + time:cond + (dummy(time, "post1w")||participant), 
-            data = strength_long[strength_long$type == "isok" & strength_long$group == "int",])
+ m2 <- lmer(isok ~ time + time:cond + (dummy(time, "post1w")||participant), 
+            data = strength_long[strength_long$group == "int",])
  
  summary(rePCA(m2))
 
  anova(m1, m2)
 # Does not improve fit, simplify further, removing random slopes
- m3 <- lmer(torque ~  time + time:cond + (1|participant), 
-            data = strength_long[strength_long$type == "isok" & strength_long$group == "int",])
+ m3 <- lmer(isok ~  time + time:cond + (1|participant), 
+            data = strength_long[strength_long$group == "int",])
  
  anova(m1, m2, m3)
  # Lowest AIC and non-significant improvement in models containing more complicated 
  # random effects structures. m3 is the preferred model.
- 
-confint(m3) 
+  plot(m3)
+  confint(m3) 
 # At least 1/3 of the 95% CI overlaps between conditions, little evidence for any between condition effects 
 # in isokinetic strength. 
 
 # Isometric data 
 
-m1 <- lmer(log(torque) ~ time + time:cond + (time|participant), 
-           data = strength_long[strength_long$type == "isom" & strength_long$group == "int",])
+m1 <- lmer(log(isom) ~ time + time:cond + (time|participant), 
+           data = strength_long[strength_long$group == "int",])
 
 summary(rePCA(m1))
 summary(m1)
 # Singular, all variation is explained at the intercept, removing correlation reducing slopes
 
-m2 <- lmer(log(torque) ~ time + time:cond + (dummy(time, "post1w")||participant), 
-           data = strength_long[strength_long$type == "isom" & strength_long$group == "int",])
+m2 <- lmer(log(isom) ~ time + time:cond + (dummy(time, "post1w")||participant), 
+           data = strength_long[strength_long$group == "int",])
 
 summary(rePCA(m2))
 
 anova(m1, m2)
 # Does not improve fit, simplify further, removing random slopes
-m3 <- lmer(log(torque) ~  time + time:cond + (1|participant), 
-           data = strength_long[strength_long$type == "isom" & strength_long$group == "int",])
+m3 <- lmer(log(isom) ~  time + time:cond + (1|participant), 
+           data = strength_long[strength_long$group == "int",])
 
 anova(m1, m2, m3)
 # Adding a random slope for time, uncorrelated to the intercept and only covering post1w improved the 
 # fit. m2 for isom is the preferred model. 
 
 #  confint(m2) 
- summary(m2)
-# Symmetrical confidence intervals gives little evidence for condition effects on strength changes. 
+# summary(m2)
+
+ # Symmetrical confidence intervals gives little evidence for condition effects on strength changes. 
+
 
 # Between group comparisons Strength ##########################
-# A single model can be used to do all comparisons. Pre- to post-data are compared between groups
-# with and without the de-training period in the intervention group (time == post1w in the full dataset)
-
-# A modified data set is used 
+# Since the control group does not have two post-measurements a fully crossed model 
+# will be rank deficient. Insted of a time * group interaction model, a new factor is 
+# used to represent combinations in the data frame that we want to model. 
+# Post-hoc comparisons are used to test interactions (i.e. change in intervention group 
+# vs. change in the control group). 
 
 strength_long2 <- strength_long %>%
   # Time coefficients are set as baseline/post
@@ -369,29 +369,39 @@ strength_long2 <- strength_long %>%
          # The de-training period get its own coefficient
          detrain = if_else(time == "post1w" & group == "int", "detrain", "train"),
          # The effect of de training will be added to the model --within-- the intervention group 
-         detrain = factor(detrain, levels = c("train", "detrain"))) %>%
+         detrain = factor(detrain, levels = c("train", "detrain")), 
+         tx = paste(time_pp, group, detrain, sep = "_"), 
+         tx = factor(tx, levels = c("baseline_con_train", 
+                                    "post_con_train", 
+                                    "baseline_int_train", 
+                                    "post_int_train", 
+                                    "post_int_detrain"))) %>%
   # Removes duplicated data used for paralell modeling
-  filter(!(time == "post1w" & group == "con")) %>%
   print()
   
 
 # Isokinetic models
   
-m1 <- lmer(torque ~  time_pp * group + group:time_pp:detrain  + (1 + time_pp|participant), 
-               data = strength_long2[strength_long2$type == "isok", ])
+m1 <- lmer(isok ~  tx + (1 + tx|participant), 
+               data = strength_long2)
 
 summary(rePCA(m1)) 
 # the fit is not singular, but most of the variance is contained in the 
 # intercept, simplify by removing correlation
 
-m2 <- lmer(torque ~  time_pp * group  + group:time_pp:detrain + (dummy(time_pp, "post")||participant), 
-           data = strength_long2[strength_long2$type == "isok", ])
+m2 <- lmer(isok ~  tx + (dummy(tx, c("post_int_train", 
+                                       "post_con_train"))||participant), 
+           data = strength_long2)
 
 
 summary(rePCA(m2)) # Sligthly more partition in the simpler model
 # Fitting a simpler model
-m3 <- lmer(torque ~  time_pp * group + group:time_pp:detrain + (1|participant), 
-           data = strength_long2[strength_long2$type == "isok", ])
+
+summary(m2)
+
+
+m3 <- lmer(isok ~  tx + (1|participant), 
+           data = strength_long2)
 
 # The model is rank deficient (not all combinations of coefficients exists in the data)
 # it is OK.
@@ -400,34 +410,38 @@ m3 <- lmer(torque ~  time_pp * group + group:time_pp:detrain + (1|participant),
 anova(m1, m2, m3) # No, the simplest model is preferred
 plot(m3)
 
+summary(m3)
+
+
 ## Isometric models 
 
-m1.isom <- lmer(torque ~  time_pp * group + group:time_pp:detrain  + (1 + time_pp|participant), 
-           data = strength_long2[strength_long2$type == "isom", ])
+m1.isom <- lmer(isom ~  tx + (1 + tx|participant), 
+                data = strength_long2)
 
 summary(rePCA(m1.isom)) 
 plot(m1.isom)
 # Not a singular fit, seeing if simplification may improve the model.
 
-m2.isom <- lmer(torque ~  time_pp * group  + group:time_pp:detrain + (dummy(time_pp, "post")||participant), 
-           data = strength_long2[strength_long2$type == "isom", ])
+m2.isom <-  lmer(isom ~  tx + (dummy(tx, c("post_int_train", 
+                                           "post_con_train"))||participant), 
+                 data = strength_long2)
 
 
 summary(rePCA(m2.isom)) # Some of the variance is contained in the uncorrelated random slope
 # Fitting a simpler model
-m3.isom <- lmer(torque ~   time_pp * group + group:time_pp:detrain + (1|participant), 
-           data = strength_long2[strength_long2$type == "isom", ])
+m3.isom <- lmer(isom ~  tx + (1|participant), 
+                data = strength_long2)
 
-# The model is rank deficient (not all combinations of coefficients exists in the data)
-# it is OK.
+
 
 # Check if random effects structure matters to model fit
 anova(m1.isom, m2.isom, m3.isom) 
-# An uncorrelated random slope improves the fit of the model, model 2 is preferred
 
-plot(m2.isom)
+# The simplest model is preferred
 
-summary(m2.isom)
+plot(m3.isom)
+
+summary(m3.isom)
 # The random effects structure does not change the inference, but the simplest model has the lowest AIC
 # and no improvement in fit with more elaborate models. The simplest model is preferred.
 
@@ -435,37 +449,111 @@ summary(m2.isom)
 
 # Combine data for plotting 
 
-# We want to show average change in each group + change in intervention group pre to post detraining
-# and the comparisons between changes in control to intervention (with and without detraining)
-# This can be specified using the multcomp package as custom contrasts.
+# Emmeans can be used as the contrats specified are combinations of factors. 
+# emmeans::emmeans is used to create a emmGrid object:
 
-# Custom contrasts are defined from the model matrix, to access it:
+em.isok <- emmeans(m3, specs =  ~ tx)
+em.isom <- emmeans(m3.isom, specs = ~ tx)
 
 
-con.post <- matrix(c(1, 1, 0, 0, 0),1) - matrix(c(1, 0, 0, 0, 0),1) 
-int.post <- (matrix(c(1, 1, 1, 1, 0),1) - matrix(c(1, 0, 1, 0, 0),1))
-int.post.detrain <- (matrix(c(1, 1, 1, 1, 1),1) - matrix(c(1, 0, 1, 0, 0),1)) 
+# The object contains no contrats, but simple means can be shown by calling the 
+# object.  
+em.isok
 
-k <-  rbind(con.post, 
-            int.post, 
-            int.post.detrain,
-            int.post - con.post, 
-            int.post.detrain - con.post) 
-# Set rownames
-rownames(k) <- c("post_con", "post_int", "post1w_int", "inter:post_int", "inter:post1w_int") 
+# To create contrats, each levels can be specified by a indicator vector. 
+
+baseline_con_train  =  c(1, 0, 0, 0, 0)
+post_con_train      =  c(0, 1, 0, 0, 0) 
+baseline_int_train  =  c(0, 0, 1, 0, 0) 
+post_int_train      =  c(0, 0, 0, 1, 0) 
+post_int_detrain    =  c(0, 0, 0, 0, 1)
+
+# these can be combined in a named list to produce the contrasts of interest. 
+
+
+comp_strength <- rbind(contrast(em.isok, 
+         method = list("post_con"         = post_con_train -  baseline_con_train, 
+                       "post_int"         = post_int_train - baseline_int_train, 
+                       "post1w_int"       = post_int_detrain - baseline_int_train, 
+                       "inter:post_int"   = (post_int_train - baseline_int_train) -  (post_con_train - baseline_con_train), 
+                       "inter:post1w_int" = (post_int_detrain - baseline_int_train) -  (post_con_train - baseline_con_train))) %>%
+  confint() %>%
+  data.frame() %>%
+  mutate(type = "isok"), 
+  contrast(em.isom, 
+           method = list("post_con"         = post_con_train -  baseline_con_train, 
+                         "post_int"         = post_int_train - baseline_int_train, 
+                         "post1w_int"       = post_int_detrain - baseline_int_train, 
+                         "inter:post_int"   = (post_int_train - baseline_int_train) -  (post_con_train - baseline_con_train), 
+                         "inter:post1w_int" = (post_int_detrain - baseline_int_train) -  (post_con_train - baseline_con_train))) %>%
+    confint() %>%
+    data.frame() %>%
+    mutate(type = "isom")) %>%
+  mutate(time_group = contrast) %>%
+  print()
   
-## These confidence intervals are not adjusted. 
-ci.isok <- confint(glht(m3, linfct = k), calpha = univariate_calpha())
-ci.isom <- confint(glht(m3.isom, linfct = k), calpha = univariate_calpha())
 
-em <- rbind(ci.isok$confint %>%
-  data.frame() %>% 
-  mutate(time_group = rownames(.), 
-         type = "isok"),
-  ci.isom$confint %>%
-    data.frame() %>% 
-    mutate(time_group = rownames(.), 
-           type = "isom"))
+## brms alternative strength #######################
+
+
+
+mx <- lmer(isom ~  tx + (1|participant), 
+           data = strength_long2)
+
+summary(mx)
+
+
+m1 <- brm(isom ~  tx + (1|participant),
+          
+          warmup = 1000, # number of samples before sampling
+          iter = 3000,  # number of mcmc iterations 
+          cores = 8, # number of cores used in sampling
+          chains = 4, # number of chains
+          seed = 123, # seed for reproducible results
+
+          data = strength_long2)
+
+plot(m1)
+
+
+# "post-hoc" tests would be needed to test interactions. This can be done using 
+# the hypothesis function. Hypotheses are written as character vectors 
+# to create a credible interval around the parameter/estimate of interest -- these can be used for 
+# inference. 
+
+#### This is where IM at ########################
+
+h <- hypothesis(m1, "txpost_int_train - txbaseline_int_train  = txpost_con_train")
+?hypothesis
+h
+
+
+# Model diagnostics
+
+# the ggs function transforms the brms output into a longformat tibble, 
+# that we can use to make different types of plots.
+
+m1_long <- ggs(m1)
+
+
+ggplot(filter(m1_long, Parameter %in% c("b_Intercept",
+                                        "b_txpost_con_train",
+                                        "b_txbaseline_int_train",
+                                        "b_txpost_int_train",
+                                        "b_txpost_int_detrain")),
+       aes(x   = Iteration,
+           y   = value, 
+           col = as.factor(Chain)))+
+  geom_line() +
+  geom_vline(xintercept = 1000)+
+  facet_grid(Parameter ~ . ,
+             scale  = 'free_y',
+             switch = 'y')+
+  labs(title = "Caterpillar Plots", 
+       col   = "Chains")
+
+
+
 
 
   
@@ -508,20 +596,20 @@ raw_scores <- strength %>%
              shape = 21, size = 1.2, alpha = 0.4) + 
   
   # Isokinetic strength
-  geom_errorbar(data = em[1:3,], 
-                aes(time_group, Estimate, ymin = lwr, ymax = upr, fill = NULL), 
+  geom_errorbar(data = comp_strength[1:3,], 
+                aes(time_group, estimate, ymin = lower.CL, ymax = upper.CL, fill = NULL), 
                 position = position_nudge(x = - 0.25), width = 0) +
  
-   geom_point(data = em[1:3,], 
-              aes(time_group, Estimate, fill = NULL), 
+   geom_point(data = comp_strength[1:3,], 
+              aes(time_group, estimate, fill = NULL), 
              position = position_nudge(x = -0.25), color = "white", size = 0.5, shape = 15) + 
   # Isometric strength
-  geom_errorbar(data = em[6:8,], 
-                aes(time_group, Estimate, ymin = lwr, ymax = upr, fill = NULL), 
+  geom_errorbar(data = comp_strength[6:8,], 
+                aes(time_group, estimate, ymin = lower.CL, ymax = upper.CL,  fill = NULL), 
                 position = position_nudge(x =  0.25), width = 0) +
   
-  geom_point(data = em[6:8,], 
-             aes(time_group, Estimate, fill = NULL), 
+  geom_point(data = comp_strength[6:8,], 
+             aes(time_group, estimate, fill = NULL), 
              position = position_nudge(x = 0.25), color = "white", size = 0.5, shape = 15) + 
   
   
@@ -542,13 +630,15 @@ raw_scores <- strength %>%
 
 
 
-comp_panel <- em %>%
+comp_panel <- comp_strength %>%
 
   filter(time_group %in% c("inter:post_int", "inter:post1w_int")) %>%
   
   mutate(time_group = gsub("inter:", "", time_group)) %>%
+  dplyr::select(estimate, lower.CL, upper.CL, type, time_group) %>%
 
-  rbind(data.frame(Estimate = NA, lwr = NA, upr = NA, type = c("isom", "isok"),
+
+  rbind(data.frame(estimate = NA, lower.CL = NA, upper.CL = NA, type = c("isom", "isok"),
                    time_group = "post_con")) %>%
 
   mutate(time_group = factor(time_group,  
@@ -560,11 +650,11 @@ comp_panel <- em %>%
                        labels = c("Isokinetic",
                                   "Isometric"))) %>%
   
-  ggplot(aes(time_group, Estimate, fill = type)) + 
+  ggplot(aes(time_group, estimate, fill = type)) + 
   
   geom_hline(yintercept = 0, color = "gray90") +
   
-  geom_errorbar(aes(ymin = lwr, ymax = upr, color = type), width = 0.1, 
+  geom_errorbar(aes(ymin = lower.CL, ymax = upper.CL, color = type), width = 0.1, 
                 position = position_dodge(width = 0.25)) + 
   geom_point(size = 1.5, 
              shape = 21,
@@ -590,89 +680,6 @@ comp_panel <- em %>%
 ### Save UL results as graph
 strength_results <- plot_grid(raw_scores, comp_panel, nrow = 2, align = "v")
 
-
-# Bayesian alternative BRMS ########################
-
-# brms will not ignore rank deficient columns from the design matrix. Factors needs 
-# to be re-formulated in combination from the data frame. This will solve similar problems 
-# in other implementations (e.g. nlme::lme). Post-hoc test can be used to check interactions.
-
-
-strength_long3 <- strength_long %>%
-  # Time coefficients are set as baseline/post
-  mutate(time_pp = if_else(time == "post1w", "post", time),
-         # The de-training period get its own coefficient
-         detrain = if_else(time == "post1w" & group == "int", "detrain", "train"),
-         # The effect of de training will be added to the model --within-- the intervention group 
-         detrain = factor(detrain, levels = c("train", "detrain")), 
-         tx = paste(time_pp, group, detrain, sep = "_"), 
-         tx = factor(tx, levels = c("baseline_con_train", 
-                                    "post_con_train", 
-                                    "baseline_int_train", 
-                                    "post_int_train", 
-                                    "post_int_detrain"))) %>%
-  # Removes duplicated data used for paralell modeling
-  filter(!(time == "post1w" & group == "con")) %>%
-  print()
-
-
-
-mx <- lmer(torque ~  tx + (1|participant), 
-           data = strength_long3[strength_long3$type == "isok", ])
-
-summary(mx)
-
-
-m1 <- brm(torque ~  tx + (1|participant),
-          
-          warmup = 1000, # number of samples before sampling
-          iter = 3000,  # number of mcmc iterations 
-          cores = 2, # number of cores used in sampling
-          chains = 2, # number of chains
-          seed = 123, # seed for reproducible results
-           
-           
-           
-           data = strength_long3[strength_long3$type == "isok", ])
-
-summary(m1)
-
-
-# "post-hoc" tests would be needed to test interactions. This can be done using 
-# the hypothesis function. Hypotheses are written as character vectors 
-# to create a credible interval around the parameter/estimate of interest -- these can be used for 
-# inference. 
-
-#### This is where IM at ########################
-
-h <- hypothesis(m1, "txpost_int_train - txbaseline_int_train  = txpost_con_train")
-?hypothesis
-h
-
-
-# Model diagnostics
-
-# the ggs function transforms the brms output into a longformat tibble, 
-# that we can use to make different types of plots.
-
-m1_long <- ggs(m1)
-
-
-ggplot(filter(m1_long, Parameter %in% c("b_Intercept",
-                                        "b_txpost_con_train",
-                                        "b_txbaseline_int_train",
-                                        "b_txpost_int_train",
-                                        "b_txpost_int_detrain")),
-       aes(x   = Iteration,
-           y   = value, 
-           col = as.factor(Chain)))+
-  geom_line() +
-  geom_vline(xintercept = 1000)+
-  facet_grid(Parameter ~ . ,
-             scale  = 'free_y',
-             switch = 'y')+
-  labs(title = "Caterpillar Plots", 
-       col   = "Chains")
 
 
 

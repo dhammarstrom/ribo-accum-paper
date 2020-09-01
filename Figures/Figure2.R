@@ -255,6 +255,51 @@ rna_control %>%
 
 
 
+###### Panel X Intervention vs. control qPCR ##################
+
+
+qpcr_res_int_con <- readRDS("./data/derivedData/qpcr-analysis-bayes/qpcr_res_int_con.RDS")
+
+
+
+
+interaction_effects <- qpcr_res_int_con %>%
+  
+  filter(comparison %in% c("inter:S1", "inter:post", "inter:post1w","")) %>%
+  
+  mutate(comparison = gsub("inter:", "", comparison), 
+         comparison = factor(comparison, levels = c("S1", "post", "post1w"))) %>%
+  ggplot(aes(target, Estimate)) + 
+  geom_point() +
+  geom_errorbar(aes(ymin = CI.Lower, ymax = CI.Upper)) + 
+  facet_wrap(  comparison ~ .) + coord_flip()
+
+
+fold_changes <- qpcr_res_int_con %>%
+  
+  filter(!(comparison %in% c("inter:S1", "inter:post", "inter:post1w",""))) %>%
+  separate(comparison, into = c("group", "time"), sep = "_") %>%
+  
+  mutate(Estimate = exp(Estimate), 
+         CI.Lower = exp(CI.Lower), 
+         CI.Upper = exp(CI.Upper), 
+         time = factor(time, levels = c("S1", "post", "post1w"))) %>%
+  ggplot(aes(time, Estimate, fill = group)) + 
+  
+  geom_bar(stat = "identity", position = position_dodge(width = 0.3), width = 0.15) + 
+  
+  geom_errorbar(aes(ymin = CI.Lower, 
+                    ymax = CI.Upper), 
+                position = position_dodge(width = 0.3), 
+                width = 0.1) + 
+  
+  facet_grid(target ~ .)
+
+
+cowplot::plot_grid(fold_changes, interaction_effects)
+
+
+
 
 
 
