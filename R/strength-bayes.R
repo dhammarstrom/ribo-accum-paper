@@ -47,6 +47,7 @@ strength_long <- read_excel("./data/tr010_humac.xlsx") %>%
 # vs. change in the control group). 
 
 
+
 strength_long2 <- strength_long %>%
   # Time coefficients are set as baseline/post
   mutate(time_pp = if_else(time == "post1w", "post", time),
@@ -64,53 +65,75 @@ strength_long2 <- strength_long %>%
   print()
 
 
-
 m1.isok <- brm(isok ~  tx + (1|participant),
                
-               warmup = 500, # number of samples before sampling
-               iter = 3000,  # number of mcmc iterations 
+               warmup = 1000, # number of samples before sampling
+               iter = 4000,  # number of mcmc iterations 
                cores = 4, # number of cores used in sampling
                chains = 4, # number of chains
                seed = 123, # seed for reproducible results
                
                data = strength_long2)
 
+# m2.isok <- brm(isok ~  tx + (tx||participant),
+#                
+#                warmup = 1000, # number of samples before sampling
+#                iter = 4000,  # number of mcmc iterations 
+#                cores = 4, # number of cores used in sampling
+#                chains = 4, # number of chains
+#                seed = 123, # seed for reproducible results
+#                
+#                data = strength_long2)
+# 
+# To check what model is better, use loo. 
+loo(m1.isok, m2.isok)
 
+# Model 2 which would involve slightly more complex 
+# random effect does not fit better. Keep model 1
+
+rm(m2.isok)
+
+
+# launch_shinystan(m1.isok) # to check diganstics in shiny interface.
 ## Model diagnostics -- Posterior predictive Check
 
 # Plots data and predictive values
-pp_check(m1.isok)
+pp_check(m1.isok) 
+
+# Predictive values match the data... good. 
+
+# plot chains
+plot(m1.isok)
+          
+summary(m1.isok)
 
 
-pp_check(m1.isok, type = "stat_grouped", stat = "mean", group = "tx")
-pp_check(m1.isok, type = "stat_2d", stat = c("max", "min"))
+saveRDS(m1.isok, "./data/derivedData/strength-bayes/m1.isok.RDS") 
 
-pp_check(m1.isok, type = "ribbon_grouped",  group = "tx") 
-           
+
 
 
 m1.isom <- brm(isom ~  tx + (1|participant),
-               
+              
                warmup = 500, # number of samples before sampling
                iter = 3000,  # number of mcmc iterations 
                cores = 4, # number of cores used in sampling
                chains = 4, # number of chains
                seed = 123, # seed for reproducible results
-               
                data = strength_long2)
+
+
 
 summary(m1.isom)
 
 pp_check(m1.isom)
 
-
-pp_check(m1.isom, type = "stat_grouped", stat = "mean", group = "tx")
-pp_check(m1.isok, type = "stat_2d", stat = c("max", "min"))
-
-pp_check(m1.isok, type = "ribbon_grouped",  group = "tx") 
+plot(m1.isom)
 
 
-plot(m1)
+saveRDS(m1.isom, "./data/derivedData/strength-bayes/m1.isom.RDS") 
+
+
 
 
 # "post-hoc" tests would be needed to test interactions. This can be done using 
@@ -118,11 +141,46 @@ plot(m1)
 # to create a credible interval around the parameter/estimate of interest -- these can be used for 
 # inference. 
 
-#### This is where IM at ########################
 
-h <- hypothesis(m1.isok, "txpost_int_train - txbaseline_int_train  = txpost_con_train")
+# Load models in case of crash
 
-h
+m1.isom <- readRDS("./data/derivedData/strength-bayes/m1.isom.RDS") 
+m1.isok <- readRDS("./data/derivedData/strength-bayes/m1.isok.RDS") 
+
+summary(m1.isom)
+
+# Write contrasts for all comparisons 
+h.isom <- hypothesis(m1.isom, c("txpost_con_train = 0", 
+                      "txpost_int_train = txbaseline_int_train", 
+                      "txpost_int_detrain = txbaseline_int_train", 
+                      "txpost_int_train - txbaseline_int_train = txpost_con_train", 
+                      "txpost_int_detrain - txbaseline_int_train = txpost_con_train"))
+
+
+h.isok <- hypothesis(m1.isok, c("txpost_con_train = 0", 
+                                "txpost_int_train = txbaseline_int_train", 
+                                "txpost_int_detrain = txbaseline_int_train", 
+                                "txpost_int_train - txbaseline_int_train = txpost_con_train", 
+                                "txpost_int_detrain - txbaseline_int_train = txpost_con_train"))
+
+
+
+comp_strength_bayes <- data.frame(time_group = rep(c("post_con",        
+                                         "post_int",        
+                                         "post1w_int",      
+                                         "inter:post_int",  
+                                         "inter:post1w_int"), 2), 
+                      type = rep(c("isom", "isok"), each = 5)) %>%
+  cbind(
+    rbind(data.frame(h.isom$hypothesis), 
+          data.frame(h.isok$hypothesis))
+  ) %>%
+  mutate(estimate = Estimate, lower.CL = CI.Lower, upper.CL = CI.Upper) %>%
+  dplyr::select(time_group, estimate, lower.CL, upper.CL, type) %>%
+  print()
+
+
+saveRDS(comp_strength_bayes, "./data/derivedData/strength-bayes/comp_strength.RDS")
 
 
 # Model diagnostics
