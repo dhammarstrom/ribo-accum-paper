@@ -195,7 +195,7 @@ em.isom <- emmeans(m3.isom, specs = ~ tx)
 # object.  
 em.isok
 
-# To create contrats, each levels can be specified by a indicator vector. 
+# To create contrasts, each levels can be specified by a indicator vector. 
 
 baseline_con_train  =  c(1, 0, 0, 0, 0)
 post_con_train      =  c(0, 1, 0, 0, 0) 
