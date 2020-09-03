@@ -199,8 +199,8 @@ load.stats <- read_excel("./data/tr010_training.xlsx", sheet = 1, na = "NA") %>%
          week = if_else(session %in% c(1:4), "W1", if_else(session %in% c(5:8), "W2", "W3"))) %>%
   group_by(participant, cond, session, week) %>%
   summarise(load = mean(load, na.rm = TRUE)) %>%
-  mutate(week = factor(week, levels = c("W1", "W2", "W3"))) %>%
-  print()
+  mutate(week = factor(week, levels = c("W1", "W2", "W3"))) 
+
 
 load.m1 <- lme(log(load) ~ week + week:cond, random = list(participant = ~1), 
                data = load.stats, method = "ML")
@@ -230,6 +230,46 @@ load.inr.w3 <- paste0(sprintf("%.0f",load.intervals[3, 2]*100),
 
 All participants successfully completed their prescribed sessions. The different training protocols resulted in diverging loading profiles (load &#215; repetitions) over the course of the study (Figure 1B). The intensity of exercise (load at 10RM) increased similarly in both conditions from the first to the second (`r load.inr.w2`) and third (`r load.inr.w3`)  four-session block, respectively. Compared to the non-training control group, isokinetic strength increased to Session 12 in the experimental group, with an attenuated difference seen after de-training (Figure 1C). Average isometric strength showed the same general pattern although with considerable more uncertainty indicated by wider 95% CI (Figure 1C). Muscle thickness of the *m. vastus lateralis* increased in the experimental group compared to the control group both after Session 12 and after eight days of de-training (Figure 1D). There were no indications of differences between training conditions in strength or muscle thickness changes.
 
+```{r total-rna}
+
+# Segmented model analysis in text 
+# Read the segmented model 
+tc.m2 <- readRDS("./data/derivedData/total-rna-analysis/tc.m2.RDS")
+
+time1.hyp <- hypothesis(tc.m2, "time1 = 0")
+time2.hyp <- hypothesis(tc.m2, c("time2 + time1 = 0")) # The slope (on log scale) between session 4 and 8
+time3.hyp <- hypothesis(tc.m2, c("time2 + time1 +time3 = 0")) # The slope on log scale between session 8 and 12
+
+slope0_4 <- paste0(sprintf("%.1f", 100 * (exp(time1.hyp$hypothesis[1,2]) - 1)),
+                           "%, 95% CI: [",
+                   sprintf("%.1f", 100 * (exp(time1.hyp$hypothesis[1,4]) - 1)), 
+                   ", ",
+                   sprintf("%.1f", 100 * (exp(time1.hyp$hypothesis[1,5]) - 1)),
+                   "]")
+                      
+slope4_8 <- paste0(sprintf("%.1f", 100 * (exp(time2.hyp$hypothesis[1,2]) - 1)),
+                           "%, [",
+                   sprintf("%.1f", 100 * (exp(time2.hyp$hypothesis[1,4]) - 1)), 
+                   ", ",
+                   sprintf("%.1f", 100 * (exp(time2.hyp$hypothesis[1,5]) - 1)),
+                   "]")
+                      
+
+slope8_12 <- paste0(sprintf("%.1f", 100 * (exp(time3.hyp$hypothesis[1,2]) - 1)),
+                           "%, [",
+                   sprintf("%.1f", 100 * (exp(time3.hyp$hypothesis[1,4]) - 1)), 
+                   ", ",
+                   sprintf("%.1f", 100 * (exp(time3.hyp$hypothesis[1,5]) - 1)),
+                   "]")
+                      
+
+
+
+
+
+```
+
+Compared to control, a single session of RT led to robust increase in 45S and 47S pre-rRNA (Figure 2B) expressed per unit tissue weight. These were also increased compared to control after twelve sessions together with the 45S ITS and mature rRNA species 28S and 18S. After eight days of rest, only 18S remained elevated above control group  (Figure 2B). This general pattern of rRNA expression was reflected also in total RNA expressed per unit tissue weight were a robust increase compared to contral was seen after session twelve (Figure 2B). Within the experimental group, no differences were seen between volume conditions. Most of the increase was seen in after the first four sessions where the average increase was `r slope0_4` per session in the intervention group as a whole. Between session four and eight, and eight to twelve changes in total RNA per tissue weight per session was not different from zero (`r slope4_8` and `r slope8_12`).     
 
 
 

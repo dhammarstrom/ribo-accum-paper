@@ -143,19 +143,32 @@ rna$pred<- predict(l.mod)
 rna %>%
   mutate(outlier = if_else(resid < -2| resid > 2, "out", "in")) %>%
   # filter(resid > 3) %>%
-  ggplot(aes(log(tissue_weight), log(rna), color = time)) + geom_point() 
+  ggplot(aes(log(tissue_weight), log(rna), color = outlier)) + geom_point() 
 
 
 
 ### Save data 
 
 rna.save <- rna %>%
-#  mutate(outlier = if_else(resid < -2.5| resid > 2.5, "out", "in")) %>%
+  mutate(outlier = if_else(resid < -2| resid > 2, "out", "in")) %>%
   inner_join(read_excel("./data/leg_randomization.xlsx")) %>%
   print()
   
 
 saveRDS(rna.save, "./data/derivedData/tot-rna/tot-rna.RDS")
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
