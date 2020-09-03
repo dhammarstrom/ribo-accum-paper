@@ -3,6 +3,8 @@
 
 ## Panels
 
+# Use Bayesian estimates?
+bayes <- TRUE
 
 
 source("./R/figure-source.R")
@@ -42,15 +44,15 @@ primers_fig <- data.frame(x = c(1, 13500),
   # 28S segment
   annotate("segment", x = 7925, xend = 12990, y = 1.5, yend = 1.5, size = 2.5) +
   
-  geom_segment(data = primers, aes(y = c(1.51, 1.52, 1.53, 1.54, 1.55, 1.56), 
-                                   yend = c(1.51, 1.52, 1.53, 1.54, 1.55, 1.56), 
+  geom_segment(data = primers, aes(y = c(1.54, 1.52, 1.53, 1.54, 1.55, 1.56), 
+                                   yend = c(1.54, 1.52, 1.53, 1.54, 1.55, 1.56), 
                                    x= on45S_start, xend = on45S_end), 
                size = 4) +
   
-  geom_text_repel(data = primers, aes(y = c(1.51, 1.52, 1.53, 1.54, 1.55, 1.56),
+  geom_text_repel(data = primers, aes(y = c(1.54, 1.52, 1.53, 1.54, 1.55, 1.56),
                                       x= on45S_start, label = symbol_ext), 
                   size = 2.2, 
-                  nudge_y = 0.01) +
+                  nudge_x = 100) +
   
   scale_y_continuous(limits = c(1.48, 1.58)) +
   plot_theme() + 
@@ -64,239 +66,208 @@ primers_fig <- data.frame(x = c(1, 13500),
 
 # Total RNA analysis and plot #################################################
 
-# load full data set
-rna <- readRDS("./data/derivedData/tot-rna/tot-rna.RDS")
+# load model comparisons between 
 
-
-rna_complete <- rna %>%
- # filter(outlier == "in") %>% # removes outlier based on RNA to tissue weight relationship
-  dplyr::select(participant, series, sample, leg, time, cond, tissue_weight, rna) %>%
-  mutate(time.c = gsub("S", "", time), 
-         detrain = if_else(time.c == "post1w", "detrain", "train"),
-         time.c = if_else(time.c == "post1w", "12", time.c),
-         time.c = if_else(time.c == "postctrl", "12", time.c),
-         time.c = gsub("c", "", time.c), 
-         time.c = as.numeric(time.c), 
-         time = factor(time, levels = c("S0", "S1","S1c", 
-                                        "S4", "S5", "S8", 
-                                        "S9", "S12", "post1w", "postctrl"))) %>%
-  print()
-
-
-
-
-
-
-# Time course data in experimental group #
-time_course <- rna_complete %>%
-  filter(cond != "ctrl_leg") %>%
-  filter(time != "post1w") %>%
+if(bayes == TRUE){
   
-  group_by(participant,leg, time,time.c, cond, ) %>%
-  summarise(rna = mean(rna, na.rm = TRUE), 
-            tissue_weight = mean(tissue_weight, na.rm = TRUE)) %>%
-  ungroup() %>%
-  mutate(participant = factor(participant), 
-         cond = factor(cond), 
-         rna.tissue = log(rna/tissue_weight), 
-         tw = tissue_weight - mean(tissue_weight), 
-         time.c.cent = time.c - 4) %>%
-  print()
-
-
-# Splines per group
-gam2 <- gamm(rna ~ tw +  s(time.c,  k = 7, by = cond), 
-           random = list(participant = ~ 1, leg = ~ 1), 
-          data = time_course, method = "ML")
-
-
-# Control vs. experimental group 
-
-rna_control <- rna_complete %>%
-  filter(time %in% c("S0","S1", "S1c", "S12", "postctrl", "post1w")) %>%
-  mutate(time_pp = if_else(time == "S0", "pre", 
-                        if_else(time %in% c("S1", "S1c"), "S1",  "post")), 
-         group = if_else(cond == "ctrl_leg", "con", "int")) %>%
+comp_rna <- readRDS("./data/derivedData/total-rna-analysis/comp_rna_bayes.RDS")
   
- # mutate(leg = if_else(group == "con",  "R", leg)) %>%
+}
+
+if(bayes == FALSE){
   
-  filter(!(participant == "P10" & time_pp == "S1")) %>%
-
- # group_by(participant, leg, time, time_pp, group, detrain) %>%
- # summarise(rna = mean(rna, na.rm = TRUE), 
- #           tissue_weight = mean(tissue_weight, na.rm = TRUE)) %>%
-  mutate(sample = paste(participant, leg, time, sep = "_")) %>%
-  ungroup() %>%
-  mutate(tw = tissue_weight - mean(tissue_weight), 
-         detrain = factor(detrain, levels = c("train", "detrain")), 
-         time_pp = factor(time_pp, levels = c("pre", "S1", "post"))) %>%
-  print()
-
-
-
-rna_control %>%
-  filter(group == "con") %>%
-  group_by(time, participant) %>%
-  summarise(tw = mean(tw), 
-            tissue_weight = mean(tissue_weight), 
-            rna = mean(rna)) %>%
+  comp_rna <- readRDS("./data/derivedData/total-rna-analysis/comp_rna_freq.RDS")
   
-ggplot(aes(tissue_weight, rna, label = paste(participant, time))) + geom_point() + geom_text_repel()
-  
-  
-  ggplot(aes(time, rna/tissue_weight, 
-             group = participant, 
-             label = paste(participant, time))) + geom_line() + geom_text_repel()
+}
 
 
 
 
-# Testing random effects in the control vs. experimental group model.
-
-m1 <- lmer(log(rna) ~ tw + time_pp * group + time_pp:group:detrain + 
-             (time_pp|participant) + 
-             (1|sample), 
-           data = rna_control)
-plot(m1)
-summary(rePCA(m1))
-# Basically no variation in slope terms, removing correlation
-m2 <- lmer(log(rna) ~ tw + time_pp * group + time_pp:group:detrain + 
-             (1 + dummy(time_pp, "post")||participant) +
-             (1|sample), 
-           data = rna_control)
-
-summary(rePCA(m2))
-
-# Results in singular fit, no information in the slope... A simpler model 
-m3 <- lmer(log(rna) ~ tw + time_pp * group + time_pp:group:detrain + 
-             (1|participant) + (1|sample), 
-           data = rna_control)
 
 
-anova(m1, m2, m3)
-# Adding the slope term givs additional fit to the model, model 2 is preferred, however model
-# 2 is probably to complex borderline singular fit. 
-
-summary(m3)
-
-
-# Get percentage change in each time-point compared to control using a custom 
-
-# Custom contrast matrix k
-
-head(model.matrix(m3))
-
-
-con.s1 <- matrix(c(1, 0, 1, 0, 0, 0, 0, 0),1) - matrix(c(1, 0, 0, 0, 0, 0, 0, 0),1)
-con.post <- matrix(c(1, 0, 0, 1, 0, 0, 0, 0),1) - matrix(c(1, 0, 0, 0, 0, 0, 0, 0),1)
-
-int.s1       <- matrix(c(1, 0, 1, 0, 1, 1, 0, 0),1) - matrix(c(1, 0, 0, 0, 1, 0, 0, 0),1)
-int.post     <- matrix(c(1, 0, 0, 1, 1, 0, 1, 0),1) - matrix(c(1, 0, 0, 0, 1, 0, 0, 0),1) 
-int.detrain  <- matrix(c(1, 0, 0, 1, 1, 0, 1, 1),1) - matrix(c(1, 0, 0, 0, 1, 0, 0, 0),1) 
-
-summary(m3)
-
-k <-  rbind(con.s1, 
-            con.post,
-            int.s1,     
-            int.post,   
-            int.detrain,
-            int.s1 - con.s1, 
-            int.post - con.post, 
-            int.detrain - con.post) 
-# Set rownames
-rownames(k) <- c("con_s1", 
-                 "con_post", 
-                 "int_s1", 
-                 "int_post", 
-                 "int_detrain", 
-                 "inter:int_s1",
-                 "inter:int_post",
-                 "inter:int_detrain") 
-
-## These confidence intervals are not adjusted. 
-ci <- confint(glht(m3, linfct = k), calpha = univariate_calpha())
-
-
-# Calculate average change scores per participant
-
-
-ci$confint %>%
-  data.frame() %>%
-  print()
-
-
-rna_control %>%
-
-  group_by(participant, leg, time_pp, group, detrain) %>%
-  summarise(rna.weight = mean(rna, na.rm = TRUE) / mean(tissue_weight, na.rm = TRUE)) %>%
-  
-  mutate(time = paste0(time_pp, "_", detrain)) %>%
-  ungroup() %>%
-  dplyr::select(participant, leg, time,group, rna.weight) %>%
-
-  
-  pivot_wider(names_from = time, values_from = rna.weight) %>%
-
-  mutate(S1 = 100 * ((S1_train/pre_train) -1), 
-         post = 100 * ((post_train/pre_train) -1), 
-         detrain = 100 * ((post_detrain/pre_train) -1)) %>%
-  
-  dplyr::select(participant, leg, group, S1:detrain) %>%
-  pivot_longer(names_to = "time", 
-               values_to = "rel_change", 
-               cols = S1:detrain) %>%
-  filter(!(is.na(rel_change))) %>%
-  mutate(time_group = paste0(group, "_", time)) %>%
-  
-
-  
-  ggplot(aes(time_group, rel_change)) + geom_point()
-
-
-
-###### Panel X Intervention vs. control qPCR ##################
+###### Panel X Intervention vs. control qPCR rRNA + total RNA  ##################
 
 
 qpcr_res_int_con <- readRDS("./data/derivedData/qpcr-analysis-bayes/qpcr_res_int_con.RDS")
 
 
+complete_rrna_comp <- comp_rna %>%
+  mutate(comparison = time_group, 
+         target = "totalRNA") %>%
+  dplyr::select(target, comparison, estimate:upper.CL) %>%
+  rbind(qpcr_res_int_con %>%
+          dplyr::select(target, comparison, estimate = Estimate, lower.CL = CI.Lower, upper.CL = CI.Upper)) %>%
+  print()
 
 
-interaction_effects <- qpcr_res_int_con %>%
+
+# Create an annotation data frame
+
+anno.df <- data.frame(target = unique(complete_rrna_comp$target), 
+           label = c("Total RNA", 
+                     "rRNA 18S", 
+                     "rRNA 45S ETS", 
+                     "rRNA 47S ETS", 
+                     "rRNA 5S", 
+                     "rRNA 28S", 
+                     "rRNA 45S ITS", 
+                     "rRNA 5.8S"), 
+           time = factor("S1", levels = c("S1", "post")), 
+           estimate = 3.5) %>%
+  mutate(target = factor(target, levels = c("totalRNA", 
+                                            "rRNA18SF2R2",
+                                            "rRNA5.8SF2R2",
+                                            "rRNA28SF2R2",
+                                            "rRNA5SF3R3", 
+                                            "rRNA45SITSF12R12",
+                                            "rRNA45SF5R5",     
+                                            "rRNA47SF1R1")),
+         target = fct_rev(target))
+
+
+
+interaction_effects <- complete_rrna_comp %>%
+  
+
+  
   
   filter(comparison %in% c("inter:S1", "inter:post", "inter:post1w","")) %>%
   
-  mutate(comparison = gsub("inter:", "", comparison), 
-         comparison = factor(comparison, levels = c("S1", "post", "post1w"))) %>%
-  ggplot(aes(target, Estimate)) + 
+  mutate(target = factor(target, levels = c("totalRNA", 
+                                            "rRNA18SF2R2",
+                                            "rRNA5.8SF2R2",
+                                            "rRNA28SF2R2",
+                                            "rRNA5SF3R3", 
+                                            "rRNA45SITSF12R12",
+                                            "rRNA45SF5R5",     
+                                            "rRNA47SF1R1")),
+         
+         comparison = gsub("inter:", "", comparison), 
+         comparison = factor(comparison, levels = c("S1", "post", "post1w"), 
+                             labels = c("Session 1", 
+                                        "Post-training", 
+                                        "Post-trainin \n+ De-training")),
+         estimate = exp(estimate), 
+         lower.CL = exp(lower.CL), 
+         upper.CL = exp(upper.CL), 
+         robust = if_else(lower.CL  > 1, "robust", "notrobust")) %>%
+  
+  ggplot(aes(estimate, 
+             target, color = robust)) + 
+  
+  
+  labs(x = "Fold change compared to Control") +
+  
+  geom_vline(xintercept = 1, color = "gray85", lty = 2) +
+  
   geom_point() +
-  geom_errorbar(aes(ymin = CI.Lower, ymax = CI.Upper)) + 
-  facet_wrap(  comparison ~ .) + coord_flip()
+  geom_errorbarh(aes(xmin = lower.CL, xmax = upper.CL), height = 0.2) + 
+  facet_wrap(  comparison ~ .) +
+  
+  scale_color_manual(values = c("blue", "red")) +
+  
+  plot_theme() +
+  theme(strip.background = element_rect(color = "white", fill = "white"), 
+        strip.text = element_text(size = 8),
+        axis.title.y = element_blank()  , 
+        axis.text.y = element_blank(), 
+        legend.position = "none")
+  
+  
 
 
-fold_changes <- qpcr_res_int_con %>%
+fold_changes <- complete_rrna_comp %>%
   
   filter(!(comparison %in% c("inter:S1", "inter:post", "inter:post1w",""))) %>%
   separate(comparison, into = c("group", "time"), sep = "_") %>%
   
-  mutate(Estimate = exp(Estimate), 
-         CI.Lower = exp(CI.Lower), 
-         CI.Upper = exp(CI.Upper), 
-         time = factor(time, levels = c("S1", "post", "post1w"))) %>%
-  ggplot(aes(time, Estimate, fill = group)) + 
   
-  geom_bar(stat = "identity", position = position_dodge(width = 0.3), width = 0.15) + 
   
-  geom_errorbar(aes(ymin = CI.Lower, 
-                    ymax = CI.Upper), 
+  mutate(target = factor(target, levels = c("totalRNA", 
+                                            "rRNA18SF2R2",
+                                            "rRNA5.8SF2R2",
+                                            "rRNA28SF2R2",
+                                            "rRNA5SF3R3", 
+                                            "rRNA45SITSF12R12",
+                                            "rRNA45SF5R5",     
+                                            "rRNA47SF1R1")),
+         target = fct_rev(target),
+
+         estimate = exp(estimate), 
+         lower.CL = exp(lower.CL), 
+         upper.CL = exp(upper.CL), 
+         group = if_else(time == "post1w", "int_detrain", group),
+         time = if_else(time == "post1w", "post", time),
+         time = factor(time, levels = c("S1", "post"))) %>%
+  
+  ggplot(aes(time, estimate, fill = group)) + 
+  
+  geom_text(data = anno.df, aes(time, estimate, label = label, fill = NULL), 
+            position = position_nudge(x = -0.5), 
+            hjust = 0,
+            size = 2.2) +
+  geom_hline(yintercept = 1, lty = 2, color = "gray80") +
+
+  # geom_bar(stat = "identity", position = position_dodge(width = 0.3), width = 0.15) + 
+  geom_errorbar(aes(ymin = lower.CL, 
+                    ymax = upper.CL), 
                 position = position_dodge(width = 0.3), 
-                width = 0.1) + 
+                width = 0) + 
+  
+  geom_point(position = position_dodge(width = 0.3), shape = 21) +
+  
+  scale_x_discrete(limits = c( "S1", "post"), labels = c("Session 1", "Post-\ntraining")) +
+  
+  labs(y = "Fold change from Baseline") +
+  plot_theme() +
+  
+  theme(strip.background = element_blank(), 
+        strip.text = element_blank(), 
+        legend.position = "none", 
+        axis.title.x = element_blank()) +
   
   facet_grid(target ~ .)
 
 
-cowplot::plot_grid(fold_changes, interaction_effects)
+rnra_ctrl_vs_int <- cowplot::plot_grid(
+  cowplot::plot_grid(NULL, fold_changes, NULL, ncol = 1, rel_heights = c(0.08, 1, 0.06)),
+  interaction_effects, ncol = 2, rel_widths = c(0.6, 1))
+
+
+
+# Time course in the intervention group #####
+
+cond_eff_rna_tc <- readRDS("./data/derivedData/total-rna-analysis/cond_eff_rna_tc.RDS")
+
+
+
+rna_tc_fig <-  cond_eff_rna_tc %>%
+  mutate(cond = factor(cond, levels = c("const", "var"), 
+                       labels = c("Constant volume", 
+                                  "Variable volume")), 
+         cond = fct_rev(cond)) %>%
+  ggplot(aes(time.c, estimate, color = cond, fill = cond)) +
+  geom_line() + 
+   geom_ribbon(aes(ymin = lower, ymax = upper, color = NULL), alpha = 0.2) +
+   
+   labs(x = "Session", 
+        y = "RNA ng \U00D7 mg<sup>-1</sup>") +
+   
+   scale_x_continuous(limits = c(0, 12), expand = c(0,0), 
+                      breaks = c(0, 3, 6, 9, 12)) +
+   
+   scale_y_continuous(limits = c(250, 650), expand = c(0,0), 
+                      breaks = c(250, 300, 350, 400, 450, 500, 550, 600, 650), 
+                      labels = c("",  300, "",  400, "",  500, "" , 600, "")) +
+   
+   plot_theme() +
+   theme(legend.position = c(0.5, 0.15), 
+         legend.key.size = unit(0.3, "cm"), 
+         axis.title.y = element_markdown(), 
+         ) 
+   
+
+   
 
 
 
@@ -315,15 +286,17 @@ cowplot::plot_grid(fold_changes, interaction_effects)
 
 
 
-figure2 <- plot_grid(plot_grid(total_rna_fig,NULL, ncol = 2),
-                     plot_grid(primers_fig, NULL,  NULL, ncol = 3, rel_widths = c(0.5, 0.25, 0.25)), 
-                     rel_heights = c(1, 1),
-                     ncol = 1) +
+figure2 <- plot_grid( 
+                     plot_grid(plot_grid(primers_fig, rna_tc_fig, ncol = 1, rel_heights = c(0.5, 1.5)),
+                               rnra_ctrl_vs_int, rel_widths = c(0.8, 1),
+                               ncol = 2),
+                     plot_grid(rna_tc_fig, NULL, ncol = 2), 
+                     ncol = 1, rel_heights = c(1, 0.5)) +
   
   
   draw_plot_label(label=c("A",  "B",  "C", "D"),
-                  x =   c(0.02, 0.02, 0.5, 0.75), 
-                  y =   c(0.98, 0.33, 0.33, 0.33),
+                  x =   c(0.02, 0.45, 0.5, 0.75), 
+                  y =   c(0.98, 0.98, 0.33, 0.33),
                   hjust=.5, vjust=.5, size = label.size)
 
 

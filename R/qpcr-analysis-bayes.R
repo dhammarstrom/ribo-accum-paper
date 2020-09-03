@@ -12,13 +12,6 @@ library(tidyverse)
 
 
 
-# brms offers several 
-
-
-
-
-
-
 # qdat is the compiled data frame containing sample information and 
 # qpcr estimates. Created in qpcr-compile.R. Use this for downstream analyses
 
@@ -66,6 +59,7 @@ nf <- qdat %>%
 
 #### rRNA per tissue weight analysis #### 
 
+# THIW IS WHERE IM AT ###############
 
 qdat.rrna  <- qdat %>%
   group_by(target) %>%
@@ -244,14 +238,60 @@ qpcr_res_int_con <- data.frame(target = rep(c("rRNA18SF2R2"      ,
 
 
 
+#### Model 47S/45S per mature rRNA ##############################
 
 
 
 
+qdat_rrna2 <- qdat.rrna %>%
+  filter(cond != "ctrl_leg") %>%
+  dplyr::select(participant, leg, time, time.c, cond, technical, biological, target,Ra, counts) %>%
+  
+  filter(target %in% c("rRNA18S F2R2", 
+                       "rRNA28S F2R2", 
+                       "rRNA5.8S F2R2", 
+                       "rRNA45S F5R5", 
+                       "rRNA47S F1R1")) %>%
+  
+  mutate(type = if_else(target %in% c("rRNA18S F2R2", 
+                                      "rRNA28S F2R2", 
+                                      "rRNA5.8S F2R2"), 
+                        "mature", "pre")) %>%
+
+  filter(time != "post1w") %>%
+
+  print()
 
 
 
 
+library(mgcv)
+
+qdat_rrna2 %>%
+  filter(rel.counts < 0.001) %>%
+  ggplot(aes(time.c, rel.counts)) + geom_point()
+
+
+m1 <- brm(bf(counts ~ s(time.c, by = target, k = 7) + (1|participant) + (1|technical), 
+             sigma ~ target),
+
+          warmup = 1000, # number of samples before sampling
+          iter = 6000,  # number of mcmc iterations 
+          cores = 4, # number of cores used in sampling
+          chains = 4, # number of chains
+          seed = 123, # seed for reproducible results
+          thin = 5,
+          data = qdat_rrna2)
+
+saveRDS(m1, "./data/derivedData/temp/qpcr_smooth.RDS")
+m1 <- readRDS("./data/derivedData/temp/qpcr_smooth.RDS")
+
+conditional_effects(m1)
+
+
+
+
+?brm
 
 
 
