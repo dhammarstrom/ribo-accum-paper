@@ -18,55 +18,58 @@ library(tidyverse)
 qdat <- readRDS("./data/derivedData/qpcr/qpcr_compiled.RDS")
 
 
-# Remove bad reaction prior to modelling. 
-# Bad reactions are no amplification or estimatyed to cq < 5
+# Remove bad reactions prior to modeling. 
 
-
+# Explorative plots
 qdat %>%
   ggplot(aes(cq, color = target)) + geom_histogram() + 
   facet_wrap(~ target)
 
 qdat %>%
   group_by(target) %>%
-  mutate(outlier = if_else(cq > mean(cq, na.rm = TRUE) + 5 * sd(cq, na.rm = TRUE)|
-                             cq < mean(cq, na.rm = TRUE) - 5 * sd(cq, na.rm = TRUE), 
+  mutate(outlier = if_else(cq > mean(cq, na.rm = TRUE) + 2 * sd(cq, na.rm = TRUE)|
+                             cq < mean(cq, na.rm = TRUE) - 2 * sd(cq, na.rm = TRUE), 
                            "outlier", "in")) %>%
   
-  ggplot(aes(paste(participant, leg, time), cq, color = target, shape = outlier)) + 
-  geom_point() + theme_minimal() 
+  ggplot(aes(paste(participant, leg, time), cq, 
+             color = target, 
+             shape = outlier, 
+             alpha = outlier)) + 
+  geom_point() + theme_minimal()  + scale_alpha_manual(values = c(0.2, 0.8))
 
-# 5 sd's away from target mean seems to capture the worst reactions.. 
-
-
+# 3 sd's away from target mean seems to capture the worst reactions.. 
 
 
 
 ### Lambda normalization ####
 
-nf <- qdat %>%
+nf <- qdat %>% group_by(target) %>%
+  mutate(outlier = if_else(cq > mean(cq, na.rm = TRUE) + 2 * sd(cq, na.rm = TRUE)|
+                             cq < mean(cq, na.rm = TRUE) - 2 * sd(cq, na.rm = TRUE), 
+                           "outlier", "in")) %>%
   filter(target == "Lambda KIT") %>%
-  filter(cq > 5) %>% # Removes bad reactions
+ filter(outlier == "in") %>% # Removes bad reactions
   mutate(nf.w = (eff ^ -cq) * tissue_weight) %>%
   dplyr::select(participant, leg, time, cdna, nf.w) %>%
   group_by(participant, leg, time, cdna) %>%
   summarise(nf.w = mean(nf.w, na.rm = TRUE)) %>%
+  
   ungroup() %>%
+  # Scale the factor
+  mutate(nf.w = nf.w/max(nf.w)) %>%
+
   print()
-
-
-
-
+  
 
 #### rRNA per tissue weight analysis #### 
 
-# THIW IS WHERE IM AT ###############
 
 qdat.rrna  <- qdat %>%
   group_by(target) %>%
-  mutate(outlier = if_else(cq > mean(cq, na.rm = TRUE) + 5 * sd(cq, na.rm = TRUE)|
-                             cq < mean(cq, na.rm = TRUE) - 5 * sd(cq, na.rm = TRUE), 
+  mutate(outlier = if_else(cq > mean(cq, na.rm = TRUE) + 2 * sd(cq, na.rm = TRUE)|
+                             cq < mean(cq, na.rm = TRUE) - 2 * sd(cq, na.rm = TRUE), 
                            "outlier", "in")) %>%
-  filter(outlier == "in") %>%
+ filter(outlier == "in") %>%
   group_by(participant, leg, time, sex, cond, cdna, target) %>%
   summarise(cq = mean(cq, na.rm = TRUE), 
             eff = mean(eff, na.rm = TRUE), 
@@ -129,16 +132,19 @@ qdat.ctrl <- qdat.rrna %>%
 m1 <- brm(bf(counts ~ 0 + target + target:tx + (1|participant) + (1|technical) + offset(nf.w), 
              shape ~ target),
           family = negbinomial(),
-          warmup = 500, # number of samples before sampling
-          iter = 4000,  # number of mcmc iterations 
-          cores = 4, # number of cores used in sampling
-          chains = 4, # number of chains
+          warmup = 1000, # number of samples before sampling
+          iter = 8000,  # number of mcmc iterations 
+          cores = 6, # number of cores used in sampling
+          chains = 6, # number of chains
           seed = 123, # seed for reproducible results
-
+          control = list(adapt_delta = 0.95), 
           data = qdat.ctrl)
 
+# Save model 
+saveRDS(m1, "./data/derivedData/qpcr-analysis-bayes/ctrl_vs_int.RDS")
 
-
+pp_check(m1)
+summary(m1)
 # combine factors for hypotheses
 
 
@@ -233,70 +239,222 @@ qpcr_res_int_con <- data.frame(target = rep(c("rRNA18SF2R2"      ,
   print()
 
 
+saveRDS(qpcr_res_int_con, "./data/derivedData/qpcr-analysis-bayes/qpcr_res_int_con.RDS")
 
 
 
 
+# pre- to mature-rRNA analysis ###################
 
-#### Model 47S/45S per mature rRNA ##############################
+# The aim of the normalization procedure is to map pre-rRNA fluctuations per 
+# mature rRNA to explore de novo transcription of rRNA. 
 
+# Creating the normalization factor. 
 
-
-
-qdat_rrna2 <- qdat.rrna %>%
+nf <- qdat.rrna %>%
   filter(cond != "ctrl_leg") %>%
-  dplyr::select(participant, leg, time, time.c, cond, technical, biological, target,Ra, counts) %>%
-  
-  filter(target %in% c("rRNA18S F2R2", 
-                       "rRNA28S F2R2", 
+  filter(time != "post1w") %>%
+  filter(target %in% c("rRNA28S F2R2",
                        "rRNA5.8S F2R2", 
-                       "rRNA45S F5R5", 
+                       "rRNA18S F2R2")) %>%
+  group_by(participant, leg, time, cond, time.c, cdna) %>%
+  summarise(nf = sum(counts, na.rm = TRUE)) %>%
+  ungroup() %>%
+  print()
+
+  
+nf %>%
+  ggplot(aes(time.c, log(nf))) + geom_point() +
+  facet_grid(leg ~  participant)
+
+
+
+
+
+qdat_pre <- qdat.rrna %>%
+  filter(cond != "ctrl_leg") %>%
+  filter(time != "post1w") %>%
+  filter(target %in% c("rRNA45S F5R5", 
                        "rRNA47S F1R1")) %>%
   
-  mutate(type = if_else(target %in% c("rRNA18S F2R2", 
-                                      "rRNA28S F2R2", 
-                                      "rRNA5.8S F2R2"), 
-                        "mature", "pre")) %>%
 
-  filter(time != "post1w") %>%
 
+  inner_join(nf) %>%
+  mutate(participant = factor(participant), 
+         cond = factor(cond), 
+         target = factor(target),
+         time = factor(time, levels = c("S0", 
+                                        "S1", 
+                                        "S4", 
+                                        "S5", 
+                                        "S8", 
+                                        "S9", 
+                                        "S12")), 
+        time.c = as.numeric(gsub("S", "", time)), 
+        norm = Ra - log(nf)) %>% 
+  filter(!(participant == "P4" & time == "S5" & cond == "const" & cdna == "cDNA1")) %>%
   print()
 
 
 
+qdat_pre %>%
+  ggplot(aes(nf, norm, color = participant)) + geom_point() +
+  geom_text(data = subset(qdat_pre, norm > -32), 
+            aes(label = paste(participant, time, cond, cdna)), 
+            hjust = 0)
+
+
+qdat_pre %>%
+  ggplot(aes(time.c, log(counts)-log(nf), color = cond)) + geom_point() +
+  geom_smooth() + facet_grid(.~target)
+
+qdat_pre %>%
+  filter(time == "S0") %>%
+  ggplot(aes(participant, cq, color = cond)) + 
+  geom_point() + 
+  facet_grid(.~ target)
+
+
+
+library(nlme); library(emmeans); library(mgcv); library(ggeffects)
+
+
+
+m <- lme(norm ~ target + time * cond, 
+         random = list(participant = ~ 1, technical = ~ 1),
+         weights = varIdent(form = ~ 1|target),
+             data = qdat_pre)
+
+plot(m)
+
+summary(m)
+
+m <- gam(counts ~ target + cond + s(time.c, by = cond, k = 7) + offset(log(nf)), 
+         data = qdat_pre, 
+         family = nb)
+plot(m)
+
+
+
+
+m2x <- brm(bf(counts ~  target + target:time + target:cond + target:time:cond + (1|participant) + (1|participant:cdna) + offset(log(nf)), 
+              shape ~ target),
+           family = negbinomial(),
+           warmup = 1000, # number of samples before sampling
+           iter = 3000,  # number of mcmc iterations 
+           cores = 6, # number of cores used in sampling
+           chains = 6, # number of chains
+           seed = 123, # seed for reproducible results
+           control = list(adapt_delta = 0.8),
+           data = qdat_pre)
+saveRDS(m2x, "./data/derivedData/temp/temp.RDS")
+
+summary(m2x)
+conditional_effects(m2x)
+
+hypothesis(m1x, c("timeS12:condvar = 0"))
+
+pp_check(m2x, type = "ecdf_overlay")
+
+
+ggeffect(mx)
+
+??ggpredict
+
+qdat_pre$resid <- resid(m)
+qdat_pre$fitted <- fitted(m)
+
+
+qdat_pre %>%
+  
+    ggplot(aes(fitted, resid )) + geom_point(shape = 21) + 
+  geom_text(data = subset(qdat_pre, resid > 2.5|resid < -1.5), aes(label = paste(participant, leg, time)))
+
+
+
+
+
+em <- emmeans(m, specs = ~ time | cond)
+
+em %>%
+  data.frame() %>%
+  mutate(time.c = as.numeric(gsub("S", "", time))) %>% 
+  
+  ggplot(aes(time.c, emmean, color = cond, group = cond)) +
+  
+  geom_line() 
+
+
+
+
+
+summary(m)
+
+
+qdat_pre %>%
+  group_by(participant, time.c, time, leg, cond, target) %>%
+  
+  summarise(nf = mean(nf), 
+            counts = mean(counts)) %>%
+  
+  ggplot(aes(time.c, nf, color = cond,
+             group = paste(participant, leg))) + 
+  geom_line() +
+  geom_point() + 
+  facet_grid(target ~ participant)
+
+
+
+
+
+
+
+
+
+log(nf$nf)
+
+get_prior(bf(counts ~ cond + s(time.c, by = cond, k = 7) + (1|participant) + offset(log(nf))), 
+           data = qdat_pre[qdat_pre$target == "rRNA47S F1R1",])
+
+
+m1x <- brm(bf(log(norm) ~ cond + s(time.c, by = cond, k = 7) + 
+               (1|participant)),
+
+    
+  
+          warmup = 1000, # number of samples before sampling
+          iter = 4000,  # number of mcmc iterations 
+          cores = 6, # number of cores used in sampling
+          chains = 6, # number of chains
+          seed = 123, # seed for reproducible results
+          control = list(adapt_delta = 0.95),
+          data = qdat_pre)
+
+
+
+
+pp_check(m1)
+summary(m1)
+
+
+plot(m1)
+
+
+conditional_smooths(m1x)
+
 
 library(mgcv)
 
-qdat_rrna2 %>%
-  filter(rel.counts < 0.001) %>%
-  ggplot(aes(time.c, rel.counts)) + geom_point()
+mx <- gam(counts ~ cond + s(time.c, by = cond, k = 6) + 
+            
+            s(participant, bs = "re"), 
+          offset = log(nf),
+          family = poisson,
+
+          data = qdat_pre[qdat_pre$target == "rRNA47S F1R1",])
 
 
-m1 <- brm(bf(counts ~ s(time.c, by = target, k = 7) + (1|participant) + (1|technical), 
-             sigma ~ target),
-
-          warmup = 1000, # number of samples before sampling
-          iter = 6000,  # number of mcmc iterations 
-          cores = 4, # number of cores used in sampling
-          chains = 4, # number of chains
-          seed = 123, # seed for reproducible results
-          thin = 5,
-          data = qdat_rrna2)
-
-saveRDS(m1, "./data/derivedData/temp/qpcr_smooth.RDS")
-m1 <- readRDS("./data/derivedData/temp/qpcr_smooth.RDS")
-
-conditional_effects(m1)
-
-
-
-
-?brm
-
-
-
-
-
+plot(mx)
 
 
 
