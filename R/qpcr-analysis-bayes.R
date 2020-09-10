@@ -63,7 +63,6 @@ nf <- qdat %>% group_by(target) %>%
 
 #### rRNA per tissue weight analysis #### 
 
-
 qdat.rrna  <- qdat %>%
   group_by(target) %>%
   mutate(outlier = if_else(cq > mean(cq, na.rm = TRUE) + 2 * sd(cq, na.rm = TRUE)|
@@ -78,7 +77,9 @@ qdat.rrna  <- qdat %>%
   filter(target %in% c("rRNA18S F2R2",      "rRNA28S F2R2",     
                        "rRNA5.8S F2R2",       
                        "rRNA45S F5R5",      "rRNA45SITS F12R12", 
-                       "rRNA47S F1R1",      "rRNA5S F3R3")) %>%
+                       "rRNA47S F1R1",      "rRNA5S F3R3", 
+                       "UBTF F4R4", "UBTF F6R6", 
+                       "rpS6 F2R2")) %>%
   mutate(Ra = -cq * log(eff), # Relative abundance
          counts = as.integer(round(eff ^ (39-cq), 0)), # counts, ref Matz et al.
          technical = paste0(participant, leg, time, cdna), 
@@ -129,7 +130,8 @@ qdat.ctrl <- qdat.rrna %>%
 
 
 
-m1 <- brm(bf(counts ~ 0 + target + target:tx + (1|participant) + (1|technical) + offset(nf.w), 
+m1 <- brm(bf(counts ~ 0 + target + target:tx + (1|participant) + (1|technical) + 
+               offset(nf.w), 
              shape ~ target),
           family = negbinomial(),
           warmup = 1000, # number of samples before sampling
@@ -143,7 +145,10 @@ m1 <- brm(bf(counts ~ 0 + target + target:tx + (1|participant) + (1|technical) +
 # Save model 
 saveRDS(m1, "./data/derivedData/qpcr-analysis-bayes/ctrl_vs_int.RDS")
 
-pp_check(m1)
+m1 <- readRDS("./data/derivedData/qpcr-analysis-bayes/ctrl_vs_int.RDS")
+
+
+pp_check(m1, type = "stat", stat = "median")
 summary(m1)
 # combine factors for hypotheses
 
@@ -157,6 +162,11 @@ h <- hypothesis(m1,
           "targetrRNA28SF2R2:txS1_int_train -     targetrRNA28SF2R2:txpre_int_train =      targetrRNA28SF2R2:txS1_con_train",
           "targetrRNA45SITSF12R12:txS1_int_train -targetrRNA45SITSF12R12:txpre_int_train = targetrRNA45SITSF12R12:txS1_con_train", 
           "targetrRNA5.8SF2R2:txS1_int_train -    targetrRNA5.8SF2R2:txpre_int_train =     targetrRNA5.8SF2R2:txS1_con_train", 
+          
+          "targetUBTFF4R4:txS1_int_train -     targetUBTFF4R4:txpre_int_train =      targetUBTFF4R4:txS1_con_train",
+          "targetUBTFF6R6:txS1_int_train -targetUBTFF6R6:txpre_int_train = targetUBTFF6R6:txS1_con_train", 
+          "targetrpS6F2R2:txS1_int_train -    targetrpS6F2R2:txpre_int_train =     targetrpS6F2R2:txS1_con_train", 
+          
           # Interaction effects post-training
           "targetrRNA18SF2R2:txpost_int_train -     targetrRNA18SF2R2:txpre_int_train =      targetrRNA18SF2R2:txpost_con_train",
           "targetrRNA45SF5R5:txpost_int_train -     targetrRNA45SF5R5:txpre_int_train =      targetrRNA45SF5R5:txpost_con_train",
@@ -165,6 +175,14 @@ h <- hypothesis(m1,
           "targetrRNA28SF2R2:txpost_int_train -     targetrRNA28SF2R2:txpre_int_train =      targetrRNA28SF2R2:txpost_con_train",
           "targetrRNA45SITSF12R12:txpost_int_train -targetrRNA45SITSF12R12:txpre_int_train = targetrRNA45SITSF12R12:txpost_con_train", 
           "targetrRNA5.8SF2R2:txpost_int_train -    targetrRNA5.8SF2R2:txpre_int_train =     targetrRNA5.8SF2R2:txpost_con_train", 
+          
+          
+          "targetUBTFF4R4:txpost_int_train -     targetUBTFF4R4:txpre_int_train =      targetUBTFF4R4:txpost_con_train",
+          "targetUBTFF6R6:txpost_int_train -targetUBTFF6R6:txpre_int_train = targetUBTFF6R6:txpost_con_train", 
+          "targetrpS6F2R2:txpost_int_train -    targetrpS6F2R2:txpre_int_train =     targetrpS6F2R2:txpost_con_train", 
+          
+          
+          
           # Interaction effects detraining (post1w)
           "targetrRNA18SF2R2:txpost_int_detrain -     targetrRNA18SF2R2:txpre_int_train =      targetrRNA18SF2R2:txpost_con_train",
           "targetrRNA45SF5R5:txpost_int_detrain -     targetrRNA45SF5R5:txpre_int_train =      targetrRNA45SF5R5:txpost_con_train",
@@ -173,6 +191,11 @@ h <- hypothesis(m1,
           "targetrRNA28SF2R2:txpost_int_detrain -     targetrRNA28SF2R2:txpre_int_train =      targetrRNA28SF2R2:txpost_con_train",
           "targetrRNA45SITSF12R12:txpost_int_detrain -targetrRNA45SITSF12R12:txpre_int_train = targetrRNA45SITSF12R12:txpost_con_train",
           "targetrRNA5.8SF2R2:txpost_int_detrain -    targetrRNA5.8SF2R2:txpre_int_train =     targetrRNA5.8SF2R2:txpost_con_train", 
+          
+          "targetUBTFF4R4:txpost_int_detrain -     targetUBTFF4R4:txpre_int_train =         targetUBTFF4R4:txpost_con_train",
+          "targetUBTFF6R6:txpost_int_detrain -     targetUBTFF6R6:txpre_int_train =         targetUBTFF6R6:txpost_con_train",
+          "targetrpS6F2R2:txpost_int_detrain -     targetrpS6F2R2:txpre_int_train =         targetrpS6F2R2:txpost_con_train", 
+          
           
           # Whitin group fold change
           "targetrRNA18SF2R2:txpost_int_detrain =     targetrRNA18SF2R2:txpre_int_train",     
@@ -183,6 +206,12 @@ h <- hypothesis(m1,
           "targetrRNA45SITSF12R12:txpost_int_detrain = targetrRNA45SITSF12R12:txpre_int_train",
           "targetrRNA5.8SF2R2:txpost_int_detrain =    targetrRNA5.8SF2R2:txpre_int_train", 
           
+          "targetUBTFF4R4:txpost_int_detrain =     targetUBTFF4R4:txpre_int_train",    
+          "targetUBTFF6R6:txpost_int_detrain =     targetUBTFF6R6:txpre_int_train",
+          "targetrpS6F2R2:txpost_int_detrain =     targetrpS6F2R2:txpre_int_train", 
+          
+          
+          
           "targetrRNA18SF2R2:txpost_int_train =     targetrRNA18SF2R2:txpre_int_train",     
           "targetrRNA45SF5R5:txpost_int_train =     targetrRNA45SF5R5:txpre_int_train",     
           "targetrRNA47SF1R1:txpost_int_train =     targetrRNA47SF1R1:txpre_int_train",     
@@ -190,6 +219,10 @@ h <- hypothesis(m1,
           "targetrRNA28SF2R2:txpost_int_train =     targetrRNA28SF2R2:txpre_int_train",    
           "targetrRNA45SITSF12R12:txpost_int_train = targetrRNA45SITSF12R12:txpre_int_train",
           "targetrRNA5.8SF2R2:txpost_int_train =    targetrRNA5.8SF2R2:txpre_int_train", 
+          
+          "targetUBTFF4R4:txpost_int_train =      targetUBTFF4R4:txpre_int_train",    
+          "targetUBTFF6R6:txpost_int_train =      targetUBTFF6R6:txpre_int_train",
+          "targetrpS6F2R2:txpost_int_train =      targetrpS6F2R2:txpre_int_train", 
           
           "targetrRNA18SF2R2:txS1_int_train =     targetrRNA18SF2R2:txpre_int_train",     
           "targetrRNA45SF5R5:txS1_int_train =     targetrRNA45SF5R5:txpre_int_train",     
@@ -199,6 +232,12 @@ h <- hypothesis(m1,
           "targetrRNA45SITSF12R12:txS1_int_train = targetrRNA45SITSF12R12:txpre_int_train",
           "targetrRNA5.8SF2R2:txS1_int_train =    targetrRNA5.8SF2R2:txpre_int_train", 
           
+          "targetUBTFF4R4:txS1_int_train =    targetUBTFF4R4:txpre_int_train",    
+          "targetUBTFF6R6:txS1_int_train =    targetUBTFF6R6:txpre_int_train",
+          "targetrpS6F2R2:txS1_int_train =    targetrpS6F2R2:txpre_int_train", 
+          
+          
+          
           "targetrRNA18SF2R2:txS1_con_train = 0",
           "targetrRNA45SF5R5:txS1_con_train = 0",
           "targetrRNA47SF1R1:txS1_con_train = 0",
@@ -207,13 +246,24 @@ h <- hypothesis(m1,
           "targetrRNA45SITSF12R12:txS1_con_train = 0", 
           "targetrRNA5.8SF2R2:txS1_con_train = 0", 
           
+          "targetUBTFF4R4:txS1_con_train = 0",
+          "targetUBTFF6R6:txS1_con_train = 0", 
+          "targetrpS6F2R2:txS1_con_train = 0", 
+          
+          
           "targetrRNA18SF2R2:txpost_con_train = 0",
           "targetrRNA45SF5R5:txpost_con_train = 0",
           "targetrRNA47SF1R1:txpost_con_train = 0",
           "targetrRNA5SF3R3:txpost_con_train = 0",
           "targetrRNA28SF2R2:txpost_con_train = 0",
            "targetrRNA45SITSF12R12:txpost_con_train = 0",
-           "targetrRNA5.8SF2R2:txpost_con_train = 0"
+           "targetrRNA5.8SF2R2:txpost_con_train = 0", 
+          
+          "targetUBTFF4R4:txpost_con_train = 0",
+          "targetUBTFF6R6:txpost_con_train = 0", 
+          "targetrpS6F2R2:txpost_con_train = 0" 
+          
+          
           ))
 h
 
@@ -224,17 +274,20 @@ qpcr_res_int_con <- data.frame(target = rep(c("rRNA18SF2R2"      ,
                                           "rRNA5SF3R3"       ,
                                           "rRNA28SF2R2"      ,    
                                           "rRNA45SITSF12R12" ,
-                                          "rRNA5.8SF2R2"), 8), 
-                               comparison = c(rep("inter:S1", 7),
-                                              rep("inter:post", 7),
-                                              rep("inter:post1w", 7), 
+                                          "rRNA5.8SF2R2", 
+                                          "UBTFF4R4",
+                                          "UBTFF6R6", 
+                                          "rpS6F2R2" ), 8), 
+                               comparison = c(rep("inter:S1", 10),
+                                              rep("inter:post", 10),
+                                              rep("inter:post1w", 10), 
                                               
-                                              rep("int_S1", 7), 
-                                              rep("int_post", 7),
-                                              rep("int_post1w", 7),
+                                              rep("int_post1w", 10), 
+                                              rep("int_post", 10),
+                                              rep("int_S1", 10),
                                               
-                                              rep("con_S1", 7),
-                                              rep("con_post", 7))) %>%
+                                              rep("con_S1", 10),
+                                              rep("con_post", 10))) %>%
   cbind(data.frame(h$hypothesis)[,-1]) %>%
   print()
 
