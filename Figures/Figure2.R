@@ -87,8 +87,7 @@ if(bayes == FALSE){
 
 ###### Panel X Intervention vs. control qPCR rRNA + total RNA  ##################
 
-
-qpcr_res_int_con <- readRDS("./data/derivedData/qpcr-analysis-bayes/qpcr_res_int_con.RDS")
+qpcr_res_int_con <- readRDS("./data/derivedData/qpcr-analysis-bayes2/qpcr_res_int_con.RDS")
 
 
 complete_rrna_comp <- comp_rna %>%
@@ -96,16 +95,18 @@ complete_rrna_comp <- comp_rna %>%
          target = "totalRNA") %>%
   dplyr::select(target, comparison, estimate:upper.CL) %>%
   rbind(qpcr_res_int_con %>%
-          dplyr::select(target, comparison, estimate = Estimate, lower.CL = CI.Lower, upper.CL = CI.Upper)) %>%
+          filter(model == "tissue") %>%
+          dplyr::select(target, comparison = contrast, estimate, lower.CL , upper.CL)) %>%
 
-  filter(!(target %in% c( "UBTFF4R4",
-                        "UBTFF6R6", 
-                        "rpS6F2R2" ))) %>%
+  filter(!(target %in% c("UBTF F4R4",
+                        "UBTF F6R6", 
+                        "rpS6 F2R2", 
+                        "MyHC1 F1R1", 
+                        "MyHC2A F5R5", 
+                        "MyHC2X F5R5"))) %>%
   print()
 
  
-
-  print()
 
 
 
@@ -114,23 +115,23 @@ complete_rrna_comp <- comp_rna %>%
 
 anno.df <- data.frame(target = unique(complete_rrna_comp$target), 
            label = c("Total RNA", 
-                     "rRNA 18S", 
-                     "rRNA 45S ETS", 
-                     "rRNA 47S ETS", 
-                     "rRNA 5S", 
-                     "rRNA 28S", 
+                     "rRNA 18S",
+                     "rRNA 28S",  
+                     "rRNA 45S ETS",
                      "rRNA 45S ITS", 
-                     "rRNA 5.8S"), 
+                     "rRNA 47S ETS", 
+                     "rRNA 5.8S",
+                     "rRNA 5S" ), 
            time = factor("S1", levels = c("S1", "post")), 
            estimate = 3.5) %>%
   mutate(target = factor(target, levels = c("totalRNA", 
-                                            "rRNA18SF2R2",
-                                            "rRNA5.8SF2R2",
-                                            "rRNA28SF2R2",
-                                            "rRNA5SF3R3", 
-                                            "rRNA45SITSF12R12",
-                                            "rRNA45SF5R5",     
-                                            "rRNA47SF1R1")),
+                                            "rRNA18S F2R2",
+                                            "rRNA5.8S F2R2",
+                                            "rRNA28S F2R2",
+                                            "rRNA5S F3R3", 
+                                            "rRNA45SITS F12R12",
+                                            "rRNA45S F5R5",     
+                                            "rRNA47S F1R1")),
          target = fct_rev(target))
 
 
@@ -138,18 +139,16 @@ anno.df <- data.frame(target = unique(complete_rrna_comp$target),
 interaction_effects <- complete_rrna_comp %>%
   
 
-  
-  
   filter(comparison %in% c("inter:S1", "inter:post", "inter:post1w","")) %>%
   
   mutate(target = factor(target, levels = c("totalRNA", 
-                                            "rRNA18SF2R2",
-                                            "rRNA5.8SF2R2",
-                                            "rRNA28SF2R2",
-                                            "rRNA5SF3R3", 
-                                            "rRNA45SITSF12R12",
-                                            "rRNA45SF5R5",     
-                                            "rRNA47SF1R1")),
+                                            "rRNA18S F2R2",
+                                            "rRNA5.8S F2R2",
+                                            "rRNA28S F2R2",
+                                            "rRNA5S F3R3", 
+                                            "rRNA45SITS F12R12",
+                                            "rRNA45S F5R5",     
+                                            "rRNA47S F1R1")),
          
          comparison = gsub("inter:", "", comparison), 
          comparison = factor(comparison, levels = c("S1", "post", "post1w"), 
@@ -193,13 +192,13 @@ fold_changes <- complete_rrna_comp %>%
   
   
   mutate(target = factor(target, levels = c("totalRNA", 
-                                            "rRNA18SF2R2",
-                                            "rRNA5.8SF2R2",
-                                            "rRNA28SF2R2",
-                                            "rRNA5SF3R3", 
-                                            "rRNA45SITSF12R12",
-                                            "rRNA45SF5R5",     
-                                            "rRNA47SF1R1")),
+                                            "rRNA18S F2R2",
+                                            "rRNA5.8S F2R2",
+                                            "rRNA28S F2R2",
+                                            "rRNA5S F3R3", 
+                                            "rRNA45SITS F12R12",
+                                            "rRNA45S F5R5",     
+                                            "rRNA47S F1R1")),
          target = fct_rev(target),
 
          estimate = exp(estimate), 

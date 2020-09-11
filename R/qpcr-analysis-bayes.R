@@ -339,7 +339,7 @@ h <- hypothesis(m1,
           
           "targetUBTFF4R4:txpost_con_train = 0",
           "targetUBTFF6R6:txpost_con_train = 0", 
-          "targetrpS6F2R2:txpost_con_train = 0" 
+          "targetrpS6F2R2:txpost_con_train = 0", 
           
           
 
