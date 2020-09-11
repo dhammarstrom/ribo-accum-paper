@@ -269,6 +269,7 @@ slope8_12 <- paste0(sprintf("%.1f", 100 * (exp(time3.hyp$hypothesis[1,2]) - 1)),
 
 ```
 
+
 Compared to control, a single session of RT led to robust increase in 45S and 47S pre-rRNA (Figure 2B) expressed per unit tissue weight. These were also increased compared to control after twelve sessions together with the 45S ITS and mature rRNA species 28S and 18S. After eight days of rest, only 18S remained elevated above control group (Figure 2B). This general pattern of rRNA expression was reflected also in total RNA expressed per unit tissue weight were a robust increase compared to contral was seen after session twelve (Figure 2B). Within the experimental group, no differences were seen between volume conditions. Most of the increase was seen in after the first four sessions where the average increase was `r slope0_4` per session in the intervention group as a whole. Between session four and eight, and eight to twelve changes in total RNA per tissue weight per session was not different from zero (`r slope4_8` and `r slope8_12`).     
 
 ```{r western-data}
@@ -276,6 +277,10 @@ Compared to control, a single session of RT led to robust increase in 45S and 47
 ```
 
 Protein levels of RPS6 and UBF increased only after twelve sessions in the training group compared to control (Figure 3A) and stayed elevated after eight days of rest. There were no differences between volume-conditions. The average increase in expression levels over twelve sessions were linear in both and estimated to 4 and 8% per session for RPS6 and UBF, respectively. 
+
+Compared to control, a single session of RT led to robust increase in 45S and 47S pre-rRNA (Figure 2B) expressed per unit tissue weight. These were also increased compared to control after twelve sessions together with the 45S ITS and mature rRNA species 28S and 18S. After eight days of rest, only 18S remained elevated above control group  (Figure 2B). This general pattern of rRNA expression was reflected also in total RNA expressed per unit tissue weight were a robust increase compared to contral was seen after session twelve (Figure 2B). Within the experimental group, no differences were seen between volume conditions. Most of the increase was seen in after the first four sessions where the average increase was `r slope0_4` per session in the intervention group as a whole. Between session four and eight, and eight to twelve changes in total RNA per tissue weight per session was not different from zero (`r slope4_8` and `r slope8_12`).     
+
+
 
 
 

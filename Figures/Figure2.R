@@ -97,12 +97,18 @@ complete_rrna_comp <- comp_rna %>%
   dplyr::select(target, comparison, estimate:upper.CL) %>%
   rbind(qpcr_res_int_con %>%
           dplyr::select(target, comparison, estimate = Estimate, lower.CL = CI.Lower, upper.CL = CI.Upper)) %>%
+
   filter(!(target %in% c( "UBTFF4R4",
                         "UBTFF6R6", 
                         "rpS6F2R2" ))) %>%
   print()
 
  
+
+  print()
+
+
+
 
 # Create an annotation data frame
 
