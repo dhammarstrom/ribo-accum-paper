@@ -289,5 +289,12 @@ Compared to control, a single session of RT led to robust increase in 45S and 47
 # References
 <div id="refs"></div>
 
+# Figure legends
+
+**Figure 1.** Study design (A) training load (B) and training outcomes (muscle strength, C; muscle thickness D).   
+
+
+**Figure 2.**  Total RNA and ribosomal RNA subspecies in response to trainin. Total RNA increased compared to non-training controls to post-training (12 sessions) and tended to normalize after de-training (A). There were no robust differences between different volume conditions in the training group (A). B shows primer locations targeting different ribosomal RNA subspecies. Subsets of ribosomal RNA showed robust increases compared to control 48 h after the first session and other after the training period (C). Error bars shows 95% CI. Asterisk in C indicates robust differences between volume conditions (a 95% CI of pairwise differences not containing 0).    
+
 
 

@@ -418,6 +418,16 @@ saveRDS(ctrl_vs_int, "./data/derivedData/qpcr-analysis-bayes2/qpcr_res_int_con.R
 
 qdat_int <- qdat.rrna %>%
   filter(cond != "ctrl_leg") %>%
+  
+  mutate(time = factor(time, 
+                       levels = c("S0", 
+                                  "S1", 
+                                  "S4", 
+                                  "S5", 
+                                  "S8", 
+                                  "S9", 
+                                  "S12", 
+                                  "post1w"))) %>%
   print()
 
 
@@ -446,15 +456,15 @@ clusterExport(cl, "qdat_int")
 # use parLapply() to execute 10 runs of MCMCglmm(), each with nitt=100000
 model3 <- parLapply(cl=cl, 1:4, function(i) {
   
-  MCMCglmm(fixed = counts ~ 0 + target + target:time + target:cond + target:time:cond,
+  MCMCglmm(fixed = counts ~ 0 + target + target:time + target:time:cond,
            random = ~participant + technical + idh(target):participant, 
            prior = prior3, 
            family = "poisson", 
            data = qdat_int, 
            rcov = ~idh(target):units,
            thin = 10,
-           burnin = 5000,
-           nitt = 50000)
+           burnin = 10000,
+           nitt = 65000)
   
 }
 )
@@ -481,7 +491,6 @@ prior4 <- list(R = list(V = diag(13), # n genes/targets
 prior4$B$V[1,1] <- 1e-5 # replace the offset variance
 
 
-
 setCores <- 4 # use detectCores() by itself if you want all CPUs
 
 # make the cluster
@@ -496,21 +505,95 @@ clusterExport(cl, "qdat_int")
 # use parLapply() to execute 10 runs of MCMCglmm(), each with nitt=100000
 model4 <- parLapply(cl=cl, 1:4, function(i) {
   
-  MCMCglmm(fixed = counts ~ 0 + log(nf.w) + target + target:time + target:cond + target:time:cond,
+  MCMCglmm(fixed = counts ~ 0 + log(nf.w) + target + target:time + target:time:cond,
            random = ~participant + technical + idh(target):participant, 
            prior = prior4, 
            family = "poisson", 
            data = qdat_int, 
            rcov = ~idh(target):units,
            thin = 10,
-           burnin = 5000,
-           nitt = 50000)
+           burnin = 10000,
+           nitt = 65000)
   
 }
 )
 
 # once it's finished, use stopCluster() to stop running the parallel cluster
 stopCluster(cl)
+
+
+##### Mature vs pre-rna ##########################
+# An attempt to model pre-rrna and mature rna together 
+# Warning, experimental!
+
+
+qdat_int2 <- qdat_int %>%
+  filter(target != "rRNA5.8S F2R2") %>%
+  mutate(Target = if_else(target %in% c("rRNA45S F5R5", 
+                                        "rRNA47S F1R1"), "pre", 
+                          if_else(target %in% c("rRNA18S F2R2", 
+                                                "rRNA5.8S F2R2", 
+                                                "rRNA28S F2R2"), "mature", target))) %>%
+  print()
+
+qdat_int2 %>%
+  filter(target == "rRNA18S F2R2") %>%
+  dplyr::select(target, Target) %>%
+  print()
+
+
+prior5 <- list(R = list(V = diag(12), # n genes/targets 
+                        nu = 4.002),
+               B = list(V = diag(161) * 1e5, 
+                        mu = c(1, rep(0, 160))),
+               # the G part are the variance components for the 
+               # random effects
+               G = list(G1 = list(nu = 0.002, V = 1), 
+                        G2 = list(nu = 0.002, V = 1),
+                        G3 = list(nu = 0.002, V = diag(12))))
+
+
+
+prior5$B$V[1,1] <- 1e-5 # replace the offset variance
+
+
+setCores <- 4 # use detectCores() by itself if you want all CPUs
+
+# make the cluster
+cl <- makeCluster(getOption("cl.cores", setCores))
+
+# load the MCMCglmm package within the cluster
+cl.pkg <- clusterEvalQ(cl, library(MCMCglmm)) 
+# import each object that's necessary to run the function
+clusterExport(cl, "prior5")
+clusterExport(cl, "qdat_int2")
+
+# use parLapply() to execute 10 runs of MCMCglmm(), each with nitt=100000
+model5 <- parLapply(cl=cl, 1:4, function(i) {
+  
+  MCMCglmm(fixed = counts ~ 0 + log(nf.w) + Target + Target:time + Target:time:cond,
+           random = ~participant + technical + idh(target):participant, 
+           prior = prior5, 
+           family = "poisson", 
+           data = qdat_int2, 
+           rcov = ~idh(target):units,
+           thin = 10,
+           burnin = 10000,
+           nitt = 65000)
+  
+}
+)
+
+# once it's finished, use stopCluster() to stop running the parallel cluster
+stopCluster(cl)
+
+
+
+
+
+
+
+
 
 
 
@@ -529,31 +612,80 @@ m4 <- lapply(model4, function(m) m$Sol)
 
 m4 <- do.call(mcmc.list, m4)
 
+m5 <- lapply(model5, function(m) m$Sol)
+
+m5 <- do.call(mcmc.list, m5)
+
 # The gelman plot from 
 gelman.diag(m3)
+gelman.diag(m4)
+gelman.diag(m5)
 
-t <- summary(m3)
-t
-temp <-  cbind(summary(m4)$statistics, summary(m3)$quantiles[,c(1,5)]) %>%
+
+
+# Combine data per target from regression coefficients #
+
+
+reg_cof <- rbind(cbind(summary(m4)$statistics, summary(m4)$quantiles[,c(1,5)]) %>%
    data.frame() %>%
-   mutate(coef = rownames(.)) %>%
+   mutate(coef = rownames(.), 
+          model = "tissue"), 
+   cbind(summary(m3)$statistics, summary(m3)$quantiles[,c(1,5)]) %>%
+     data.frame() %>%
+     mutate(coef = rownames(.), 
+            model = "tot_rna"), 
+   cbind(summary(m5)$statistics, summary(m5)$quantiles[,c(1,5)]) %>%
+     data.frame() %>%
+     mutate(coef = rownames(.), 
+            model = "combine_rrna")) %>%
    print()
-   
-temp %>%
+
+
+
+interaction_rrna <- reg_cof %>%
   separate(coef, into = c("target", "time", "cond"), sep = ":") %>%
-  mutate(target = gsub("target", "", target)) %>%
-  filter(target == "rRNA47S F1R1") %>%
-  dplyr::select(target, time, cond, Mean, X2.5., X97.5.) %>%
+  mutate(target = gsub("target", "", target), 
+         target = gsub("Target", "", target)) %>%
+  dplyr::select(model, target, time, cond, Mean, lwr =  X2.5., upr = X97.5.) %>%
+  filter(target %in% c("rRNA47S F1R1",
+                       "rRNA45S F5R5",
+                       "rRNA45SITS F12R12",
+                       "rRNA18S F2R2", 
+                       "rRNA5.8S F2R2", 
+                       "rRNA28S F2R2", 
+                       "rRNA5S F3R3",
+                       "pre", "mature")) %>%
+
+  mutate(time = gsub("time", "", time), 
+         time = factor(time, levels = c("S0", 
+                                          "S1", 
+                                          "S4", 
+                                          "S5", 
+                                          "S8", 
+                                          "S9", 
+                                          "S12", 
+                                          "post1w")), 
+         robust = if_else(lwr > 0 | upr < 0, "robust", "notrobust")) %>%
   
+  
+  filter(cond == "condvar", 
+         model %in% c("tissue", "combine_rrna"))%>%
   print()
   
 
-rbind(emmeans(model3[[1]], specs = ~ time * cond|target, data = qdat_int) %>%
+
+
+estimated_means_rrna <- rbind(emmeans(model3[[2]], specs = ~ time * cond|target, data = qdat_int) %>%
   data.frame() %>%
     mutate(model = "total_rna"), 
-  emmeans(model4[[1]], specs = ~ time * cond|target, data = qdat_int) %>%
+  emmeans(model4[[2]], specs = ~ time * cond|target, data = qdat_int) %>%
     data.frame() %>%
-    mutate(model = "tissue")) %>%
+    mutate(model = "tissue"),
+  emmeans(model5[[2]], specs = ~ time * cond|Target, data = qdat_int2) %>%
+  data.frame() %>%
+  mutate(model = "combine_rrna") %>% 
+  dplyr::select(time, cond, target = Target, emmean:model) %>%
+    filter(target %in% c("pre", "mature"))) %>%
   mutate(time = factor(time, levels = c("S0", 
                                         "S1", 
                                         "S4",
@@ -562,14 +694,31 @@ rbind(emmeans(model3[[1]], specs = ~ time * cond|target, data = qdat_int) %>%
                                         "S9", 
                                         "S12", 
                                         "post1w"))) %>%
-  filter(target %in% c("rRNA45S F5R5", 
-                       "rRNA47S F1R1")) %>%
-  ggplot(aes(time, emmean, color = cond, group = paste(model, cond), lty = model)) + 
-  geom_line() + facet_wrap(~ target, scales = "free")
-  data.frame() 
+  filter(model %in% c("tissue","combine_rrna"),  
+         target %in% c("rRNA47S F1R1",
+                       "rRNA45S F5R5",
+                       "rRNA45SITS F12R12",
+                       "rRNA18S F2R2", 
+                       "rRNA5.8S F2R2", 
+                       "rRNA28S F2R2",
+                       "rRNA5S F3R3",
+                       "pre", 
+                       "mature")) %>%
+  print()
+  
+  
+  
+
+## Save data 
+
+rrna_timecourse <- list(estimated_means = estimated_means_rrna, 
+                        estimated_diff = interaction_rrna)
+
+
+saveRDS(rrna_timecourse, "./data/derivedData/qpcr-analysis-bayes2/time_course_qpcr.RDS")
 
 
 
-
-
-
+  
+  
+  
