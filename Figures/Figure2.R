@@ -31,6 +31,9 @@ primers <- read_excel("./data/tr010_primers.xlsx") %>%
 
 
 
+
+
+
 primers_fig <- data.frame(x = c(1, 13500), 
            y = c(1, 2)) %>%
   ggplot(aes(x, y)) +
@@ -44,26 +47,36 @@ primers_fig <- data.frame(x = c(1, 13500),
   # 28S segment
   annotate("segment", x = 7925, xend = 12990, y = 1.5, yend = 1.5, size = 2.5) +
   
-  geom_segment(data = primers, aes(y = c(1.54, 1.52, 1.53, 1.54, 1.55, 1.56), 
-                                   yend = c(1.54, 1.52, 1.53, 1.54, 1.55, 1.56), 
+  geom_segment(data = primers, aes(y = c(1.54, 1.52, 1.528, 1.54, 1.55, 1.56), 
+                                   yend = c(1.54, 1.52, 1.528, 1.54, 1.55, 1.56), 
                                    x= on45S_start, xend = on45S_end), 
                size = 4) +
   
-  geom_text_repel(data = primers, aes(y = c(1.54, 1.52, 1.53, 1.54, 1.55, 1.56),
-                                      x= on45S_start, label = symbol_ext), 
+  geom_text(data = primers, aes(y = c(1.54, 1.52, 1.528, 1.544, 1.55, 1.56),
+                                      x= on45S_end, label = symbol_ext), 
                   size = 2.2, 
-                  nudge_x = 100) +
+          hjust = 0,
+            position = position_nudge(x = 200)) +
   
-  scale_y_continuous(limits = c(1.48, 1.58)) +
+  # Annotations 
+  annotate("text", x = c(3655/2, 5523 - (5523-3655)/2, 
+                         6757 - (6757-6601)/2,
+                         12990 - (12990-7925)/2), 
+                   y = rep(1.48, 4), 
+           color = "gray50",
+           label = c("47/45S ETS", "18S", "5.8S", "28S"), 
+           fontface = "italic",
+  
+           size = 2.2) +
+  
+  
+  
+  scale_y_continuous(limits = c(1.46, 1.58)) +
   plot_theme() + 
   theme(axis.title = element_blank(), 
         axis.text = element_blank(), 
         axis.line = element_blank(),
         axis.ticks = element_blank())
-
-
-
-
 
 
 
@@ -107,7 +120,12 @@ anno.df <- data.frame(target = unique(complete_rrna_comp$target),
                                             "rRNA5S F3R3", 
                                             "rRNA45SITS F12R12",
                                             "rRNA45S F5R5",     
-                                            "rRNA47S F1R1")),
+                                            "rRNA47S F1R1")), 
+         comparison = "S1",
+         comparison = factor(comparison, levels = c("S1", "post", "post1w"), 
+                             labels = c("Session 1", 
+                                        "Post-training", 
+                                        "Post-trainin \n+ De-training")),
          target = fct_rev(target))
 
 
@@ -117,8 +135,7 @@ interaction_effects <- complete_rrna_comp %>%
 
   filter(comparison %in% c("inter:S1", "inter:post", "inter:post1w","")) %>%
   
-  mutate(target = factor(target, levels = c(
-                                            "rRNA18S F2R2",
+  mutate(target = factor(target, levels = c("rRNA18S F2R2",
                                             "rRNA5.8S F2R2",
                                             "rRNA28S F2R2",
                                             "rRNA5S F3R3", 
@@ -139,6 +156,19 @@ interaction_effects <- complete_rrna_comp %>%
   ggplot(aes(estimate, 
              target, color = robust)) + 
   
+  geom_text(data = anno.df %>%
+              mutate(target = factor(target, levels = c("rRNA18S F2R2",
+                                                        "rRNA5.8S F2R2",
+                                                        "rRNA28S F2R2",
+                                                        "rRNA5S F3R3", 
+                                                        "rRNA45SITS F12R12",
+                                                        "rRNA45S F5R5",     
+                                                        "rRNA47S F1R1"))),
+            aes(estimate - 2, target,  label = label, color = NULL), 
+            position = position_nudge(y = 0.25), 
+            hjust = 0,
+            size = 2.2) +
+  
   
   labs(x = "Fold change compared to Control") +
   
@@ -148,11 +178,11 @@ interaction_effects <- complete_rrna_comp %>%
   geom_errorbarh(aes(xmin = lower.CL, xmax = upper.CL), height = 0.2) + 
   facet_wrap(  comparison ~ .) +
   
-  scale_color_manual(values = c("blue", "red")) +
+  scale_color_manual(values = c("gray50", "gray10")) +
   
   plot_theme() +
   theme(strip.background = element_rect(color = "white", fill = "white"), 
-        strip.text = element_text(size = 8),
+        strip.text = element_text(size = 7),
         axis.title.y = element_blank()  , 
         axis.text.y = element_blank(), 
         legend.position = "none")
@@ -181,6 +211,10 @@ fold_changes <- complete_rrna_comp %>%
          lower.CL = exp(lower.CL), 
          upper.CL = exp(upper.CL), 
          group = if_else(time == "post1w", "int_detrain", group),
+         
+         group = factor(group, levels = c("con", "int", "int_detrain"), 
+                        labels = c("Control", "Training", "Training\n+De-training")),
+         
          time = if_else(time == "post1w", "post", time),
          time = factor(time, levels = c("S1", "post"))) %>%
   
@@ -203,12 +237,20 @@ fold_changes <- complete_rrna_comp %>%
   scale_y_continuous(limits = c(0.5, 3.8), breaks = c(1, 2, 3)) +
   scale_x_discrete(limits = c( "S1", "post"), labels = c("Session 1", "Post-\ntraining")) +
   
+  scale_fill_manual(values = c(color.scale[5], color.scale[6],color.scale[8])) +
+  
+  
   labs(y = "Fold change from Baseline") +
   plot_theme() +
   
   theme(strip.background = element_blank(), 
         strip.text = element_blank(), 
-        legend.position = "none", 
+        legend.position = "bottom", 
+        legend.text = element_text(size = 7, margin = margin(t = 0.1, b= 0.1,r = 0.1,l = 0.1, unit = "pt")),
+        legend.key.size = unit(0, "cm"),
+        legend.margin = margin(-0.5, 0, -0.5, 0, "cm"),
+        legend.spacing.x = unit(0.1, 'cm'),
+        legend.direction = "vertical",
         axis.title.x = element_blank()) +
   
   facet_grid(target ~ .)
@@ -271,6 +313,7 @@ diffs <- rrna_data$estimated_diff %>%
 
 targets <- unique(rrna_timecourse$target)
 
+
 plots <- list()
 
 
@@ -306,8 +349,12 @@ for(i in 1:length(targets)) {
          y = "Estimated log-abundance per tissue weight (AU)")  +
     plot_theme() +
     
+    ggtitle(anno.df[anno.df$target == targets[i], 2]) + 
+    
     theme(strip.background = element_blank(), 
           strip.text = element_blank(), 
+          plot.title = element_text(size = 7),
+
           legend.position = "none", 
           axis.title = element_blank(), 
           axis.text.x = element_blank(), 
@@ -377,8 +424,8 @@ time_traces <-  plot_grid(axis_lab,
 rnra_ctrl_vs_int <- cowplot::plot_grid(
   cowplot::plot_grid(NULL, fold_changes, NULL, ncol = 1, rel_heights = c(0.09, 1, 0.06)),
   interaction_effects,
-  plot_grid(NULL, time_traces, NULL, rel_heights = c(0.14, 1, 0.028), ncol = 1),
-  ncol = 3, rel_widths = c(0.6, 1, 0.6))
+
+  ncol = 2, rel_widths = c(0.6, 1))
 
 
 # Total RNA analysis and plot #################################################
@@ -427,12 +474,17 @@ tot_rna_interaction <- comp_rna %>%
   geom_errorbarh(aes(xmin = lower.CL, xmax = upper.CL), height = 0.2) + 
   facet_wrap(  comparison ~ .) +
   
-  scale_color_manual(values = c("blue", "red")) +
+  scale_color_manual(values = c("gray50", "gray10")) +
+  scale_x_continuous(limits = c(0.8, 2), 
+                     expand = c(0, 0), 
+                     breaks = c(0.8, 1, 1.2, 1.4, 1.6, 1.8, 2), 
+                     labels = c("",  1, "",   1.4, "", 1.8, "")) +
   
   plot_theme() +
   theme(strip.background = element_rect(color = "white", fill = "white"), 
-        strip.text = element_text(size = 8),
+        strip.text = element_text(size = 7),
         axis.title.y = element_blank()  , 
+        axis.ticks.y = element_blank(),
         axis.text.y = element_blank(), 
         legend.position = "none")
 
@@ -470,7 +522,7 @@ tot_rna_fold_change <- comp_rna %>%
                    labels = c(1, 1.2, 1.4, 1.6, 1.8, 2), 
                    expand = c(0, 0)) +
   
-  
+  scale_fill_manual(values = c(color.scale[5], color.scale[6],color.scale[8])) +
   labs(y = "Fold change from Baseline") +
   plot_theme() +
   
@@ -538,15 +590,20 @@ tot_rna_fig <- plot_grid(tot_rna_fold_change,
 
 
                   
-figure2 <-  plot_grid(tot_rna_fig, 
-           plot_grid(NULL, primers_fig,NULL,ncol = 3, rel_widths = c(0.5, 2, 0.5)),
-           rnra_ctrl_vs_int, 
-           rel_heights = c(0.5, 0.2, 1),
+figure2 <- plot_grid( 
+              plot_grid(
+                plot_grid(
+                    plot_grid(NULL, primers_fig,NULL,ncol = 3, rel_widths = c(0.2, 2, 0.2)),
+                    rnra_ctrl_vs_int, ncol = 1, rel_heights = c(0.2, 1)), 
+              time_traces, ncol = 2, rel_widths = c(0.7, 0.3)),
+              
+           tot_rna_fig, 
+           rel_heights = c(1.2, 0.5),
            ncol = 1) +
   
-  draw_plot_label(label=c("A",  "B",  "C"),
-                  x =   c(0.02, 0.15, 0.02), 
-                  y =   c(0.98, 0.66, 0.55),
+  draw_plot_label(label=c("A",  "B",   "C",  "D", "E",   "F",  "G"),
+                  x =   c(0.02, 0.02, 0.27, 0.75, 0.02, 0.33, 0.71), 
+                  y =   c(0.98, 0.83, 0.83, 0.98, 0.3, 0.27, 0.3),
                   hjust=.5, vjust=.5, size = label.size)
 
 

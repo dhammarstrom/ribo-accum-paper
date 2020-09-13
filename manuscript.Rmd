@@ -1,6 +1,6 @@
 ---
 title: "Ribosome accumulation during early phase resistance training"
-author: Daniel Hammarström^1,2,£^&ast;,Sjur Øfsteng^2,£^, Lise Koll^3^,   Bent R. Rønnestad^2^, Stian Ellefsen^1,3^
+author: Daniel Hammarström^1,2,£^&ast;,Sjur Øfsteng^2,£^, Bent R. Rønnestad^2^, Stian Ellefsen^1,3^
 date: ""
 header-includes:
   - \usepackage{wasysym}
@@ -184,7 +184,6 @@ Raw fluorescence data was exported from the QuantStudio software and estimates o
 ## Immunoblotting
 Protein samples (20 &#956;g) were separated on 4-20% Tris-Glycin gels (Criterion TGX Precast Gels, Bio-Rad) at 250 V for 45 min using the recommended running buffer (25 mM Tris, 192 mM Glycin, 0.1% SDS). All samples from the same participant were run on the same gel and all samples were run in at leat duplicates. Separated samples were transferred to &#956m PVDF membranes (Immun-Blot, Bio-Rad) using wet transfer (25 mM Tris, 192 Glycin, 10% vol/vol methanol) at a constant voltage of 300 mA for 3 h. Membranes were then stained to confirm transfer and enable total protein quantification using a reversible protein stain (Pierce Reversible Protein Stain, ThermoFisher Scientiﬁc). Primary antibodies were acquired to detect UBF (F-9, sc-13125, Santa-Cruz Biotechnology) and ribosomal protein S6 (54D2, #2317, Cell signaling technology). After blocking (Tris-buffered saline blocking buffer, 20 mM Tris, 150 mM NaCl, 5% fat-free milk, 0.1% Tween-20), membranes were incubated over-night with primary antibodies diluted in blocking buffer (UBF, 1:200; S6, 1:1000) followed by incubation with a secondary antibody conjugated to horseradish peroxidase (Anti-mouse IgG, #7076, Cell Singlaing Technology, 1:10000). Membranes were washed 6 &#215; 5 min after incubation with primary antibodies and 8 &#215; 5 min after incubation with the secondary antibody. All incubation and washing steps were performed at 4&deg;C using an automatic membrane processor (BlotCycler, Precision Biosystems, Mansﬁeld, MA, USA). Chemiluminescent signals from membranes were detected after 5 min incubation in substrate (Super Signal West Femto Maximum Sensitivity Substrate, ThermoFisher Scientiﬁc) using a documentation system (). Total protein content was quantified whole membrane images defined as the mean gray value of the whole lane. Between-lane gray values were used as background subtracted from protein values. Total protein quantification was done using ImageJ [REF]. Chemiluminescence signals were quantified using Image Studio Lite (LI-COR Biotechnology, Lincoln, NE, USA).
 
-## Immunohistochemistry
 
 ## Statistics and data analysis
 
@@ -227,8 +226,7 @@ load.inr.w3 <- paste0(sprintf("%.0f",load.intervals[3, 2]*100),
 
 ```
 
-
-All participants successfully completed their prescribed sessions. The different training protocols resulted in diverging loading profiles (load &#215; repetitions) over the course of the study (Figure 1B). The intensity of exercise (load at 10RM) increased similarly in both conditions from the first to the second (`r load.inr.w2`) and third (`r load.inr.w3`)  four-session block, respectively. Compared to the non-training control group, isokinetic strength increased to Session 12 in the experimental group, with an attenuated difference seen after de-training (Figure 1C). Average isometric strength showed the same general pattern although with considerable more uncertainty indicated by wider 95% CI (Figure 1C). Muscle thickness of the *m. vastus lateralis* increased in the experimental group compared to the control group both after Session 12 and after eight days of de-training (Figure 1D). There were no indications of differences between training conditions in strength or muscle thickness changes.
+All participants successfully completed their prescribed sessions. The different training protocols resulted in diverging loading profiles (load &#215; repetitions) over the course of the study (Figure 1B). The intensity of exercise (load at 10RM) increased similarly in both conditions from the first to the second (`r load.inr.w2`) and third (`r load.inr.w3`) four-session block, respectively. Isokinetic strength increased to Session 12 in the experimental group compared to the non-training control group, with an attenuated difference seen after de-training (Figure 1C). Average isometric strength showed the same general pattern although with considerable more uncertainty indicated by wider 95% CI (Figure 1C). Muscle thickness of the *m. vastus lateralis* increased in the experimental group compared to the control group both after Session 12 and after eight days of de-training (Figure 1D). There were no indications of differences between training conditions in strength or muscle thickness changes.
 
 ```{r total-rna}
 
@@ -269,18 +267,63 @@ slope8_12 <- paste0(sprintf("%.1f", 100 * (exp(time3.hyp$hypothesis[1,2]) - 1)),
 
 ```
 
-
-Compared to control, a single session of RT led to robust increase in 45S and 47S pre-rRNA (Figure 2B) expressed per unit tissue weight. These were also increased compared to control after twelve sessions together with the 45S ITS and mature rRNA species 28S and 18S. After eight days of rest, only 18S remained elevated above control group (Figure 2B). This general pattern of rRNA expression was reflected also in total RNA expressed per unit tissue weight were a robust increase compared to contral was seen after session twelve (Figure 2B). Within the experimental group, no differences were seen between volume conditions. Most of the increase was seen in after the first four sessions where the average increase was `r slope0_4` per session in the intervention group as a whole. Between session four and eight, and eight to twelve changes in total RNA per tissue weight per session was not different from zero (`r slope4_8` and `r slope8_12`).     
+A single session of RT led to robust increase in 47S and 45S pre-rRNA expressed per unit tissue weight within the training group (Figure 2B) and compared to control (Figure 2C). These were also increased compared to control after twelve sessions together with the 45S ITS and mature rRNA species 28S and 18S (Figure 2C). After eight days of rest, only 18S and 28S remained elevated above levels measured in the control group (Figure 2B). This general pattern of rRNA expression was reflected also in total RNA expressed per unit tissue weight were a robust increase compared to control was seen after session twelve (Figure 2E and F). Within the experimental group, only small differences were seen in rRNA subspecies as 45S ETS was robustly higher after 12 sessions in the variable volume condition after an imbalance between conditions prior to training (Figure 2D). Total RNA increased similarly in both volume conditions throughout the training period (Figure 2G). Most of the increase was seen in after the first four sessions where the average increase was `r slope0_4` per session in the intervention group as a whole. Between session four and eight, and eight to twelve changes in total RNA per tissue weight per session was not robustly different from zero (`r slope4_8` and `r slope8_12`).     
 
 ```{r western-data}
+segmented_protein_results <- readRDS("./data/derivedData/western-analysis/segmented_results.RDS")
+
+
+
+s6_slope0_4 <- paste0(sprintf("%.1f", 100 * (exp(segmented_protein_results[6,4]) - 1)),
+                           "% [",
+                   sprintf("%.1f", 100 * (exp(segmented_protein_results[6,6]) - 1)), 
+                   ", ",
+                   sprintf("%.1f", 100 * (exp(segmented_protein_results[6,7]) - 1)),
+                   "]")
+                      
+s6_slope4_8 <- paste0(sprintf("%.1f", 100 * (exp(segmented_protein_results[7,4]) - 1)),
+                           "% [",
+                   sprintf("%.1f", 100 * (exp(segmented_protein_results[7,6]) - 1)), 
+                   ", ",
+                   sprintf("%.1f", 100 * (exp(segmented_protein_results[7,7]) - 1)),
+                   "]")
+                      
+
+s6_slope8_12 <- paste0(sprintf("%.1f", 100 * (exp(segmented_protein_results[8,4]) - 1)),
+                           "% [",
+                   sprintf("%.1f", 100 * (exp(segmented_protein_results[8,6]) - 1)), 
+                   ", ",
+                   sprintf("%.1f", 100 * (exp(segmented_protein_results[8,7]) - 1)),
+                   "]")
+
+ubf_slope0_4 <- paste0(sprintf("%.1f", 100 * (exp(segmented_protein_results[14,4]) - 1)),
+                           "% [",
+                   sprintf("%.1f", 100 * (exp(segmented_protein_results[14,6]) - 1)), 
+                   ", ",
+                   sprintf("%.1f", 100 * (exp(segmented_protein_results[14,7]) - 1)),
+                   "]")
+                      
+ubf_slope4_8 <- paste0(sprintf("%.1f", 100 * (exp(segmented_protein_results[15,4]) - 1)),
+                           "% [",
+                   sprintf("%.1f", 100 * (exp(segmented_protein_results[15,6]) - 1)), 
+                   ", ",
+                   sprintf("%.1f", 100 * (exp(segmented_protein_results[15,7]) - 1)),
+                   "]")
+                      
+
+ubf_slope8_12 <- paste0(sprintf("%.1f", 100 * (exp(segmented_protein_results[16,4]) - 1)),
+                           "% [",
+                   sprintf("%.1f", 100 * (exp(segmented_protein_results[16,6]) - 1)), 
+                   ", ",
+                   sprintf("%.1f", 100 * (exp(segmented_protein_results[16,7]) - 1)),
+                   "]")
+                      
+
+                    
 
 ```
 
-Protein levels of RPS6 and UBF increased only after twelve sessions in the training group compared to control (Figure 3A) and stayed elevated after eight days of rest. There were no differences between volume-conditions. The average increase in expression levels over twelve sessions were linear in both and estimated to 4 and 8% per session for RPS6 and UBF, respectively. 
-
-Compared to control, a single session of RT led to robust increase in 45S and 47S pre-rRNA (Figure 2B) expressed per unit tissue weight. These were also increased compared to control after twelve sessions together with the 45S ITS and mature rRNA species 28S and 18S. After eight days of rest, only 18S remained elevated above control group  (Figure 2B). This general pattern of rRNA expression was reflected also in total RNA expressed per unit tissue weight were a robust increase compared to contral was seen after session twelve (Figure 2B). Within the experimental group, no differences were seen between volume conditions. Most of the increase was seen in after the first four sessions where the average increase was `r slope0_4` per session in the intervention group as a whole. Between session four and eight, and eight to twelve changes in total RNA per tissue weight per session was not different from zero (`r slope4_8` and `r slope8_12`).     
-
-
+Protein levels of RPS6 and UBF increased only after twelve sessions in the training group compared to control  and stayed elevated after eight days of rest (Figure 3A and B). The average increase in expression levels over twelve sessions near to linear in both and estimated to `r s6_slope0_4`, `r s6_slope4_8` and `r s6_slope8_12` in RPS6, and `r ubf_slope0_4`, `r ubf_slope4_8` and `r ubf_slope8_12` in UBF per session between session 1-4, 4-8 and 8-12, respectively. 
 
 
 

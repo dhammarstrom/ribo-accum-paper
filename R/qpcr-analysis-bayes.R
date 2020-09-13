@@ -67,7 +67,7 @@ nf <- qdat %>% group_by(target) %>%
                              cq < mean(cq, na.rm = TRUE) - 2 * sd(cq, na.rm = TRUE), 
                            "outlier", "in")) %>%
   filter(target == "Lambda KIT") %>%
- filter(outlier == "in") %>% # Removes bad reactions
+ filter(outlier == "in")  # Removes bad reactions
 
 nf <- qdat %>%
   filter(target == "Lambda KIT") %>%
@@ -104,7 +104,7 @@ qdat.rrna  <- qdat %>%
 
 #### rRNA per tissue weight analysis #### 
 
-# THIW IS WHERE IM AT ###############
+
 
 qdat.rrna  <- qdat %>%
   group_by(target) %>%
@@ -126,7 +126,6 @@ qdat.rrna  <- qdat %>%
                        "UBTF F4R4", "UBTF F6R6", 
                        "rpS6 F2R2")) %>%
 
-                       "rRNA47S F1R1",      "rRNA5S F3R3")) %>%
 
   mutate(Ra = -cq * log(eff), # Relative abundance
          counts = as.integer(round(eff ^ (39-cq), 0)), # counts, ref Matz et al.
