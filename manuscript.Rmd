@@ -349,4 +349,4 @@ UBF levels determine rRNA gene activity throgh regulation of chromatin[@RN2556] 
 **Figure 2.**  Total RNA and ribosomal RNA subspecies in response to trainin. Total RNA increased compared to non-training controls to post-training (12 sessions) and tended to normalize after de-training (A). There were no robust differences between different volume conditions in the training group (A). B shows primer locations targeting different ribosomal RNA subspecies. Subsets of ribosomal RNA showed robust increases compared to control 48 h after the first session and other after the training period (C). Error bars shows 95% CI. Asterisk in C indicates robust differences between volume conditions (a 95% CI of pairwise differences not containing 0).    
 
 
-
+**Figure 3.** mRNA (A and B) and protein abundances (C and D) of ribosomal protein S6 and Upstream bindning factor (UBF). mRNA abundaces are expressed per total RNA (round points) or per muscle weight (triangles). Black points and error bars represents statistically robust results (a 95% CI not containing 0). E shows western-blots and total protein stains from a representative participant.   
