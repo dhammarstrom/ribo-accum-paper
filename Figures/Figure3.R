@@ -155,14 +155,112 @@ prot_interaction <- tx_results_western %>%
 
 
 
-
-############## Combine panels  ###################
-
+### mRNA rpS6 and UBF ###########################
 
 
 
-figure3 <- plot_grid(prot_fold_change, prot_interaction, 
-                     ncol = 2, rel_widths = c(0.5, 0.5)) +
+ctrl_vs_int <- readRDS("./data/derivedData/qpcr-analysis-bayes2/qpcr_res_int_con.RDS")
+
+
+mrna_vs_ctrl <- ctrl_vs_int %>%
+  filter(target %in% c("UBTF F4R4", "UBTF F6R6", "rpS6 F2R2")) %>%
+  
+  filter(contrast %in% c("inter:post", "inter:post1w", "inter:S1")) %>%
+  mutate(contrast = gsub("inter:", "", contrast), 
+         contrast = factor(contrast, levels = c("S1", 
+                                                "post", 
+                                                "post1w"), 
+                           labels = c("Session 1", 
+                                      "Post-training", 
+                                      "De-training")), 
+         robust = if_else(lower.CL > 0, "robust", "notrobust"), 
+         target = if_else(target == "rpS6 F2R2", "rpS6 mRNA", 
+                          if_else(target == "UBTF F4R4", "UBF mRNA[1,4]", "UBF mRNA[2,3]")), 
+         estimate = exp(estimate), 
+         lower.CL = exp(lower.CL), 
+         upper.CL = exp(upper.CL)) %>%
+  
+  ggplot(aes(contrast, estimate, shape = model, color = robust)) + 
+  
+  geom_hline(yintercept = 1, lty = 2, color = "gray50") +
+  
+  geom_errorbar(aes(ymin = lower.CL, ymax = upper.CL), 
+                position = position_dodge(width = 0.2), 
+                width = 0) +
+  geom_point(position = position_dodge(width = 0.2))  +
+  
+  scale_color_manual(values = c("gray50", "gray10")) +
+  scale_y_continuous(limits = c(0.5, 3.1), 
+                     breaks = c(1, 2, 3)) +
+  scale_x_discrete(guide = guide_axis(n.dodge=2)) +
+  labs(y = "Fold change compared to Control") +
+  
+  plot_theme() +
+  theme(strip.background = element_rect(color = "white", fill = "white"), 
+        
+        strip.text = element_text(size = 7, hjust = 0),
+        axis.title.x = element_blank(),
+        axis.text.y = element_text(size = 7),
+        legend.position = "none") +
+
+  facet_wrap(~ target, ncol = 1)
+  
+
+  
+  rrna_timecourse <-  readRDS("./data/derivedData/qpcr-analysis-bayes2/time_course_qpcr.RDS")
+
+volume_diff_mrna <-   rrna_timecourse$estimated_diff %>%
+    filter(model == "tissue") %>%
+    
+    filter(target %in% c("UBTF F4R4", "UBTF F6R6", "rpS6 F2R2")) %>%
+
+    
+    mutate( target = if_else(target == "rpS6 F2R2", "rpS6 mRNA", 
+                            if_else(target == "UBTF F4R4", "UBF mRNA[1,4]", "UBF mRNA[2,3]")), 
+           estimate = exp(Mean), 
+           lower.CL = exp(lwr), 
+           upper.CL = exp(upr)) %>%
+    
+    ggplot(aes(time, estimate, color = robust)) + 
+    
+    geom_hline(yintercept = 1, lty = 2, color = "gray50") +
+    
+    geom_errorbar(aes(ymin = lower.CL, ymax = upper.CL), 
+                  width = 0) +
+    geom_point() +
+    labs(y = "Fold difference (Variable/Constant)", 
+         x = "Session") +
+    scale_color_manual(values = c("gray50", "gray10")) +
+    scale_y_continuous(limits = c(0.2, 1.8), 
+                       breaks = c(0.5, 1, 1.5)) +
+  scale_x_discrete(labels = c("0", "1", "4", "5", "8", "9", "12", "\nDe-train")) +
+    
+    plot_theme() +
+    theme(strip.background = element_rect(color = "white", fill = "white"), 
+          
+          strip.text = element_text(size = 7, hjust = 0),
+
+          axis.text.y = element_text(size = 7),
+          legend.position = "none") +
+    facet_wrap(~ target, ncol = 1)
+    
+
+    
+
+  
+  
+  
+  ############## Combine panels  ###################
+
+
+
+
+figure3 <- plot_grid(
+   plot_grid(mrna_vs_ctrl, volume_diff_mrna, ncol = 2),
+    
+  plot_grid(prot_fold_change, prot_interaction, 
+                     ncol = 2, rel_widths = c(0.5, 0.5)), 
+  ncol = 1, rel_heights = c(1, 1)) +
   
   draw_plot_label(label=c("A",  "B"),
                   x =   c(0.02, 0.5), 
@@ -178,7 +276,7 @@ figure3 <- plot_grid(prot_fold_change, prot_interaction,
 # height of figure = full page = 23 cm
 
 
-ggsave("figures/figure3.pdf", plot = figure3, width = 8.9, height = 23 * 0.25, 
+ggsave("figures/figure3.pdf", plot = figure3, width = 8.9, height = 23 * 0.5, 
        dpi = 600,
        units = "cm", device=cairo_pdf)
 

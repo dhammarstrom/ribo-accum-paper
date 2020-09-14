@@ -329,6 +329,15 @@ Protein levels of RPS6 and UBF increased only after twelve sessions in the train
 
 # Discussion
 
+
+UBF levels determine rRNA gene activity throgh regulation of chromatin[@RN2556] <!--  Sanij 2008 -->
+
+
+
+
+
+
+
 # References
 <div id="refs"></div>
 

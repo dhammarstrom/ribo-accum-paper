@@ -272,8 +272,15 @@ rrna_data <- readRDS("./data/derivedData/qpcr-analysis-bayes2/time_course_qpcr.R
 
 
 rrna_timecourse <- rrna_data$estimated_means %>%
-  filter(model == "tissue") %>%
-
+  filter(model == "tissue", 
+         target %in% c("rRNA18S F2R2",
+                       "rRNA5.8S F2R2",
+                       "rRNA28S F2R2",
+                       "rRNA5S F3R3", 
+                       "rRNA45SITS F12R12",
+                       "rRNA45S F5R5",     
+                       "rRNA47S F1R1")) %>%
+  
   mutate(target = factor(target, levels = c("rRNA18S F2R2",
                                             "rRNA5.8S F2R2",
                                             "rRNA28S F2R2",
@@ -340,10 +347,11 @@ for(i in 1:length(targets)) {
     
     scale_color_manual(values = c(color.scale[1], color.scale[2])) +
     
-    scale_y_continuous(limits = c(floor(min(dat$emmean)), ceiling(max(dat$emmean))),
-                       breaks = c(floor(min(dat$emmean)),
-                                  ceiling(max(dat$emmean)) + ((floor(min(dat$emmean)) - ceiling(max(dat$emmean)))/2), 
-                       ceiling(max(dat$emmean)))) +
+    scale_y_continuous(limits = c(floor(min(dat$emmean, na.rm = TRUE)), 
+                                  ceiling(max(dat$emmean, na.rm = TRUE))),
+                       breaks = c(floor(min(dat$emmean, na.rm = TRUE)),
+                                  ceiling(max(dat$emmean, na.rm = TRUE)) + ((floor(min(dat$emmean, na.rm = TRUE)) - ceiling(max(dat$emmean, na.rm = TRUE)))/2), 
+                       ceiling(max(dat$emmean, na.rm = TRUE)))) +
     
     labs(x = "Session", 
          y = "Estimated log-abundance per tissue weight (AU)")  +

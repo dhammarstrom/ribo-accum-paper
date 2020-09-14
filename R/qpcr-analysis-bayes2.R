@@ -39,10 +39,14 @@ library(coda)
 # qdat is the compiled data frame containing sample information and 
 # qpcr estimates. Created in qpcr-compile.R. Use this for downstream analyses
 
-qdat <- readRDS("./data/derivedData/qpcr/qpcr_compiled.RDS")
+qdat <- readRDS("./data/derivedData/qpcr/qpcr_compiled.RDS") %>%
+  # problems with S1/R in P3, remove these for now until diagnosed
+  filter(!(participant == "P3" & leg == "R" &  time == "S1"))
 
 
 
+  
+  
 # Remove bad reactions prior to modeling. 
 
 qdat %>%
@@ -52,9 +56,10 @@ qdat %>%
 qdat %>%
   group_by(target) %>%
   
-  mutate(outlier = if_else(cq > mean(cq, na.rm = TRUE) + 2 * sd(cq, na.rm = TRUE)|
-                             cq < mean(cq, na.rm = TRUE) - 2 * sd(cq, na.rm = TRUE), 
+  mutate(outlier = if_else(cq > mean(cq, na.rm = TRUE) + 2.5 * sd(cq, na.rm = TRUE)|
+                             cq < mean(cq, na.rm = TRUE) - 2.5 * sd(cq, na.rm = TRUE), 
                            "outlier", "in")) %>%
+
   
   ggplot(aes(paste(participant, leg, time), cq, 
              color = target, 
@@ -69,8 +74,8 @@ qdat %>%
 
 
 nf <- qdat %>% group_by(target) %>%
-  mutate(outlier = if_else(cq > mean(cq, na.rm = TRUE) + 2 * sd(cq, na.rm = TRUE)|
-                             cq < mean(cq, na.rm = TRUE) - 2 * sd(cq, na.rm = TRUE), 
+  mutate(outlier = if_else(cq > mean(cq, na.rm = TRUE) + 2.5 * sd(cq, na.rm = TRUE)|
+                             cq < mean(cq, na.rm = TRUE) - 2.5 * sd(cq, na.rm = TRUE), 
                            "outlier", "in")) %>%
   filter(target == "Lambda KIT") %>%
   filter(outlier == "in") %>% # Removes bad reactions
@@ -99,8 +104,8 @@ nf <- qdat %>% group_by(target) %>%
 
 qdat.rrna  <- qdat %>%
   group_by(target) %>%
-  mutate(outlier = if_else(cq > mean(cq, na.rm = TRUE) + 2 * sd(cq, na.rm = TRUE)|
-                             cq < mean(cq, na.rm = TRUE) - 2 * sd(cq, na.rm = TRUE), 
+  mutate(outlier = if_else(cq > mean(cq, na.rm = TRUE) + 2.5 * sd(cq, na.rm = TRUE)|
+                             cq < mean(cq, na.rm = TRUE) - 2.5 * sd(cq, na.rm = TRUE), 
                            "outlier", "in")) %>%
   filter(outlier == "in") %>%
   
@@ -591,18 +596,6 @@ stopCluster(cl)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 # Combine all chains for diagnostics
 
 m3 <- lapply(model3, function(m) m$Sol)
@@ -633,7 +626,7 @@ reg_cof <- rbind(cbind(summary(m4)$statistics, summary(m4)$quantiles[,c(1,5)]) %
    cbind(summary(m3)$statistics, summary(m3)$quantiles[,c(1,5)]) %>%
      data.frame() %>%
      mutate(coef = rownames(.), 
-            model = "tot_rna"), 
+            model = "total_rna"), 
    cbind(summary(m5)$statistics, summary(m5)$quantiles[,c(1,5)]) %>%
      data.frame() %>%
      mutate(coef = rownames(.), 
@@ -654,6 +647,9 @@ interaction_rrna <- reg_cof %>%
                        "rRNA5.8S F2R2", 
                        "rRNA28S F2R2", 
                        "rRNA5S F3R3",
+                       "UBTF F6R6", 
+                       "UBTF F4R4", 
+                       "rpS6 F2R2",
                        "pre", "mature")) %>%
 
   mutate(time = gsub("time", "", time), 
@@ -669,7 +665,7 @@ interaction_rrna <- reg_cof %>%
   
   
   filter(cond == "condvar", 
-         model %in% c("tissue", "combine_rrna"))%>%
+         model %in% c("tissue", "combine_rrna", "total_rna"))%>%
   print()
   
 
@@ -694,7 +690,7 @@ estimated_means_rrna <- rbind(emmeans(model3[[2]], specs = ~ time * cond|target,
                                         "S9", 
                                         "S12", 
                                         "post1w"))) %>%
-  filter(model %in% c("tissue","combine_rrna"),  
+  filter(model %in% c("tissue","combine_rrna", "total_rna"),  
          target %in% c("rRNA47S F1R1",
                        "rRNA45S F5R5",
                        "rRNA45SITS F12R12",
@@ -702,6 +698,9 @@ estimated_means_rrna <- rbind(emmeans(model3[[2]], specs = ~ time * cond|target,
                        "rRNA5.8S F2R2", 
                        "rRNA28S F2R2",
                        "rRNA5S F3R3",
+                       "UBTF F6R6", 
+                       "UBTF F4R4", 
+                       "rpS6 F2R2",
                        "pre", 
                        "mature")) %>%
   print()
@@ -716,6 +715,24 @@ rrna_timecourse <- list(estimated_means = estimated_means_rrna,
 
 
 saveRDS(rrna_timecourse, "./data/derivedData/qpcr-analysis-bayes2/time_course_qpcr.RDS")
+
+
+qdat_int %>%
+  filter(time == "S1") %>%
+  ggplot(aes(technical, cq, color = target)) + geom_point()
+  print()
+
+
+  qdat_int %>%
+    filter(time == "S1") %>%
+    filter(!is.na(cq)) %>%
+    group_by(technical) %>%
+    summarise(n = n()) %>%
+    arrange(n)
+    
+    
+    
+
 
 
 
