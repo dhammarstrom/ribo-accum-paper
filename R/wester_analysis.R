@@ -61,6 +61,7 @@ ubf.m1 <- brm(bf(log.expr ~ tx + (1|participant)),
 
 
 
+
 # Save model 
 saveRDS(s6.m1, "./data/derivedData/western-analysis/s6_tx_m1.RDS")
 saveRDS(ubf.m1, "./data/derivedData/western-analysis/ubf_tx_m1.RDS")
@@ -222,5 +223,70 @@ segmented_protein_results <- cbind(data.frame(target = rep(c("rpS6", "UBF"), eac
 
 ### Save compiled results 
 saveRDS(segmented_protein_results, "./data/derivedData/western-analysis/segmented_results.RDS")
+
+################ De-training model comparing cond and var ################
+
+
+# A de-training model is used to estimate differences between 
+# volume conditions 
+
+west_detrain <- western_data %>%
+  filter(cond != "ctrl_leg", 
+         time %in% c("S12", "post1w")) %>%
+  mutate(participant = factor(participant), 
+         cond = factor(cond), 
+         target = factor(target),
+         time = factor(time, levels = c("S12", "post1w"))) %>%
+  
+  group_by(target, participant, cond, time) %>%
+  summarise(expression = mean(expression)) %>%
+  mutate(log.expr = log(expression)) %>%
+  filter(!is.na(expression)) %>%
+  
+  print()
+
+
+s6.m3 <- brm(bf(log.expr ~ time * cond + (1|participant)),
+             
+             warmup = 2000, # number of samples before sampling
+             iter = 10000,  # number of mcmc iterations 
+             cores = 4, # number of cores used in sampling
+             chains = 4, # number of chains
+             seed = 5, # seed for reproducible results
+             thin = 10,
+             control = list(adapt_delta = 0.95), 
+             data = west_detrain[west_detrain$target == "t-s6",])
+
+
+ubf.m3 <- brm(bf(log.expr ~ time * cond + (1|participant)),
+              
+              warmup = 2000, # number of samples before sampling
+              iter = 10000,  # number of mcmc iterations 
+              cores = 4, # number of cores used in sampling
+              chains = 4, # number of chains
+              seed = 5, # seed for reproducible results
+              thin = 10,
+              control = list(adapt_delta = 0.95), 
+              data = west_detrain[west_detrain$target == "t-UBF",])
+
+
+
+pp_check(ubf.m3, type = "ecdf_overlay")
+pp_check(s6.m3, type = "ecdf_overlay")
+
+
+# Save models
+
+saveRDS(s6.m3, "./data/derivedData/western-analysis/s6_detrain.RDS")
+saveRDS(ubf.m3, "./data/derivedData/western-analysis/ubf_detrain.RDS")
+
+
+
+
+summary(ubf.m3)
+
+
+
+
 
 

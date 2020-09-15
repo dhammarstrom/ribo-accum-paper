@@ -82,10 +82,11 @@ western_data <- rbind(western_data_round1, western_data_round2) %>%
   mutate(tp.factor = tp.factor / max(tp.factor, na.rm = TRUE), 
          signal = signal / max(signal, na.rm = TRUE)) %>%
   ungroup() %>%
-  mutate(expression = signal / tp.factor) %>%
-  dplyr::select(participant,sample, leg, cond, time, gel, target, expression) %>%
+  mutate(expression = signal / tp.factor ) %>%
+  group_by(gel, target) %>%
+  mutate(expression.sd = (expression - mean(expression))/sd(expression)) %>%
+  dplyr::select(participant,sample, leg, cond, time, gel, target, expression, expression.scaled = expression.sd) %>%
   print()
-
 
 
 
