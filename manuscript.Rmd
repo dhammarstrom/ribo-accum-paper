@@ -238,6 +238,10 @@ All participants successfully completed their prescribed sessions. The different
 # Read the segmented model 
 tc.m2 <- readRDS("./data/derivedData/total-rna-analysis/tc.m2.RDS")
 
+summary(tc.m2)
+
+
+
 time1.hyp <- hypothesis(tc.m2, "time1 = 0")
 time2.hyp <- hypothesis(tc.m2, c("time2 + time1 = 0")) # The slope (on log scale) between session 4 and 8
 time3.hyp <- hypothesis(tc.m2, c("time2 + time1 +time3 = 0")) # The slope on log scale between session 8 and 12
@@ -265,13 +269,23 @@ slope8_12 <- paste0(sprintf("%.1f", 100 * (exp(time3.hyp$hypothesis[1,2]) - 1)),
                    "]")
                       
 
+## Effect of detraining 
 
+detrain.hyp <- hypothesis(tc.m2, "detraindetrain = 0")
+
+detrain_rna <- paste0(sprintf("%.1f", 100 * (exp(detrain.hyp$hypothesis[1,2]) - 1)),
+                           "%, [",
+                      sprintf("%.1f", 100 * (exp(detrain.hyp$hypothesis[1,4]) - 1)), 
+                   ", ",
+                       sprintf("%.1f", 100 * (exp(detrain.hyp$hypothesis[1,5]) - 1)),
+                   "]")
+                      
 
 
 
 ```
 
-A single session of RT led to robust increase in 47S and 45S pre-rRNA expressed per unit tissue weight within the training group (Figure 2B) and compared to control (Figure 2C). These were also increased compared to control after twelve sessions together with the 45S ITS and mature rRNA species 28S and 18S (Figure 2C). After eight days of rest, only 18S and 28S remained elevated above levels measured in the control group (Figure 2B). This general pattern of rRNA expression was reflected also in total RNA expressed per unit tissue weight were a robust increase compared to control was seen after session twelve (Figure 2E and F). Within the experimental group, only small differences were seen in rRNA subspecies as 45S ETS was robustly higher after 12 sessions in the variable volume condition after an imbalance between conditions prior to training (Figure 2D). Total RNA increased similarly in both volume conditions throughout the training period (Figure 2G). Most of the increase was seen in after the first four sessions where the average increase was `r slope0_4` per session in the intervention group as a whole. Between session four and eight, and eight to twelve changes in total RNA per tissue weight per session was not robustly different from zero (`r slope4_8` and `r slope8_12`).     
+A single session of RT led to robust increase in 47S and 45S pre-rRNA expressed per unit tissue weight within the training group (Figure 2B) and compared to control (Figure 2C). These were also increased compared to control after twelve sessions together with the 45S ITS and mature rRNA species 28S and 18S (Figure 2C). After eight days of rest, only 18S and 28S remained elevated above levels measured in the control group (Figure 2B). This general pattern of rRNA expression was reflected also in total RNA expressed per unit tissue weight were a robust increase compared to control was seen after session twelve (Figure 2E and F). Within the experimental group, only small differences were seen in rRNA subspecies as 45S ETS was robustly higher after 12 sessions in the variable volume condition after an imbalance between conditions prior to training (Figure 2D). Total RNA increased similarly in both volume conditions throughout the training period (Figure 2G). Most of the increase was seen in after the first four sessions where the average increase was `r slope0_4` per session in the intervention group as a whole. Between session four and eight, and eight to twelve changes in total RNA per tissue weight per session was not robustly different from zero (`r slope4_8` and `r slope8_12`). After the de-training period Total-RNA decreased by `r detrain_rna` from levels measured after Session 12.     
 
 ```{r western-data}
 segmented_protein_results <- readRDS("./data/derivedData/western-analysis/segmented_results.RDS")
@@ -323,11 +337,80 @@ ubf_slope8_12 <- paste0(sprintf("%.1f", 100 * (exp(segmented_protein_results[16,
                    "]")
                       
 
-                    
+     
+
+s6.m3 <- readRDS("./data/derivedData/western-analysis/s6_detrain.RDS")
+ubf.m3 <- readRDS("./data/derivedData/western-analysis/ubf_detrain.RDS")
+
+
+
+ubf.sum <- summary(ubf.m3)$fixed
+
+
+var_s12 <- paste0(sprintf("%.1f", 100 * (exp(ubf.sum[3,1]) - 1)),
+                           "% [",
+                   sprintf("%.1f", 100 * (exp(ubf.sum[3,3]) - 1)), 
+                   ", ",
+                   sprintf("%.1f", 100 * (exp(ubf.sum[3,4]) - 1)),
+                   "]")
+
+const_detrain <- paste0(sprintf("%.1f", 100 * (exp(ubf.sum[2,1]) - 1)),
+                           "% [",
+                   sprintf("%.1f", 100 * (exp(ubf.sum[2,3]) - 1)), 
+                   ", ",
+                   sprintf("%.1f", 100 * (exp(ubf.sum[2,4]) - 1)),
+                   "]")
+
+var_const_interaction <- paste0(sprintf("%.1f", 100 * (exp(ubf.sum[4,1]) - 1)),
+                           "% [",
+                   sprintf("%.1f", 100 * (exp(ubf.sum[4,3]) - 1)), 
+                   ", ",
+                   sprintf("%.1f", 100 * (exp(ubf.sum[4,4]) - 1)),
+                   "]")
+
+h <- hypothesis(ubf.m3, "condvar + timepost1w:condvar = 0")$hypothesis %>%
+  data.frame()
+
+var_change <- paste0(sprintf("%.1f", 100 * (exp(h[1,2]) - 1)),
+                           "% [",
+                   sprintf("%.1f", 100 * (exp(h[1,4]) - 1)), 
+                   ", ",
+                   sprintf("%.1f", 100 * (exp(h[1,5]) - 1)),
+                   "]")
+
 
 ```
 
-Protein levels of RPS6 and UBF increased only after twelve sessions in the training group compared to control  and stayed elevated after eight days of rest (Figure 3A and B). The average increase in expression levels over twelve sessions near to linear in both and estimated to `r s6_slope0_4`, `r s6_slope4_8` and `r s6_slope8_12` in RPS6, and `r ubf_slope0_4`, `r ubf_slope4_8` and `r ubf_slope8_12` in UBF per session between session 1-4, 4-8 and 8-12, respectively. 
+Protein levels of RPS6 and UBF increased only after twelve sessions in the training group compared to control and stayed elevated after eight days of rest (Figure 3A and B). The average increase in protein levels over twelve sessions was near linear in both targets and estimated to `r s6_slope0_4`, `r s6_slope4_8` and `r s6_slope8_12` in RPS6, and `r ubf_slope0_4`, `r ubf_slope4_8` and `r ubf_slope8_12` in UBF per session between session 1-4, 4-8 and 8-12, respectively. Slopes did not differ between volume-conditions but there was a tendency towards lower levels of UBF in the variable condition at session 12 (`r var_s12`). After the de-training period the constant volume condition tended to show decreased levels of UBF (`r const_detrain`) while the variable volume condition remaind at a similar level compare to session 12 (`r var_change`; interaction effect: `r var_const_interaction`). Levels of rpS6 did not change in the de-training period and were similar between volume conditions.    
+
+```{r combined-analysis}
+
+# Save model 
+comb.m1 <- summary(readRDS("./data/derivedData/ubf-tot-rna-model/comb_m1.RDS"))$fixed
+
+
+
+
+ubf_cor_tot_rna <- paste0(sprintf("%.1f", 100 * (exp(comb.m1[2,1]) - 1)),
+                           "% [",
+                   sprintf("%.1f", 100 * (exp(comb.m1[2,3]) - 1)), 
+                   ", ",
+                   sprintf("%.1f", 100 * (exp(comb.m1[2,4]) - 1)),
+                   "]")
+
+
+
+```
+
+UBF levels robustly predicted total RNA values with a 1 standard deviation change in UBF levels increasing Total RNA by `r ubf_cor_tot_rna` (Table X). 
+
+```{r predict-muscle-growth}
+
+
+
+
+```
+
 
 
 

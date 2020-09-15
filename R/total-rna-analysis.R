@@ -170,7 +170,8 @@ saveRDS(comp_rna, "./data/derivedData/total-rna-analysis/comp_rna_freq.RDS")
   
 time_course <- rna_complete %>%
   filter(cond != "ctrl_leg") %>%
-  filter(time != "post1w") %>%
+  
+  
   
   group_by(participant,leg, time,time.c, cond, ) %>%
   summarise(rna = mean(rna, na.rm = TRUE), 
@@ -180,12 +181,15 @@ time_course <- rna_complete %>%
          cond = factor(cond), 
          rna.tissue = rna/tissue_weight, 
          tw = tissue_weight - mean(tissue_weight), 
-         time.c.cent = time.c - 4) %>%
+         time.c.cent = time.c - 4, 
+         detrain = factor(if_else(time == "post1w", "detrain", "train"), 
+                          levels = c("train", "detrain"))) %>%
   # Create dummy variables for segmented model 
   
   mutate(time1 = time.c,
          time2 = if_else(time %in% c("S0", "S1", "S4"), 0, time.c - 4),
-         time3 = if_else(time %in% c("S0", "S1", "S4", "S5", "S8"), 0, time.c - 8)) 
+         time3 = if_else(time %in% c("S0", "S1", "S4", "S5", "S8"), 0, time.c - 8))  %>%
+  print()
   
   
   
@@ -212,7 +216,7 @@ tc.m1 <- brm(bf(log(rna.tissue) ~ cond  + s(time.c, by = cond, k = 7) + (1|parti
 pp_check(tc.m1, type = "ecdf_overlay")
 summary(tc.m1)
 
-tc.m2 <- brm(bf(log(rna.tissue) ~ (time1 + time2 + time3) + (1|participant)), 
+tc.m2 <- brm(bf(log(rna.tissue) ~ (time1 + time2 + time3) + detrain + (1|participant)), 
              data = time_course, 
              warmup = 1000, # number of samples before sampling
              iter = 4000,  # number of mcmc iterations 
