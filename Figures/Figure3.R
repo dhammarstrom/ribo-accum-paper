@@ -178,9 +178,11 @@ mrna_vs_ctrl <- ctrl_vs_int %>%
                           if_else(target == "UBTF F4R4", "UBF mRNA[1,4]", "UBF mRNA[2,3]")), 
          estimate = exp(estimate), 
          lower.CL = exp(lower.CL), 
-         upper.CL = exp(upper.CL)) %>%
+         upper.CL = exp(upper.CL), 
+         Normalization = if_else(model == "total_rna", "Total RNA", "Muscle weight"), 
+         Normalization = factor(Normalization, levels = c("Total RNA", "Muscle weight"))) %>%
   
-  ggplot(aes(contrast, estimate, shape = model, color = robust)) + 
+  ggplot(aes(contrast, estimate, shape = Normalization, color = robust)) + 
   
   geom_hline(yintercept = 1, lty = 2, color = "gray50") +
   
@@ -189,7 +191,7 @@ mrna_vs_ctrl <- ctrl_vs_int %>%
                 width = 0) +
   geom_point(position = position_dodge(width = 0.2))  +
   
-  scale_color_manual(values = c("gray50", "gray10")) +
+  scale_color_manual(values = c("gray50", "gray10"), guide = "none") +
   scale_y_continuous(limits = c(0.5, 3.1), 
                      breaks = c(1, 2, 3)) +
   scale_x_discrete(guide = guide_axis(n.dodge=2)) +
@@ -201,7 +203,13 @@ mrna_vs_ctrl <- ctrl_vs_int %>%
         strip.text = element_text(size = 7, hjust = 0),
         axis.title.x = element_blank(),
         axis.text.y = element_text(size = 7),
-        legend.position = "none") +
+        legend.position = "none",
+       # legend.text = element_text(size = 7, margin = margin(t = 0.1, b= 0.1,r = 0.1,l = 0.1, unit = "pt")),
+       # legend.key.size = unit(0, "cm"),
+       # legend.margin = margin(-0.5, 0, -0.5, 0, "cm"),
+       # legend.spacing.x = unit(0.1, 'cm'),
+       # legend.direction = "vertical"
+       ) +
 
   facet_wrap(~ target, ncol = 1)
   
@@ -245,8 +253,9 @@ volume_diff_mrna <-   rrna_timecourse$estimated_diff %>%
     facet_wrap(~ target, ncol = 1)
     
 
+## Import representative plot  
     
-
+reps_west <-  ggdraw() + draw_image("./data/wetlab/western/representative_img/round2_gel4_annotated.png") 
   
   
   
@@ -260,11 +269,14 @@ figure3 <- plot_grid(
     
   plot_grid(prot_fold_change, prot_interaction, 
                      ncol = 2, rel_widths = c(0.5, 0.5)), 
-  ncol = 1, rel_heights = c(1, 1)) +
+  reps_west,
+  ncol = 1, rel_heights = c(0.75/2, 0.75/2, 0.25)) +
   
-  draw_plot_label(label=c("A",  "B"),
-                  x =   c(0.02, 0.5), 
-                  y =   c(0.96, 0.96),
+
+  
+  draw_plot_label(label=c("A",  "B", "C", "D", "E"),
+                  x =   c(0.02, 0.51, 0.02, 0.51, 0.02), 
+                  y =   c(0.98, 0.98, 0.6, 0.6, 0.25),
                   hjust=.5, vjust=.5, size = label.size)
 
 
@@ -276,7 +288,7 @@ figure3 <- plot_grid(
 # height of figure = full page = 23 cm
 
 
-ggsave("figures/figure3.pdf", plot = figure3, width = 8.9, height = 23 * 0.5, 
+ggsave("figures/figure3.pdf", plot = figure3, width = 8.9, height = 23 * 0.75, 
        dpi = 600,
        units = "cm", device=cairo_pdf)
 
