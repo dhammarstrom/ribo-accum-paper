@@ -1,6 +1,6 @@
 ---
 title: "Ribosome accumulation during early phase resistance training"
-author: Daniel Hammarström^1,2,£^&ast;,Sjur Øfsteng^2,£^, Bent R. Rønnestad^2^, Stian Ellefsen^1,3^
+author: Daniel Hammarström^1,2,£^&ast;,Sjur J. Øfsteng^2,£^, Bent R. Rønnestad^2^, Stian Ellefsen^1,3^
 date: ""
 header-includes:
   - \usepackage{wasysym}
@@ -122,8 +122,12 @@ Prior to all RT-sessions, participants performed a standardized warm-up consisti
 ## Muscle strength, body composition and muscle thickness assessments
 Muscle strength was assessed as maximal voluntary isokinetic (90&deg; sec<sup>-1</sup>) and isometric (60&deg; angle, fully extended leg 0&deg;) knee extension torque. After a brief warm-up (5-min cycling, RPE 12-14), participants were seated and secured in the individually adjusted dynamometer. Participants were instructed to gradually increase their effort during three warm-up repetitions (50, 60 and, 70% of subjective maximal effort). After a 30-sec restitution period participants were instructed to perform three repetitions with maximal effort in the concentric phase. Sixty seconds after the isokinetic test the lever automatically moved to a 60&deg; angle and participants were instructed to push against the lever enough to see feedback from the visual feedback system. After an additional 15-sec restitution period, participants were instructed to push against the lever with maximal effort. During the same assessment session, participants remained seated in the dynamometer for meassurement from both legs. The first measurement was alternated between legs and sessions. For statistical treatment of the data, all successful attempts were used. Successful attempts were decided based on participants (...). The last strength assessment at baseline was performed at least **seven** days prior to the first biopsy sampling. At least one strength was performed on separate days with two sessions allowed perform on the same day with a short rest between sessions. Post training assessments were performed approximately 48 hours after the last session and after seven days of no training.
 
-Muscle thickness was assessed using (...) ultra sound. DXA.
+For determination of body composition participants were scanned using DXA Lunar Prodigy densitometer (GE Healthcare, Madison, WI, USA) with the standard scanning mode (13-25 cm). Participants were lying supine within the scanning bed reference lines, with a strap secured around the ankles to ensure standardised body position in each of the scans. The scans were conducted with the participants in a fasted state, with empty bladder, wearing under-wear only, between 07.00-10.00 AM. Prior to each scanning a phantom scanning was run to prevent baseline drifting from affecting analyses. The same technician was used at each time point. Analyses was performed using GE enCORE version 17.0 software (GE Healthcare). Region of interest was customized for covering upper thigh, marked with a sqaure from pubic symphysis to lateral part of tuberculum major, and distal to art. genu.
 
+Muscle thickness (MT) was measured using a B-mode ultra sound unit (SmartUS EXT-1M, Telemed, Vilnius, Lithuania). The participant lay supine in a relaxed position for 20 min before scan, with their feet strapped to a standardized box (15x15cm). A mark was set on the line 60% of the distance between Spinia Iliac Anterior Superior and the lateral femur condyle. MT of *m.vastus lateralis* was measured applying a water-soluble transmission gel (Aquasonic 100 Ultrasound Transmission Gel; Parker Laboratories Inc., Fairfield, NJ, USA), and a 39 mm 12 MHz ultrasound probe was placed perpendicular to the site of interest without depressing the skin. When the quality of the image was satisfactory, evident as distinct upper and lower muscle fascia, three images were captured, where the probe was relocated to the same position between each image. Position of the probe was marked on the skin and subsequently marked on a transparent paper to ensure similar probe placement for both the right and left *m.vastus lateralis* at the subsequent assessments. Analyses were done in Jamovi (REF). Pictures were cropped and coded for blinding of the assessor. The average MT of the three images at each assesment was used for further analyses.
+
+<!--Schindelin J, Arganda-Carreras I, Frise E, et al. Fiji: an open-source platform for biological-image analysis. Nat
+1222 Methods. 2012;28(9(7)):676-682-->
 
 ## Muscle biopsy sampling 
 Muscle specimens were sampled bilaterally from *m. vastus laterlis* under local anesthesia (lidocaion %, Manufacturer, Oslo, Norway) using a disposable needle (12-14 gauge, Universal plus, Medax, Italy), operated with a spring loaded device (Bard Magnum). Two to four passes were made to get sufficient material. One to two aliquots of the samples were quickly dissected free from connective and fat tissue, weighed and frozen in isopentan chilled to -80&deg;C and stored at -80&deg;C until further processing. At baseline, after twelve weeks of training and, after the de-training period, a further aliquot from each sample was selected for immunohistochemistry analysis and subsequently immersed in 4% formalin for fixation.        
@@ -332,6 +336,9 @@ Protein levels of RPS6 and UBF increased only after twelve sessions in the train
 
 UBF levels determine rRNA gene activity throgh regulation of chromatin[@RN2556] <!--  Sanij 2008 -->
 
+
+Per total RNA 
+Per muscle tissue
 
 
 
