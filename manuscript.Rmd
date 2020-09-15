@@ -420,6 +420,22 @@ UBF levels robustly predicted total RNA values with a 1 standard deviation chang
 UBF levels determine rRNA gene activity throgh regulation of chromatin[@RN2556] <!--  Sanij 2008 -->
 
 
+Time course data 
+UBF and S6 protein levels may be differently regulated in men and rats as more consecutive bouts of electrical stimulation in rats does not prtoduce the same pattern seen in our study 
+<!-- Kotani 2019 10.1152/japplphysiol.00665.2018 increase in t UBF at 6 h post ex but not 48 despite 2 weeks training (3 x week). S6 increase at 48 h and 6 bouts but return to sed values at 18 bouts. 18 and 28 S increased over sed at 48 h post ex with no further increase beyond 3 bouts 45S maximal at three bouts -->
+
+<!-- Goodman 2011 UBF increase due to synergist ablation is rapamycin insensitive https://doi.org/10.1113/jphysiol.2011.218255 --> 
+
+<!-- Contrfary to goodman Nader found rapamycin sensitivity in UBF increase 10.1152/ajpcell.00165.2005--> 
+
+<!-- Hannan 1996 10.1074/jbc.271.6.3213 increased rRNA transcription is associated with increased levels of UBF mRNA and protein in cardiomyocutes -->
+
+<!-- In cell lines UBF is proportional to the rat e of rDNA transcription ref 25/26 in Hannan--> 
+
+<!-- phospho of UBF shows it has a role in recruioting SL1 to the promotot  10.1152/ajpcell.00176.2006 -->
+
+
+
 Per total RNA 
 Per muscle tissue
 
