@@ -230,62 +230,7 @@ load.inr.w3 <- paste0(sprintf("%.0f",load.intervals[3, 2]*100),
 
 ```
 
-All participants successfully completed their prescribed sessions. The different training protocols resulted in diverging loading profiles (load &#215; repetitions) over the course of the study (Figure 1B). The intensity of exercise (load at 10RM) increased similarly in both conditions from the first to the second (`r load.inr.w2`) and third (`r load.inr.w3`) four-session block, respectively. Isokinetic strength increased to Session 12 in the experimental group compared to the non-training control group, with an attenuated difference seen after de-training (Figure 1C). Average isometric strength showed the same general pattern although with considerable more uncertainty indicated by wider 95% CI (Figure 1C). Muscle thickness of the *m. vastus lateralis* increased in the experimental group compared to the control group both after Session 12 and after eight days of de-training (Figure 1D). There were no indications of differences between training conditions in strength or muscle thickness changes.
-
-```{r total-rna}
-
-# Segmented model analysis in text 
-# Read the segmented model 
-tc.m2 <- readRDS("./data/derivedData/total-rna-analysis/tc.m2.RDS")
-
-summary(tc.m2)
-
-
-
-time1.hyp <- hypothesis(tc.m2, "time1 = 0")
-time2.hyp <- hypothesis(tc.m2, c("time2 + time1 = 0")) # The slope (on log scale) between session 4 and 8
-time3.hyp <- hypothesis(tc.m2, c("time2 + time1 +time3 = 0")) # The slope on log scale between session 8 and 12
-
-slope0_4 <- paste0(sprintf("%.1f", 100 * (exp(time1.hyp$hypothesis[1,2]) - 1)),
-                           "%, 95% CI: [",
-                   sprintf("%.1f", 100 * (exp(time1.hyp$hypothesis[1,4]) - 1)), 
-                   ", ",
-                   sprintf("%.1f", 100 * (exp(time1.hyp$hypothesis[1,5]) - 1)),
-                   "]")
-                      
-slope4_8 <- paste0(sprintf("%.1f", 100 * (exp(time2.hyp$hypothesis[1,2]) - 1)),
-                           "%, [",
-                   sprintf("%.1f", 100 * (exp(time2.hyp$hypothesis[1,4]) - 1)), 
-                   ", ",
-                   sprintf("%.1f", 100 * (exp(time2.hyp$hypothesis[1,5]) - 1)),
-                   "]")
-                      
-
-slope8_12 <- paste0(sprintf("%.1f", 100 * (exp(time3.hyp$hypothesis[1,2]) - 1)),
-                           "%, [",
-                   sprintf("%.1f", 100 * (exp(time3.hyp$hypothesis[1,4]) - 1)), 
-                   ", ",
-                   sprintf("%.1f", 100 * (exp(time3.hyp$hypothesis[1,5]) - 1)),
-                   "]")
-                      
-
-## Effect of detraining 
-
-detrain.hyp <- hypothesis(tc.m2, "detraindetrain = 0")
-
-detrain_rna <- paste0(sprintf("%.1f", 100 * (exp(detrain.hyp$hypothesis[1,2]) - 1)),
-                           "%, [",
-                      sprintf("%.1f", 100 * (exp(detrain.hyp$hypothesis[1,4]) - 1)), 
-                   ", ",
-                       sprintf("%.1f", 100 * (exp(detrain.hyp$hypothesis[1,5]) - 1)),
-                   "]")
-                      
-
-
-
-```
-
-A single session of RT led to robust increase in 47S and 45S pre-rRNA expressed per unit tissue weight within the training group (Figure 2B) and compared to control (Figure 2C). These were also increased compared to control after twelve sessions together with the 45S ITS and mature rRNA species 28S and 18S (Figure 2C). After eight days of rest, only 18S and 28S remained elevated above levels measured in the control group (Figure 2B). This general pattern of rRNA expression was reflected also in total RNA expressed per unit tissue weight were a robust increase compared to control was seen after session twelve (Figure 2E and F). Within the experimental group, only small differences were seen in rRNA subspecies as 45S ETS was robustly higher after 12 sessions in the variable volume condition after an imbalance between conditions prior to training (Figure 2D). Total RNA increased similarly in both volume conditions throughout the training period (Figure 2G). Most of the increase was seen in after the first four sessions where the average increase was `r slope0_4` per session in the intervention group as a whole. Between session four and eight, and eight to twelve changes in total RNA per tissue weight per session was not robustly different from zero (`r slope4_8` and `r slope8_12`). After the de-training period Total-RNA decreased by `r detrain_rna` from levels measured after Session 12.     
+All participants successfully completed their prescribed sessions. Different volume conditions resulted in diverging loading profiles (load &#215; repetitions) over the course of the study (Figure 1B). The intensity of exercise (load at 10RM) increased similarly in both conditions from the first to the second (`r load.inr.w2`) and third (`r load.inr.w3`) four-session block, respectively. Isokinetic strength increased to Session 12 in the experimental group compared to the non-training control group, with an attenuated difference seen after de-training (Figure 1C). Average isometric strength showed the same general pattern although with considerable more uncertainty indicated by wider 95% CI (Figure 1C). Muscle thickness of the *m. vastus lateralis* increased in the experimental group compared to the control group both after Session 12 and after eight days of de-training (Figure 1D). There were no indications of differences between training conditions in strength or muscle thickness changes.
 
 ```{r western-data}
 segmented_protein_results <- readRDS("./data/derivedData/western-analysis/segmented_results.RDS")
@@ -381,7 +326,63 @@ var_change <- paste0(sprintf("%.1f", 100 * (exp(h[1,2]) - 1)),
 
 ```
 
-Protein levels of RPS6 and UBF increased only after twelve sessions in the training group compared to control and stayed elevated after eight days of rest (Figure 3A and B). The average increase in protein levels over twelve sessions was near linear in both targets and estimated to `r s6_slope0_4`, `r s6_slope4_8` and `r s6_slope8_12` in RPS6, and `r ubf_slope0_4`, `r ubf_slope4_8` and `r ubf_slope8_12` in UBF per session between session 1-4, 4-8 and 8-12, respectively. Slopes did not differ between volume-conditions but there was a tendency towards lower levels of UBF in the variable condition at session 12 (`r var_s12`). After the de-training period the constant volume condition tended to show decreased levels of UBF (`r const_detrain`) while the variable volume condition remaind at a similar level compare to session 12 (`r var_change`; interaction effect: `r var_const_interaction`). Levels of rpS6 did not change in the de-training period and were similar between volume conditions.    
+Protein levels of RPS6 and UBF increased only after twelve sessions in the training group compared to control and stayed elevated after eight days of rest (Figure 2A and B). The average increase in protein levels over twelve sessions was near linear in both targets and estimated to `r s6_slope0_4`, `r s6_slope4_8` and `r s6_slope8_12` in RPS6, and `r ubf_slope0_4`, `r ubf_slope4_8` and `r ubf_slope8_12` in UBF per session between session 1-4, 4-8 and 8-12, respectively. Slopes did not differ between volume-conditions but there was a tendency towards lower levels of UBF in the variable condition at session 12 (`r var_s12`). After the de-training period the constant volume condition tended to show decreased levels of UBF (`r const_detrain`) while the variable volume condition remained at a similar level compare to session 12 (`r var_change`; interaction effect: `r var_const_interaction`). Levels of rpS6 did not change in the de-training period and were similar between volume conditions.    
+
+
+```{r total-rna}
+
+# Segmented model analysis in text 
+# Read the segmented model 
+tc.m2 <- readRDS("./data/derivedData/total-rna-analysis/tc.m2.RDS")
+
+summary(tc.m2)
+
+
+
+time1.hyp <- hypothesis(tc.m2, "time1 = 0")
+time2.hyp <- hypothesis(tc.m2, c("time2 + time1 = 0")) # The slope (on log scale) between session 4 and 8
+time3.hyp <- hypothesis(tc.m2, c("time2 + time1 +time3 = 0")) # The slope on log scale between session 8 and 12
+
+slope0_4 <- paste0(sprintf("%.1f", 100 * (exp(time1.hyp$hypothesis[1,2]) - 1)),
+                           "%, 95% CI: [",
+                   sprintf("%.1f", 100 * (exp(time1.hyp$hypothesis[1,4]) - 1)), 
+                   ", ",
+                   sprintf("%.1f", 100 * (exp(time1.hyp$hypothesis[1,5]) - 1)),
+                   "]")
+                      
+slope4_8 <- paste0(sprintf("%.1f", 100 * (exp(time2.hyp$hypothesis[1,2]) - 1)),
+                           "%, [",
+                   sprintf("%.1f", 100 * (exp(time2.hyp$hypothesis[1,4]) - 1)), 
+                   ", ",
+                   sprintf("%.1f", 100 * (exp(time2.hyp$hypothesis[1,5]) - 1)),
+                   "]")
+                      
+
+slope8_12 <- paste0(sprintf("%.1f", 100 * (exp(time3.hyp$hypothesis[1,2]) - 1)),
+                           "%, [",
+                   sprintf("%.1f", 100 * (exp(time3.hyp$hypothesis[1,4]) - 1)), 
+                   ", ",
+                   sprintf("%.1f", 100 * (exp(time3.hyp$hypothesis[1,5]) - 1)),
+                   "]")
+                      
+
+## Effect of detraining 
+
+detrain.hyp <- hypothesis(tc.m2, "detraindetrain = 0")
+
+detrain_rna <- paste0(sprintf("%.1f", 100 * (exp(detrain.hyp$hypothesis[1,2]) - 1)),
+                           "%, [",
+                      sprintf("%.1f", 100 * (exp(detrain.hyp$hypothesis[1,4]) - 1)), 
+                   ", ",
+                       sprintf("%.1f", 100 * (exp(detrain.hyp$hypothesis[1,5]) - 1)),
+                   "]")
+                      
+
+
+
+```
+
+A single session of RT led to robust increase in 47S and 45S pre-rRNA expressed per unit tissue weight within the training group (Figure 3B) and compared to control (Figure 3C). These transcripts were also increased compared to control after twelve sessions together with the 45S ITS and mature rRNA species 28S and 18S (Figure 3C). After eight days of rest, only 18S and 28S remained elevated above levels measured in the control group (Figure 3B). This general pattern of rRNA expression was reflected also in total RNA expressed per unit tissue weight were a robust increase compared to control was seen after session twelve (Figure 3E and F). Within the experimental group, only small differences were seen in rRNA subspecies as 45S ETS was robustly higher after 12 sessions in the variable volume condition after an imbalance between conditions prior to training (Figure 3D). Total RNA increased similarly in both volume conditions throughout the training period (Figure 3G). Most of the increase was seen in the first four sessions where the average increase was `r slope0_4` per session in the intervention group as a whole. Between session four and eight, and eight to twelve changes in total RNA per tissue weight per session was not robustly different from zero (`r slope4_8` and `r slope8_12`). After the de-training period Total-RNA decreased by `r detrain_rna` from levels measured after Session 12.     
 
 ```{r combined-analysis}
 
@@ -402,7 +403,9 @@ ubf_cor_tot_rna <- paste0(sprintf("%.1f", 100 * (exp(comb.m1[2,1]) - 1)),
 
 ```
 
-UBF levels robustly predicted total RNA values with a 1 standard deviation change in UBF levels increasing Total RNA by `r ubf_cor_tot_rna` (Table X). 
+UBF levels robustly predicted total RNA values as a standard deviation change in UBF levels led to a `r ubf_cor_tot_rna` increase in total RNA per unit tissue weight (Table X).
+To estimate the influence of total RNA on muscle growth the average linear increase in total RNA was calculated for each leg together with the average total RNA abundance over the course of the training intervention in the training group.<!-- (estimated as the intercept in a regression model with number of sessions centered at session 6). move to methods -->
+The relationship between muscle growth and characteristics of individual total RNA profiles were estimated in a regression model containing the increase in total RNA concentrations, expressed as percentage increase per session, and average total RNA abundance at Session 6, expressed as standard deviations from the mean. The model also contained sex as predictor to control for sex differences in muscle growth. Total RNA increase in response to training together with the average level of total RNA robustly predicted muscle growth (Table 4, Figure 4A and B). To assess the robustness of the model, each data point was iteratively removed from the data set and the model was refitted using new estimates of the total RNA abundance and increase. This analysis indicated that the relationship between Total RNA increase and muscle growth was preserved in all iterations but the upper limit of the 95% CI spanned 0 in some instances regarding the relationship between average RNA and muscle growth (Figure 4D). We further assessed the model by iteratively removing one participant from the data set, similarly to removing a single data point this showed that estimates of the total RNA increase effect on muscle growth was robust but average total RNA estimates spanned 0 in some cases (Participant 8 and 3 in Figure 4D).
 
 ```{r predict-muscle-growth}
 
@@ -430,11 +433,15 @@ UBF and S6 protein levels may be differently regulated in men and rats as more c
 
 <!-- Hannan 1996 10.1074/jbc.271.6.3213 increased rRNA transcription is associated with increased levels of UBF mRNA and protein in cardiomyocutes -->
 
+<!-- Hannan 1996 10.1073/pnas.93.16.8750 over expression of UBF leads to rRNA transcription in cardiomyocytes -->
+
+<!-- Hannan 2003 10.1128/MCB.23.23.8862-8877.2003 mTOR is believed to play a role in phosphorylating UBF leading to recruitment of SL-1. The effect of blockage of mTOR through rapamycin is not rescued by hypophosphorylated UBF  -->
+
 <!-- In cell lines UBF is proportional to the rat e of rDNA transcription ref 25/26 in Hannan--> 
 
 <!-- phospho of UBF shows it has a role in recruioting SL1 to the promotot  10.1152/ajpcell.00176.2006 -->
 
-
+<!-- Pootinga 2004 10.1038/sj.emboj.7600335 MAD1 and c-Myc controls UBF transcription UBF is required for c-Myc induced rDNA transcription -->
 
 Per total RNA 
 Per muscle tissue

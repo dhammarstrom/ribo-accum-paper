@@ -7,6 +7,8 @@
 library(tidyverse)
 library(cowplot)
 library(ggpattern)
+library(ggridges)
+library(ggrepel)
 library(ggtext)
 # Color scale 
 color.scale <- c("#000000", "#E69F00", "#56B4E9", "#009E73", 

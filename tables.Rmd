@@ -1,6 +1,8 @@
 ---
 title: "Tables"
-output: rmarkdown::word_document
+output:
+  word_document:
+    reference_docx: resources/tables_manuscript_word_template.docx
 editor_options: 
   chunk_output_type: console
 ---
@@ -9,7 +11,7 @@ editor_options:
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 
 source("./R/libs.R")
-library(flextable)
+library(flextable); library(officer)
 
 ```
 
@@ -107,9 +109,7 @@ read_excel("./data/tr010_age_participant.xlsx") %>%
 
 
 
-<br>
-<br>
-
+\pagebreak
 
 
 ```{r table-2-primers}
@@ -163,5 +163,75 @@ primer_table %>%
 ```
 
 
+\pagebreak
+
+
+```{r table4-regression-models-muscle-thickness}
+# Save model 
+hyp.pre.m1 <- readRDS( "./data/derivedData/ubf-tot-rna-model/hyp_pre_m1.RDS")
+hyp.pre.m2 <- readRDS( "./data/derivedData/ubf-tot-rna-model/hyp_pre_m2.RDS")
+hyp.pre.m3 <- readRDS( "./data/derivedData/ubf-tot-rna-model/hyp_pre_m3.RDS")
+
+
+
+m1.sum <- summary(hyp.pre.m1)
+m2.sum <- summary(hyp.pre.m2)
+m3.sum <- summary(hyp.pre.m3)
+
+# combine output from all models 
+
+
+
+reg_results <- 
+  cbind(rbind(m3.sum$fixed,
+      m3.sum$random$participant, 
+      m3.sum$random$`participant:leg`, 
+      m3.sum$spec_pars), 
+      data.frame(coef = c("Intercept", 
+                          "Sex (Male)", 
+                          "Mean Total RNA",
+                          "Mean Total RNA increase per session", 
+                          "Between Participant variation", 
+                          "Between Participant:Leg variation", 
+                          "Residual SD"))) %>%
+  remove_rownames() %>%
+  dplyr::select(coef, Estimate, Est.Error, lwr = `l-95% CI`, upr = `u-95% CI`)
+
+
+std_border = fp_border(color="gray")
+
+reg_results %>%
+  
+  mutate(Estimate = round(Estimate, 2), 
+         Est.Error = round(Est.Error, 2), 
+         lwr = round(lwr, 2), 
+         upr = round(upr, 2)) %>%
+  
+  flextable() %>%
+  set_header_labels(coef = "Coefficient", 
+                    Est.Error = "SD", 
+                    lwr = "Lower 95% CI", 
+                    upr = "Upper 95% CI") %>%
+    add_header_lines(values = "Table 3. Total RNA as a predictor of muscle growth.") %>%
+  
+ # bold(i = c(5, 6, 13, 14, 20, 21), j = c(2:6), bold = TRUE) %>%
+  
+ # hline(i = c(9, 17), part="body", border = std_border ) %>%
+      fontsize(size = 8, part = "body") %>%
+    fontsize(size = 10, part = "header") %>%
+  
+  footnote( i = 2, j = 2,
+            value = as_paragraph(
+              c("The dependent variable is \U0394 Muscle thickness (mm)")
+            ),
+            ref_symbols = c("a"),
+            part = "header") %>%
+  
+  autofit()
+  
+
+
+
+```
 
 
