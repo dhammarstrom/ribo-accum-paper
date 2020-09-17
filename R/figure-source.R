@@ -6,7 +6,6 @@
 
 library(tidyverse)
 library(cowplot)
-library(ggpattern)
 library(ggridges)
 library(ggrepel)
 library(ggtext)

@@ -6,7 +6,7 @@ library(readxl)
 library(qpcR)
 
 # devtools::install_github("dhammarstrom/qpcrpal")
-library(qpcrpal)
+# library(qpcrpal)
 library(ggrepel)
 
 
@@ -15,9 +15,9 @@ library(nlme)
 library(lme4)
 library(brms)
 library(ggmcmc)
-library(emmeans)
+
 library(mgcv)
-library(multcomp)
+
 
 
 
