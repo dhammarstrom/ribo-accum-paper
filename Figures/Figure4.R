@@ -101,8 +101,8 @@ loo_panel <- res %>%
 predict_df <- readRDS("./data/derivedData/ubf-tot-rna-model/predict_df.RDS")
 
 # get predictions from the model
-hyp.pre.m1 <- readRDS("./data/derivedData/ubf-tot-rna-model/hyp_pre_m1.RDS")
-
+hyp.pre.m1 <- readRDS("./data/derivedData/ubf-tot-rna-model/hyp_pre_m3.RDS")
+summary(hyp.pre.m1)
 effects_m1 <- conditional_effects(hyp.pre.m1)
 
 mean_diff <- (effects_m1$sex[2, 9] - effects_m1$sex[1, 9]) / 2

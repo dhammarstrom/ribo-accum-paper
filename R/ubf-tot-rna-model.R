@@ -99,10 +99,11 @@ west_cont <- western_data %>%
 
 combined_df  <- west_cont %>%
   group_by(target, participant, cond, time) %>%
-  summarise(ubf.scaled = mean(expression.scaled, na.rm = TRUE)) %>%
+  summarise(ubf.scaled = mean(expression.scaled, na.rm = TRUE), 
+            ubf = mean(expression)) %>%
   filter(target != "t-s6") %>%
   ungroup() %>%
-  dplyr::select(participant, cond, time, ubf.scaled) %>%
+  dplyr::select(participant, cond, time, ubf.scaled, ubf) %>%
   inner_join(rna_complete %>%
                mutate(rna.mg = rna/tissue_weight) %>%
                group_by(participant, leg, time,time.c, time1, time2, time3, cond) %>%
@@ -129,15 +130,89 @@ saveRDS(combined_df, "./data/derivedData/ubf-tot-rna-model/combined_df.RDS")
 # meaning that the effect of UBF levels are similar over the course of the study. 
 
 
-comb.m1 <- brm(bf(log.rna ~ ubf.scaled + (time1 +time2 + time3) + detrain + (1 + time1|participant)),
+comb.m1 <- brm(bf(log.rna ~ ubf.scaled + (time1 +time2 + time3) + detrain + (1|participant/leg)),
               
               warmup = 1000, # number of samples before sampling
-              iter = 4000,  # number of mcmc iterations 
+              iter = 5000,  # number of mcmc iterations 
               cores = 4, # number of cores used in sampling
               chains = 4, # number of chains
               seed = 5, # seed for reproducible results
               #    control = list(adapt_delta = 0.95), 
               data = combined_df)
+
+# A naive model not accounting for time 
+# comb.m1 <- brm(bf(log.rna ~ ubf.scaled + time + (1 + time1|participant)),
+#                
+#                warmup = 1000, # number of samples before sampling
+#                iter = 4000,  # number of mcmc iterations 
+#                cores = 4, # number of cores used in sampling
+#                chains = 4, # number of chains
+#                seed = 5, # seed for reproducible results
+#                #    control = list(adapt_delta = 0.95), 
+#                data = combined_df)
+# 
+
+### Check how UBF affects total RNA levels 
+
+# Models containg all participants
+# Naive model (without time)
+
+# m1 <- lmer(log.rna ~ ubf.scaled + (1|participant), 
+#      data = combined_df)
+# 
+# # Continuous time
+# m2 <- lmer(log.rna ~ ubf.scaled + (time1 + time2 + time3) + detrain + (1|participant), 
+#            data = combined_df)
+# # Time factor
+# m3 <- lmer(log.rna ~ ubf.scaled + time  + (1|participant), 
+#            data = combined_df)
+# 
+# 
+# # Models with only TRAIN group
+# m1x <- lmer(log.rna ~ ubf.scaled + (1|participant), 
+#            data = combined_df[combined_df$cond != "ctrl_leg",])
+# 
+# # Continuous time
+# m2x <- lmer(log.rna ~ ubf.scaled + (time1 + time2 + time3) + detrain + (1 + time1|participant), 
+#             data = combined_df[combined_df$cond != "ctrl_leg",])
+# # Time factor
+# m3x <- lmer(log.rna ~ ubf.scaled + time  + (1|participant), 
+#             data = combined_df[combined_df$cond != "ctrl_leg",])
+# 
+# summary(m2x)
+# 
+# 
+# 
+# # Combine estimates 
+# 
+# df <- data.frame(model = c("naive", "continuous", "factor", "naive_TRAIN", "continuous_TRAIN", "factor_TRAIN"), 
+#            est = c(summary(m1)$coef[2,1], 
+#                    summary(m2)$coef[2,1], 
+#                    summary(m3)$coef[2,1], 
+#                    summary(m1x)$coef[2,1], 
+#                    summary(m2x)$coef[2,1], 
+#                    summary(m3x)$coef[2,1]), 
+#            
+#                    lwr = c(confint(m1)[4, 1], 
+#                            confint(m2)[4, 1], 
+#                            confint(m3)[4, 1], 
+#                            confint(m1x)[4, 1], 
+#                            confint(m2x)[6, 1], 
+#                            confint(m3x)[4, 1]), 
+#                    upr = c(confint(m1)[4, 2], 
+#                            confint(m2)[4, 2], 
+#                            confint(m3)[4, 2], 
+#                            confint(m1x)[4, 2], 
+#                            confint(m2x)[6, 2], 
+#                            confint(m3x)[4, 2]))
+# 
+# df %>%
+#   ggplot(aes(x = est, y = model)) +
+#            geom_errorbarh(aes(xmin = lwr, xmax = upr)) +
+#            geom_point() 
+# 
+# plot(m2)
+# 
 
 
 
@@ -157,6 +232,7 @@ loo(comb.m1)
 
 
 # Plot chains for convergance and RE estimates
+
 plot(comb.m1)
 
 # All effects show convergance and are interpretable (e.g. RE > 0).
@@ -249,7 +325,8 @@ us_data <- rbind(read_excel("./data/ultrasound/ultrasound_data.xlsx") %>%
 # A exploitative plot of linear fits for each participant (RNA to number of sessions).
 
 combined_df %>%
-filter(!(time %in% c("post1w"))) %>% # Removing the de-training estimate as doeas not represent training induced increase.
+filter(!(time %in% c("post1w")), 
+       cond != "ctrl_leg") %>% # Removing the de-training estimate as doeas not represent training induced increase.
 
   
  # filter(!(participant == "P21" & time == "S12" & leg == "R")) %>%
@@ -262,9 +339,30 @@ filter(!(time %in% c("post1w"))) %>% # Removing the de-training estimate as doea
   facet_wrap(~ participant)
 
 
+## UBF 
+combined_df %>%
+  filter(!(time %in% c("post1w")), 
+         cond != "ctrl_leg") %>% # Removing the de-training estimate as doeas not represent training induced increase.
+  
+  
+  # filter(!(participant == "P21" & time == "S12" & leg == "R")) %>%
+  
+  mutate(time.c = time.c - 6) %>% # this centers number of sessions and the intercept becomes
+  # the estimate total RNA (on log scale) in the mid of the training intervention.
+  
+  ggplot(aes(time.c, ubf, group = paste(participant, leg))) + geom_point() + 
+  geom_smooth(method = "lm", se = FALSE) +
+  facet_wrap(~ participant)
+
+
+
+
+
+
 
 predict_df <- combined_df %>%
-  filter(!(time %in% c( "post1w"))) %>% # Removing the de-training estimate as does not represent training induced increase.
+  filter(!(time %in% c("post1w")), 
+         cond != "ctrl_leg") %>% # Removing the de-training estimate as doeas not represent training induced increase.
   
   # Change the intercept to represent average total-RNA. This gives more meaning to the intercept 
   # and it could be use for prediction. It will also remove some of the potential correlation between 
@@ -283,10 +381,12 @@ predict_df <- combined_df %>%
   do(intercept = coef(lm(log(rna.mg) ~ time.c, data = .))[1],
      slope =     coef(lm(log(rna.mg) ~ time.c, data = .))[2], 
      max.resid = max(resid(lm(log(rna.mg) ~ time.c, data = .))^2), 
-     mean.resid =mean(resid(lm(log(rna.mg) ~ time.c, data = .))^2)) %>% 
+     mean.resid =mean(resid(lm(log(rna.mg) ~ time.c, data = .))^2), 
+     ubf.slope = coef(lm(log(ubf) ~ time.c, data = .))[2]) %>% 
 
-  unnest(c(intercept, slope, max.resid, mean.resid)) %>%
-
+  unnest(c(intercept, slope, max.resid, mean.resid, ubf.slope)) %>%
+  
+  
 # Join with the ultra sound data 
   
   inner_join(us_data %>%
@@ -318,11 +418,12 @@ saveRDS(predict_df, "./data/derivedData/ubf-tot-rna-model/predict_df.RDS")
 # Explorative plot of the relationship between slope and intercept 
 
 predict_df %>%
-  ggplot(aes(intercept, slope)) + geom_point() +
+  ggplot(aes(ubf.slope, slope)) + geom_point() +
   geom_smooth(method = "lm")
 
-# No relationship between slope and intercept. This is a good sign to avoid 
-# colinearity. We next check if this is a problem in the biggest model and subsequent 
+# No relationship between slope and intercept (RNA). This is a good sign to avoid 
+# colinearity. But there is a tendency toward positive correlation 
+# between UBF and RNA slopes. We next check if this is a problem in the biggest model and subsequent 
 # simpler ones. 
 # Fitting is done in lme4 first to check potential issues. 
 
@@ -330,31 +431,32 @@ predict_df %>%
 # estimates
 
 
+predict_df %>%
+  ggplot(aes(ubf.slope, slope, label = paste(participant, leg))) + geom_point() +
+  ggrepel::geom_text_repel() + geom_smooth(method = "lm")
+
+
+
 
 predict_df %>%
-  ggplot(aes(slope, mm_incr, label = paste(participant, leg))) + geom_point() +
-  ggrepel::geom_text_repel() 
+  ggplot(aes(participant, max.resid)) + geom_point()  
 
 
+m0 <- lmer(mm_incr  ~ pre +  ubf.slope + slope +  (1|participant), 
+           data = predict_df, REML = FALSE)
 
 
-predict_df %>%
-  ggplot(aes(participant, max.resid)) + geom_point() 
-
-
-summary(lmer(mm_incr  ~  pre +  intercept + slope + (1|participant), 
-           data = predict_df[predict_df$participant != "P3", ], REML = FALSE))
-
-m1 <- lmer(mm_incr  ~ intercept + (1|participant/leg),
+m1 <- lmer(mm_incr  ~ pre  + (1|participant),
            data = predict_df, REML = FALSE) 
 
-summary(m1)
+
+summary(m0)
+anova(m0, m1)
 
 
-
-m2 <- lmer(mm_incr  ~  pre +  intercept + slope + (1|participant/leg), 
+m2 <- lmer(mm_incr  ~  pre +  intercept + slope + ubf.slope + (1|participant/leg), 
            data = predict_df, REML = FALSE) 
-m2.2 <- lmer(mm_incr  ~ time +  sex +  intercept + slope + (1|participant), 
+m2.2 <- lmer(mm_incr  ~ time +  sex +  intercept + slope + (1|participant/leg), 
            data = predict_df, REML = FALSE) 
 m3 <- lmer(mm_incr  ~   intercept + slope + (1|participant/leg), 
            data = predict_df, REML = FALSE) 
@@ -378,8 +480,12 @@ anova(m1 ,m2, m2.2,  m3)
 summary(m1)
 
 
+
+
+
+
 hyp.pre.m1 <- brm(bf(mm_incr  ~   sex + intercept + slope + (1|participant/leg)),
-                  family = student,
+                  
                warmup = 4000, # number of samples before sampling
                iter = 10000,  # number of mcmc iterations 
                cores = 4, # number of cores used in sampling
@@ -481,7 +587,8 @@ summary(hyp.pre.m3)
 
 
 samples <- combined_df %>%
-  filter(!(time %in% c( "post1w"))) %>%
+  filter(!(time %in% c( "post1w")), 
+         cond != "ctrl_leg") %>%
   mutate(samples = paste(sep = "_", participant, leg, time)) %>%
   pull(samples)
 

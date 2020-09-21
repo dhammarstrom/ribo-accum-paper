@@ -165,17 +165,94 @@ primer_table %>%
 
 \pagebreak
 
+```{r table3-regression-models-muscle-thickness}
+# Save model 
+
+comb.m1 <- readRDS("./data/derivedData/ubf-tot-rna-model/comb_m1.RDS")
+
+comb.m1 <- summary(comb.m1)
+
+
+reg_results <- 
+  cbind(rbind(comb.m1$fixed,
+      comb.m1$random$participant, 
+      comb.m1$random$`participant:leg`, 
+      comb.m1$spec_pars), 
+      data.frame(coef = c("Intercept", 
+                          "UBF protein levels (SD-units)", 
+                          "Session 1-4",
+                          "Session 4-8", 
+                          "Session 8-12", 
+                          "De-training",
+                          "Between Participant variation",
+                          "Between Participant:Leg variation", 
+                          "Residual SD"))) %>%
+  remove_rownames() %>%
+  dplyr::select(coef, Estimate, Est.Error, lwr = `l-95% CI`, upr = `u-95% CI`)
+
+
+std_border = fp_border(color="gray")
+
+reg_results %>%
+  
+  mutate(Estimate = round(Estimate, 2), 
+         Est.Error = round(Est.Error, 2), 
+         lwr = round(lwr, 2), 
+         upr = round(upr, 2)) %>%
+  
+  flextable() %>%
+  set_header_labels(coef = "Coefficient", 
+                    Est.Error = "SD", 
+                    lwr = "Lower 95% CI", 
+                    upr = "Upper 95% CI") %>%
+    add_header_lines(values = "Table 3. Effect of UBF levels, sessions and de-training on RNA-levels.") %>%
+  
+ # bold(i = c(5, 6, 13, 14, 20, 21), j = c(2:6), bold = TRUE) %>%
+  
+ # hline(i = c(9, 17), part="body", border = std_border ) %>%
+      fontsize(size = 8, part = "body") %>%
+    fontsize(size = 10, part = "header") %>%
+      fontsize(size = 7, part = "footer") %>%
+  
+  footnote( i = 2, j = 2,
+            value = as_paragraph(
+              c("The dependent variable is total RNA levels (log)")
+            ),
+            ref_symbols = c("a"),
+            part = "header", inline = TRUE) %>%
+    footnote( i = c(3, 4, 5), j = 1,
+            value = as_paragraph(
+              c("Slope in response to session 1-4", 
+                "Change in slope in session 4-8", 
+                "Change in slope in session 8-12")
+            ),
+            ref_symbols = c("b","c","d"),
+            part = "body", inline = TRUE) %>%
+  
+  autofit()
+  
+
+
+
+
+```
+
+
+
+
+\pagebreak
+
 
 ```{r table4-regression-models-muscle-thickness}
 # Save model 
-hyp.pre.m1 <- readRDS( "./data/derivedData/ubf-tot-rna-model/hyp_pre_m1.RDS")
-hyp.pre.m2 <- readRDS( "./data/derivedData/ubf-tot-rna-model/hyp_pre_m2.RDS")
+
+
+
 hyp.pre.m3 <- readRDS( "./data/derivedData/ubf-tot-rna-model/hyp_pre_m3.RDS")
 
 
 
-m1.sum <- summary(hyp.pre.m1)
-m2.sum <- summary(hyp.pre.m2)
+
 m3.sum <- summary(hyp.pre.m3)
 
 # combine output from all models 
@@ -212,7 +289,7 @@ reg_results %>%
                     Est.Error = "SD", 
                     lwr = "Lower 95% CI", 
                     upr = "Upper 95% CI") %>%
-    add_header_lines(values = "Table 3. Total RNA as a predictor of muscle growth.") %>%
+    add_header_lines(values = "Table 4. Total RNA as a predictor of muscle growth.") %>%
   
  # bold(i = c(5, 6, 13, 14, 20, 21), j = c(2:6), bold = TRUE) %>%
   
