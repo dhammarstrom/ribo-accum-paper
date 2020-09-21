@@ -456,7 +456,50 @@ Total RNA increase in response to training RNA was robustly related to muscle gr
 
 # Discussion
 
-A main objective of this study was to establish a time course for training induced ribosomal biogenesis. We first set out to confirmed that markers of ribosome density were actually training induced and could do so as total RNA, ribosomal RNA subspecies and rpS6 mRNA and protein increased in the training group compared to the non-training control group. Total RNA has been used in many previous studies as an approximation of ribosomal density as the majority of total RNA is ribosomal [@RN2142]<!-- Figueriedo --> and total RNA concentrations predicts protein synthesis [@RN2145]<!-- Millward 1973 -->. Previous studies have indicated that the training induced rise in total RNA reaches a peak after which a plateau or decrease is observed
+ hypothesize that (1) ribosome accumulation occurs during the early phase (3-4 weeks) of RT, within which this accumulation (2) reaches a plateau when RT volume is kept constant, (3) displays fluctuations in response to fluctuating training volume and (4) is partially reversed to one week after cessation of RT. In addition to addressing these hypotheses we aimed to relate RNA accumulation to total UBF levels and muscle growth.
+
+Here, we confirm that resistance training leads to increased abundance of markers of ribosome density, measured as total RNA, expression of ribosomal RNA subspecies and rpS6 protein in previously untrained individuals compared to a non-training control group. We show that this increase is interconnected with increases in UBF protein abundance, suggesting a plausible manner for rRNA transcription regulation in response to RT. We did not find any convincing support for the notion that ribosomal biogenesis is tightly regulated by changes in training volume, however, training cessation may lead to halted ribosome biogenesis. 
+
+A main objective of this study was to establish a time course for training induced ribosomal biogenesis. Previous data from human studies indicate that mechanical loading leads to increased total RNA concentrations
+<!--@RN2266<  Hortobagyi 2000 NO change in RNA per wet weight after immobilization or 12 weeks retraining low N-->
+[@RN2225;<!-- Haun 2019 used a progressive volume troughout a six week study study RNA increased during six weeks (12% week 3; 27% week 6 -->
+@RN2005;<!-- Haddad 2005 Unloading through limb suspension leads to lowered total RNA levels, resistance training increased --> 
+
+@RN1656;<!-- Stec2015 A single session ns ~ 9% increase in young, -4% in old -->
+@RN1520;<!-- Bickel 2005 Two bouts electric stimulation, young ~ 30% incr-->
+@RN2358; <!-- Four sessions ~29 and 18 % in mod vs. low volume|31 sessions 18/12% young-->
+@RN1755<!-- Stec 2016 12 sessions 26, 9 and 6% increase in high, mod and low responders OLD-->;
+@RN1644;<!-- Figuieredo 2015 16 sessions 49% increase young -->
+@RN1809; <!-- Brook 18 sessions 8 and 40% (9 sessions) and 15,22% (18 sessions) old and young-->
+@RN1897<!-- 11% 36 sessions young -->].
+Time course data to date have suggests that maximal levels are reached within four to nine sessions in young males and females
+[@RN1809;
+@RN2358].
+This was confirmed in the present study and 
+
+
+
+
+
+
+In the present study we hypothesized that markers of ribosomal biogenesis would be sensitive to fluctuations in training volume. We based this hypothesis on a previous observation indicating that RT induced increase in total RNA, together with increases in rRNA are training volume dependent
+[@RN2358]. Additionally, ribosome biogenesis is known to be an energy demanding process
+[@RN1920]<!-- Warner, in cell models a high percentage  -->
+suggesting that it would be regulated on demand.
+It is important to note that RT in the current study was performed with constant volume in the first four sessions, something that could have maximized rRNA transcription in the initial phase. This is supported by the observation that pre-rRNA increased rapidly initially in both protocols with minimal changes in response to subsequent sessions, regardless of exercise volume. The CONST protocol in the present study corresponded to volumes used in the high volume condition in a previous study from our lab (three sets in two exercises activation knee extensor muscles) [@RN2358]. Compared to a low volume, this led to higher levels of total RNA accumulation [@RN2358]. This study was not designed to answers questions about the minimal RT dose required to maximize RT induced ribosomal accumulation, this remains to be determined. 
+Interestingly, using a progressive volume protocol in well trained participants, increases in total RNA were seen throughout six weeks of training 
+[@RN2055].<!-- Mobley 2018 trend towards higher increases in high responders 32% high resp, 8% low resp 12 wk training -->
+Although intriguing, this observation was done without any constant volume control.
+
+[@RN1916]<!-- Bickel 2003 RNA lower in atrophied muscles from spinal cord injured -->
+
+
+
+
+The time course may be informative for future studies 
+
+
+We first set out to confirmed that markers of ribosome density were actually training induced and could do so as total RNA, ribosomal RNA subspecies and rpS6 mRNA and protein increased in the training group compared to the non-training control group. Total RNA has been used in many previous studies as an approximation of ribosomal density as the majority of total RNA is ribosomal [@RN2142]<!-- Figueriedo --> and total RNA concentrations predicts protein synthesis [@RN2145]<!-- Millward 1973 -->. Previous studies have indicated that the training induced rise in total RNA reaches a peak after which a plateau or decrease is observed
 [@RN1809;<!-- brook 2016 -->
 @RN2358].<!-- Hammarström -->
 In the present study we observed a rapid increase in the first four sessions after which a plateau was observed. The observed plateau could be a consequence of the unit of measure as total RNA is estimated per unit tissue weight and that ribosome biogenesis occurs simultaneously as protein accretion leading to a dilution effect [@RN2142]<!-- Figueriedo  -->.
