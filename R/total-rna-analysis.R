@@ -192,10 +192,7 @@ time_course <- rna_complete %>%
   print()
   
   
-  
-  print()
  
-
 
 
 # gam models fitted in brms to visualize general patterns in the data. 
@@ -244,18 +241,23 @@ saveRDS(tc.m1, "./data/derivedData/total-rna-analysis/tc.m1.RDS")
 pp_check(tc.m2, type = "ecdf_overlay")
 summary(tc.m2)
 
+### A model for "descriptive" analysis of avaiable data points
 
-# Get predictions from model 1 (gam model)
 
-ce.m1 <- conditional_effects(tc.m1)
 
-cond_eff_rna_tc <- ce.m1$`time.c:cond` %>%
-  dplyr::select(time.c, cond, estimate = estimate__, lower = lower__, upper = upper__) %>%
-  mutate(estimate = exp(estimate), 
-         lower = exp(lower),
-         upper = exp(upper)) %>%
-  print()
-  
+tc.m3 <- brm(bf(log(rna.tissue) ~ (time1 + time2 + time3) + detrain + (1|participant)), 
+             data = time_course, 
+             warmup = 1000, # number of samples before sampling
+             iter = 4000,  # number of mcmc iterations 
+             cores = 4, # number of cores used in sampling
+             chains = 4, # number of chains
+             seed = 123, # seed for reproducible results
+             save_all_pars = TRUE, 
+             control = list(adapt_delta = 0.99))
+
+
+
+
 
 saveRDS(cond_eff_rna_tc, "./data/derivedData/total-rna-analysis/cond_eff_rna_tc.RDS")
 
