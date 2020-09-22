@@ -182,6 +182,8 @@ mrna_vs_ctrl <- ctrl_vs_int %>%
          Normalization = if_else(model == "total_rna", "Total RNA", "Muscle weight"), 
          Normalization = factor(Normalization, levels = c("Total RNA", "Muscle weight"))) %>%
   
+  filter(Normalization != "Muscle weight") %>%
+  
   ggplot(aes(contrast, estimate, shape = Normalization, color = robust)) + 
   
   geom_hline(yintercept = 1, lty = 2, color = "gray50") +
@@ -265,18 +267,21 @@ reps_west <-  ggdraw() + draw_image("./data/wetlab/western/representative_img/ro
 
 
 figure2 <- plot_grid(
-   plot_grid(mrna_vs_ctrl, volume_diff_mrna, ncol = 2),
+
     
   plot_grid(prot_fold_change, prot_interaction, 
                      ncol = 2, rel_widths = c(0.5, 0.5)), 
   reps_west,
-  ncol = 1, rel_heights = c(0.75/2, 0.75/2, 0.25)) +
+  
+  plot_grid(mrna_vs_ctrl, volume_diff_mrna, ncol = 2),
+  
+  ncol = 1, rel_heights = c(0.75/2, 0.25, 0.75/2)) +
   
 
   
   draw_plot_label(label=c("A",  "B", "C", "D", "E"),
-                  x =   c(0.02, 0.51, 0.02, 0.51, 0.02), 
-                  y =   c(0.98, 0.98, 0.6, 0.6, 0.25),
+                  x =   c(0.02, 0.51, 0.08, 0.02, 0.51), 
+                  y =   c(0.98, 0.98, 0.6, 0.35, 0.35),
                   hjust=.5, vjust=.5, size = label.size)
 
 

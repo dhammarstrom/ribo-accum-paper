@@ -168,9 +168,15 @@ primer_table %>%
 ```{r table3-regression-models-muscle-thickness}
 # Save model 
 
+# Model for rpS6 predicting total RNA
+comb.s6.m1 <- readRDS("./data/derivedData/ubf-tot-rna-model/comb_m1.RDS")
+
+
 comb.m1 <- readRDS("./data/derivedData/ubf-tot-rna-model/comb_m1.RDS")
 
 comb.m1 <- summary(comb.m1)
+comb.s6.m1 <- summary(comb.s6.m1)
+
 
 
 reg_results <- 
@@ -191,9 +197,31 @@ reg_results <-
   dplyr::select(coef, Estimate, Est.Error, lwr = `l-95% CI`, upr = `u-95% CI`)
 
 
-std_border = fp_border(color="gray")
+reg_results_s6 <- 
+  cbind(rbind(comb.s6.m1$fixed,
+      comb.s6.m1$random$participant, 
+      comb.s6.m1$random$`participant:leg`, 
+      comb.s6.m1$spec_pars), 
+      data.frame(coef = c("Intercept", 
+                          "rpS6 protein levels (SD-units)", 
+                          "Session 1-4",
+                          "Session 4-8", 
+                          "Session 8-12", 
+                          "De-training",
+                          "Between Participant variation",
+                          "Between Participant:Leg variation", 
+                          "Residual SD"))) %>%
+  remove_rownames() %>%
+  dplyr::select(coef, Estimate, Est.Error, lwr = `l-95% CI`, upr = `u-95% CI`)
 
-reg_results %>%
+
+
+
+
+std_border = fp_border(color="black", width = 2)
+
+
+  rbind(reg_results, reg_results_s6) %>%
   
   mutate(Estimate = round(Estimate, 2), 
          Est.Error = round(Est.Error, 2), 
@@ -205,7 +233,7 @@ reg_results %>%
                     Est.Error = "SD", 
                     lwr = "Lower 95% CI", 
                     upr = "Upper 95% CI") %>%
-    add_header_lines(values = "Table 3. Effect of UBF levels, sessions and de-training on RNA-levels.") %>%
+    add_header_lines(values = "Table 3. Effect of UBF and rpS6 levels, sessions and de-training on RNA-levels.") %>%
   
  # bold(i = c(5, 6, 13, 14, 20, 21), j = c(2:6), bold = TRUE) %>%
   
@@ -220,7 +248,7 @@ reg_results %>%
             ),
             ref_symbols = c("a"),
             part = "header", inline = TRUE) %>%
-    footnote( i = c(3, 4, 5), j = 1,
+    footnote( i = c(3, 4, 5, 12, 13, 14), j = 1,
             value = as_paragraph(
               c("Slope in response to session 1-4", 
                 "Change in slope in session 4-8", 
@@ -228,6 +256,7 @@ reg_results %>%
             ),
             ref_symbols = c("b","c","d"),
             part = "body", inline = TRUE) %>%
+    hline(i = 9, border = std_border) %>%
   
   autofit()
   

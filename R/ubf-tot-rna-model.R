@@ -99,11 +99,14 @@ west_cont <- western_data %>%
 
 combined_df  <- west_cont %>%
   group_by(target, participant, cond, time) %>%
-  summarise(ubf.scaled = mean(expression.scaled, na.rm = TRUE), 
-            ubf = mean(expression)) %>%
-  filter(target != "t-s6") %>%
+  summarise(scaled = mean(expression.scaled, na.rm = TRUE), 
+            raw = mean(expression)) %>%
+  mutate(target = if_else(target == "t-s6", "rps6", "ubf")) %>%
+  
+  pivot_wider(names_from = target, values_from = c(scaled, raw)) %>%
+
   ungroup() %>%
-  dplyr::select(participant, cond, time, ubf.scaled, ubf) %>%
+  dplyr::select(participant, cond, time, scaled_rps6:raw_ubf) %>%
   inner_join(rna_complete %>%
                mutate(rna.mg = rna/tissue_weight) %>%
                group_by(participant, leg, time,time.c, time1, time2, time3, cond) %>%
@@ -129,8 +132,8 @@ saveRDS(combined_df, "./data/derivedData/ubf-tot-rna-model/combined_df.RDS")
 # Preliminary model did not reveal any interaction effect between UBF and time or detraining
 # meaning that the effect of UBF levels are similar over the course of the study. 
 
-
-comb.m1 <- brm(bf(log.rna ~ ubf.scaled + (time1 +time2 + time3) + detrain + (1|participant/leg)),
+### The ubf model
+comb.m1 <- brm(bf(log.rna ~ scaled_ubf + (time1 +time2 + time3) + detrain + (1|participant/leg)),
               
               warmup = 1000, # number of samples before sampling
               iter = 5000,  # number of mcmc iterations 
@@ -139,6 +142,21 @@ comb.m1 <- brm(bf(log.rna ~ ubf.scaled + (time1 +time2 + time3) + detrain + (1|p
               seed = 5, # seed for reproducible results
               #    control = list(adapt_delta = 0.95), 
               data = combined_df)
+
+#### The rpS6 model
+
+
+comb.s6.m1 <- brm(bf(log.rna ~ scaled_rps6 + (time1 +time2 + time3) + detrain + (1|participant/leg)),
+               
+               warmup = 1000, # number of samples before sampling
+               iter = 5000,  # number of mcmc iterations 
+               cores = 4, # number of cores used in sampling
+               chains = 4, # number of chains
+               seed = 5, # seed for reproducible results
+               #    control = list(adapt_delta = 0.95), 
+               data = combined_df)
+
+
 
 # A naive model not accounting for time 
 # comb.m1 <- brm(bf(log.rna ~ ubf.scaled + time + (1 + time1|participant)),
@@ -223,11 +241,12 @@ pp_check(comb.m1, type = "ecdf_overlay")
 pp_check(comb.m1, type = "stat", stat = "median")
 # The data is in agreement with what the model predicts, good.
 
-
+pp_check(comb.s6.m1, type = "ecdf_overlay")
+pp_check(comb.s6.m1, type = "stat", stat = "median")
 
 # Leave one out statistics
 loo(comb.m1)
-
+loo(comb.s6.m1)
 # All Pareto estimates are OK
 
 
@@ -246,6 +265,7 @@ conditional_effects(comb.m1)
 
 # Save model 
 saveRDS(comb.m1, "./data/derivedData/ubf-tot-rna-model/comb_m1.RDS")
+saveRDS(comb.s6.m1, "./data/derivedData/ubf-tot-rna-model/comb_m1.RDS")
 
 
 

@@ -28,8 +28,6 @@ source("./R/libs.R")
 
 control_color <- "white"
 
-const_color <- "#56B4E9"
-var_color <- "#009E73"
 experiment_color <- "#4abdcb"
 
 
@@ -66,7 +64,7 @@ design_exp <- expand.grid(cond = c("Variable volume", "Constant volume"),
   
   scale_y_continuous(breaks = c(0, 3, 6, 9, 12), limits = c(0,12), expand = c(0,0), 
                      labels = c("", "3", "6", "9", "")) +
-  scale_fill_manual(values = c(color.scale[2], color.scale[3])) +
+  scale_fill_manual(values = c(color.scale[2], color.scale[1])) +
 
   annotate("text", x = c(0, 0, -2), y = c(9.1, 8.2, 6), 
            label = c("Muscle biopsy", "Muscle thickness", "Strength tests"), 
@@ -245,7 +243,7 @@ training_load <- read_excel("./data/tr010_training.xlsx", sheet = 1, na = "NA") 
   geom_line(data = training_sum, 
             aes(session, total.load, group = cond, color = cond), 
             size = 1.5) +
-  scale_color_manual(values = c(color.scale[2], color.scale[3], color.scale[4])) +
+  scale_color_manual(values = c(color.scale[1], color.scale[2], color.scale[4])) +
   geom_text(data = data.frame(session = c(1, 1),
                               total.load = c(5000, 5000), 
                               

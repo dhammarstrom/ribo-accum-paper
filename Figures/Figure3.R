@@ -574,8 +574,8 @@ rna_tc_fig <-  cond_eff_rna_tc %>%
                       breaks = c(250, 300, 350, 400, 450, 500, 550, 600, 650), 
                       labels = c("",  300, "",  400, "",  500, "" , 600, "")) +
   
-  scale_color_manual(values = c(color.scale[1], color.scale[2]), guide = NULL) +
-  scale_fill_manual(values = c(color.scale[1], color.scale[2])) +
+  scale_color_manual(values = c(color.scale[2], color.scale[1]), guide = NULL) +
+  scale_fill_manual(values = c(color.scale[2], color.scale[1])) +
    
    plot_theme() +
    theme(legend.position = c(0.7, 0.15), 
