@@ -277,6 +277,7 @@ figure4 <- plot_grid(
 
 
 
+saveRDS(figure4, "./Figures/rds/figure4.RDS")
 
 
 # Width of figure = 1x columns 8.9 cm

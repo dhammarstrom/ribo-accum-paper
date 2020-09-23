@@ -576,6 +576,10 @@ figure1 <- plot_grid(design_full_biopsies,
 
 
 
+### Save figure for plotting 
+
+saveRDS(figure1, "./Figures/rds/figure1.RDS")
+
 
 
 

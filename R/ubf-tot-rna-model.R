@@ -265,7 +265,7 @@ conditional_effects(comb.m1)
 
 # Save model 
 saveRDS(comb.m1, "./data/derivedData/ubf-tot-rna-model/comb_m1.RDS")
-saveRDS(comb.s6.m1, "./data/derivedData/ubf-tot-rna-model/comb_m1.RDS")
+saveRDS(comb.s6.m1, "./data/derivedData/ubf-tot-rna-model/comb_m1_s6.RDS")
 
 
 

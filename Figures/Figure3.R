@@ -618,6 +618,7 @@ figure3 <- plot_grid(
 
 
 
+saveRDS(figure3, "./Figures/rds/figure3.RDS")
 
 # Width of figure = 1x columns 8.9 cm
 # height of figure = full page = 23 cm

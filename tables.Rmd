@@ -169,7 +169,7 @@ primer_table %>%
 # Save model 
 
 # Model for rpS6 predicting total RNA
-comb.s6.m1 <- readRDS("./data/derivedData/ubf-tot-rna-model/comb_m1.RDS")
+comb.s6.m1 <- readRDS("./data/derivedData/ubf-tot-rna-model/comb_m1_s6.RDS")
 
 
 comb.m1 <- readRDS("./data/derivedData/ubf-tot-rna-model/comb_m1.RDS")
