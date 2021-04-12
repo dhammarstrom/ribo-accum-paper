@@ -565,7 +565,7 @@ rna_tc_fig <-  cond_eff_rna_tc %>%
    geom_ribbon(aes(ymin = lower, ymax = upper, color = NULL), alpha = 0.2) +
    
    labs(x = "Session", 
-        y = "RNA ng \U00D7 mg<sup>-1</sup>") +
+        y = bquote('Total RNA (mg'~'ng'^-1*')')) +
    
    scale_x_continuous(limits = c(0, 12), expand = c(0,0), 
                       breaks = c(0, 3, 6, 9, 12)) +
@@ -580,8 +580,7 @@ rna_tc_fig <-  cond_eff_rna_tc %>%
    plot_theme() +
    theme(legend.position = c(0.7, 0.15), 
          legend.key.size = unit(0.3, "cm"), 
-         axis.title.y = element_markdown(), 
-         ) 
+         axis.title.y = element_text() ) 
    
 
    

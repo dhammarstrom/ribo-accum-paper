@@ -94,7 +94,7 @@ loo_panel <- res %>%
   plot_theme() + 
   theme(strip.background = element_rect(color = "white", fill = "white"),
         strip.text = element_text(size = 8, hjust = 0),
-        axis.title.y = element_markdown(size = 7), 
+        axis.title.y = element_text(size = 7), 
         legend.position = "none")
 
 
@@ -147,7 +147,7 @@ prediction_slope <- predict_df %>%
   labs(x = "Total RNA increase per session (%)", 
        y = "Muscle thickness change (mm)") +
   plot_theme() + 
-  theme(axis.title.y = element_markdown(size = 7), 
+  theme(axis.title.y = element_text(size = 7), 
         legend.position = c(0.2, 0.90), 
         legend.text = element_text(size = 7))
 
@@ -187,7 +187,7 @@ prediction_intercept <- predict_df %>%
                      breaks = c(-3, -2, -1, 0, 1, 2, 3, 4, 5), 
                      labels = c("", -2, "", 0, "", 2, "", 4, "")) +
   plot_theme() + 
-  theme(axis.title.y = element_markdown(size = 7), 
+  theme(axis.title.y = element_text(size = 7), 
         legend.position = "none")
 
 
@@ -230,13 +230,13 @@ rna_to_time_estimates <- combined_df %>%
   scale_color_manual(values = c(color.scale[1], color.scale[2])) +
   
   
-  labs(y = "Total RNA (ng \U00D7 mg <sup>-1</sup>)", 
+  labs(y = bquote('Total RNA (mg'~'ng'^-1*')'), 
        x = "Sessions") +
   
   plot_theme() + 
   theme(strip.background = element_rect(color = "white", fill = "white"),
         strip.text = element_text(size = 8, hjust = 0),
-        axis.title.y = element_markdown(size = 7), 
+        axis.title.y = element_text(size = 7), 
         legend.position = "none")
 
 
@@ -273,11 +273,11 @@ figure4 <- plot_grid(
 #                   x =   c(0.02, 0.02, 0.02, 0.02), 
 #                   y =   c(0.98, 0.73, 0.48, 0.23),
 #                   hjust=.5, vjust=.5, size = label.size)
+#
 
 
 
-
-saveRDS(figure4, "./Figures/rds/figure4.RDS")
+saveRDS(figure4, "./Figures/rds/figure4_x.RDS")
 
 
 # Width of figure = 1x columns 8.9 cm

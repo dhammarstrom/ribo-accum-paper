@@ -1,14 +1,22 @@
 ---
 title: "Ribosome accumulation during early phase resistance training"
-author: Daniel Hammarström^1,2,£^&ast;,Sjur J. Øfsteng^2,£^, Nicolai B. Jacobsen^1^,
-  Krister B. Flobergseter^1^,  Bent R. Rønnestad^1^, Stian Ellefsen^1,3^
+author:
+  - Daniel Hammarström^1,2,£^*
+  - Sjur J. Øfsteng^2,£^
+  - Nicolai B. Jacobsen^1^
+  - Krister B. Flobergseter^1^
+  - Bent R. Rønnestad^1^
+  - Stian Ellefsen^1,3^
 date: ''
 output:
+  pdf_document:
+    latex_engine: xelatex
   word_document:
     reference_docx: resources/manuscript_word_template.docx
 csl: resources/experimental-physiology.csl
 bibliography: resources/bibliography.bib
-header-includes: \usepackage{wasysym}
+header-includes: 
+  \usepackage{wasysym}
 editor_options:
   chunk_output_type: console
 ---
@@ -24,17 +32,14 @@ editor_options:
 ```{r, include = FALSE}
 
 source("./R/libs.R")
+library(knitr); library(kableExtra)
 # Settings for chunk options
-knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, dev = "cairo_pdf")
 
 ```
 
 
-^1^ Section for Health and Exercise Physiology, Department of Public Health and Sport Sciences, Inland Norway University of Applied Sciences, Lillehammer, Norway. 
-
-^2^ Swedish School of Sport and Health Sciences, Stockholm, Sweden.
-
-^3^ Innlandet Hospital Trust, Lillehammer, Norway. </div>
+^1^ Section for Health and Exercise Physiology, Department of Public Health and Sport Sciences, Inland Norway University of Applied Sciences, Lillehammer, Norway. ^2^ Swedish School of Sport and Health Sciences, Stockholm, Sweden. ^3^ Innlandet Hospital Trust, Lillehammer, Norway. </div>
 
 ^£^ These authors contributed equally to this work
 
@@ -51,14 +56,12 @@ Daniel Hammarström, Section for Health and Exercise Physiology, Department of P
 <div custom-style="runningtitle_style">**Running title:** Ribosome biogenesis in early phase resistance training</div>
 
 
-\pagebreak
-
 
 # Abstract
 <div custom-style="abstract_style">
 
 
-Increased ribosomal density is a phenomena observed in response to resistance training (RT) supporting elevated. A time course of RT-induced accumulation of ribosomes has not been described. We mapped markers of ribosomal biogenesis (total RNA, ribosomal RNA (rRNA), ribosomal protein S6 (rpS6) and upstream binding factor (UBF) protein content) in response to twelve RT sessions. Additionally we investigated the effect of fluctuations in training volume on these markers and relationship between RNA accumulation and muscle growth measured as muscle thickness (ultra sound). Eighteen participants were allocated to either a training (TRAIN, *n*=11) or control (CTRL, *n*=7) group. In TRAIN, participants performed unilateral knee extension with either constant (CONST, 6 sets) or a variable volume (VAR, 6, 3 and 9 sets in sessions 1-4, 5-8 and 9-12, respectively). Muscle biopsies were sampled from *m vastus lateralis* in TRAIN before and 48 hrs after the first session as well as 48 hrs after session 4, 5, 8, 9 and 12 and after eight days of de-training. Control biopsies were sampled in CTRL at baseline and after 48 hrs and 3-5 weeks. RT led to muscle growth in TRAIN compared to CTRL and concomitant increases in total RNA, rRNA, including precursor rRNA as well as UBF and rpS6 protein through gradual increase throughout the training period, confirmed in comparison to CTRL. Total RNA increased in a curve-linear fashion, most rapidly in response to the first four sessions  (8.6%, 95% CI: [5.5, 11.7] per session), followed by a plateau and peak values (49.5% [34.2, 66.5] above baseline) after Session 8. UBF protein levels explained total RNA levels after controlling for time and increases in total RNA levels predicted RT induced muscle hypertrophy. After de-training, total RNA and specific rRNA species decreased without changes in muscle mass indicating reduced concentrations and biosynthesis of ribosomes. These result underlines a determinant role for ribosomal biogenesis in RT-induced muscle hypertrophy and that ribosomal biogenesis is sensitive to training cessation.    
+Increased ribosomal density is a phenomenon observed in response to resistance training (RT) supporting elevated. A time course of RT-induced accumulation of ribosomes has not been described. We mapped markers of ribosomal biogenesis (total RNA, ribosomal RNA (rRNA), ribosomal protein S6 (rpS6), and upstream binding factor (UBF) protein content) in response to twelve RT sessions. Additionally, we investigated the effect of fluctuations in training volume on these markers and the relationship between RNA accumulation and muscle growth measured as muscle thickness (ultrasound). Eighteen participants were allocated to either a training (TRAIN, *n*=11) or a control (CTRL, *n*=7) group. In TRAIN, participants performed unilateral knee extension with either constant (CONST, 6 sets) or a variable volume (VAR, 6, 3, and 9 sets in sessions 1-4, 5-8, and 9-12, respectively). Muscle biopsies were sampled from *m vastus lateralis* in TRAIN before and 48 hrs after the first session and 48 hrs after sessions 4, 5, 8, 9, and 12, and after eight days of de-training. Control biopsies were sampled in CTRL at baseline and after 48 hrs and 3-5 weeks. RT led to muscle growth in TRAIN compared to CTRL and concomitant increases in total RNA, rRNA, including precursor rRNA as well as UBF and rpS6 protein through gradual increase throughout the training period, confirmed in comparison to CTRL. Total RNA increased in a curve-linear fashion, most rapidly in response to the first four sessions  (8.6%, 95% CI: [5.5, 11.7] per session), followed by a plateau and peak values (49.5% [34.2, 66.5] above baseline) after Session 8. UBF protein levels explained total RNA levels after controlling for time, and increases in total RNA levels predicted RT-induced muscle hypertrophy. After de-training, total RNA and specific rRNA species decreased without muscle mass changes indicating reduced concentrations and biosynthesis of ribosomes. These results underline a determinant role for ribosomal biogenesis in RT-induced muscle hypertrophy and that ribosomal biogenesis is sensitive to training cessation.  
 
 
 
@@ -68,6 +71,7 @@ Increased ribosomal density is a phenomena observed in response to resistance tr
 </div>
 
 \pagebreak
+
 
 # Introduction
 
@@ -162,6 +166,88 @@ ctrl <- paste0(ctrl_days[1,1], " (", ctrl_days[1,2], ")")
 
 Eighteen volunteers were recruited to the study. Eligible participants were non-smokers between 18 and 35 years of age with a training history of less than one RT session per week during the six months leading up to the study. Exclusion criteria were consumption of dietary supplements or medication with known effects on muscle metabolism, injuries causing impaired strength and/or affecting their ability to perform RT, symptoms or history of disease, and known adverse reactions to local anesthetics. Participants were allocated to either an training group (TRAIN, *n* = 11) or a non-training control group (CTRL, *n* = 8; see Table 1 for participant characteristics; see Figure 1A for overview of the intervention). TRAIN performed a 12 session RT protocol lasting for 3-4 weeks, consisting of 10 repetition maximum (RM) unilateral knee-extension, with the two legs conducting RT with different volume profiles, allowing within-participant comparison of the effects of volume regimes. In TRAIN, one leg conducted RT with constant volume throughout the intervention (CONST, 6 sets per session) and the other leg performed RT with variable volume (VAR, 3 blocks of four sessions with 6, 3 and 9 sets per session, respectively; Figure 1A). CTRL did not partake in RT and were instructed to continue their everyday activities. Muscle biopsies were sampled bilaterally in TRAIN before and 48 hrs after the first session, as well as 48 hrs after the fourth, fifth, eight, ninth and twelfth session, and after a seven days of de-training. Muscle biopsies were obtained from CTRL at three occasions; at baseline and 48 hrs and 3-5 weeks (average (SD) `r ctrl`) after the first sampling event. TRAIN and CTRL performed strength assessments > seven days prior to the first biopsy sampling (TRAIN; CTRL), 72 hrs after the twelfth session (TRAIN) and 24 h after the last biopsy (TRAIN, following de-training; CTRL). Appendicular lean mass (Dual-energy X-ray absorptiometry, DXA) and muscle thickness of *m. vastus lateralis* were assessed prior to the first biopsy (TRAIN and CTRL) as wells as before the second to last (TRAIN) and last (TRAIN and CTRL) biopsy.
 
+
+
+```{r table1}
+
+# Read dxa data
+
+dxa_whole <- read_excel("./data/tr010_dxa_standarddefinitions.xlsx") %>%
+  dplyr::select(Etternavn, Kjønn,Målingsdato,Alder, Vekt:`HeleVev%fett`) %>%
+  pivot_longer(names_to = "variable", values_to = "value", cols = Vekt:`HeleVev%fett`) %>%
+  mutate(value = gsub("kg", "", value), 
+         value = gsub("[[:space:]]", "", value, fixed = FALSE), 
+         value = as.numeric(value)) %>%
+
+  separate(Etternavn, into = c("Study", "participant")) %>%
+  dplyr::select(participant, Date = Målingsdato, variable, value) %>%
+  filter(!(participant %in% c("P08", "P20", "P17"))) %>%
+  group_by(participant) %>%
+  mutate(time = if_else(Date == min(Date), "S0", 
+                        if_else(Date == max(Date), "post1w", 
+                                "S12")), 
+         leg = if_else(variable == "BeinhøyreMagermasse", "R", "L")) %>%
+  filter(variable %in% c("HeleBeinmasse", 
+                         "HeleFettmasse", 
+                         "HeleVevmasse", 
+                         "HeleMagermasse" ,
+                         "Vekt", 
+                         "HeleTotalmasse")) %>%
+  pivot_wider(names_from = variable, values_from = value) %>%
+  mutate(fat_rel = 100*(HeleFettmasse/HeleTotalmasse)) %>%
+  dplyr::select(participant, time, Vekt,HeleTotalmasse, fat_rel) %>%
+  filter(time == "S0") 
+
+# DXA weight stature
+
+read_excel("./data/tr010_age_participant.xlsx") %>%
+  inner_join(dxa_whole) %>%
+  mutate(age = difftime(recruited, dob)/365.2425, 
+         bmi = weight/(height/100)^2) %>%
+  dplyr::select(participant, group, height, weight,age, sex,bmi, fat_rel) %>%
+
+  group_by(group, sex) %>%
+  summarise(n = n(), 
+            Age = mean(age, na.rm = TRUE), 
+            age.sd = sd(age, na.rm = TRUE),
+            mass = mean(weight), 
+            mass.sd = sd(weight),
+            stature = mean(height),
+            stature.sd = sd(height), 
+            BMI = mean(bmi), 
+            bmi.sd = sd(bmi), 
+            relfat = mean(fat_rel), 
+            relfat.sd = mean(fat_rel) ) %>%
+  ungroup() %>%
+  mutate(n = as.character(n), 
+         age = paste0(sprintf("%.1f", round(Age, 1)), " (", sprintf("%.1f", round(age.sd, 1)), ")"),
+         mass = paste0(sprintf("%.1f", round(mass, 1)), " (", sprintf("%.1f", round(mass.sd, 1)), ")"),
+         stature = paste0(sprintf("%.1f", round(stature, 1)), " (", sprintf("%.1f", round(stature.sd, 1)), ")"),
+         BMI = paste0(sprintf("%.1f", round(BMI, 1)), " (", sprintf("%.1f", round(bmi.sd, 1)), ")"),
+         fat = paste0(sprintf("%.1f", round(relfat, 1)), " (", sprintf("%.1f", round(relfat.sd, 1)), ")"))%>%
+  dplyr::select(group, sex, n, age, mass, stature, BMI, fat) %>%
+  pivot_longer(names_to = "variable", values_to = "values", n:fat) %>%
+  pivot_wider(names_from = c(sex,group), values_from = values) %>%
+  
+  mutate(variable =  factor(variable,
+                          levels = c("n", "age", "mass", "stature", "BMI", "fat"), 
+                          labels = c("n", "Age (yrs)", "Body mass, (kg)", "Stature (cm)", "Body mass index (kg/m\\textsuperscript{2})", "Body fat (\\%)"))) %>%
+  
+  dplyr::select(variable, F_experiment, M_experiment, F_control, M_control) %>%
+
+  kable(caption = "Participant characteristics.", 
+        booktabs = TRUE, 
+        col.names = c("", "Female", "Male", "Female", "Male"),
+        escape = FALSE,
+        format = "latex") %>%
+  add_header_above(c(" ", "Experimental group" = 2, "Control group" = 2))
+  
+
+```
+
+
+
+
 ## RT protocol
 Prior to all RT sessions, participants performed a standardized warm-up consisting of 5 min ergometer cycling (rating of perceived exertion (RPE): 12-14), followed by ten repetitions of push-ups, sit-ups and back-extensions. After warm-up, participants performed unilateral knee-extension with the prescribed number of sets. Each set was prescribed with 10 repetitions maximum (RM). When sets were completed with either fewer (8) or more (12) repetitions, the resistance was adjusted accordingly. Inter-set rest periods were 90 sec. Throughout the intervention RT sessions were alternatingly initiated by training the right and left leg, changing every other session, with the contralateral leg being trained in the rest period between sets of the first leg. The second session of each four-session block (session 2, 6 and 10) was performed at a sub-maximal resistance (~90% of the previous session) with the same number of repetitions (10). Within each session, participants also conducted two sets of three upper-body exercises (bench press, lateral pull-down and shoulder press; 10RM).<!--Prior to each session, participants were asked to rate muscle soreness on a scale from 0 to 10 (0 = no soreness, 10 = hurting very bad, e.g. not being able to walk properly) [@Vickers2010]. After each session, participants were asked to rate their perceived exertion (Borg CR10).-->
 After completion of each session participants were given a standardized drink to aid recovery (0.15 g kg<sup>-1</sup> protein, 11.2 g kg<sup>-1</sup> carbohydrates and 0.5 g kg<sup>-1</sup> fat).
@@ -226,6 +312,66 @@ Complementary DNA (cDNA) was synthesized in technical duplicates from 500 ng of 
 
 ```
 Raw fluorescence data was exported from the QuantStudio software and estimates of quantification cycle (Cq) and amplification efficiency was derived for each reaction using the qpcR package[@RN1768].
+
+
+```{r primerstable}
+# Read qpcr data
+qdat <- readRDS("./data/derivedData/qpcr/qpcr_compiled.RDS")
+
+primer_performance <- qdat %>%
+  group_by(target) %>%
+  summarise(mean.cq = mean(cq, na.rm = TRUE), 
+            sd.cq = sd(cq, na.rm = TRUE), 
+            mean.eff = mean(eff)) 
+
+
+merge_custom <- function(ft, x, columns){
+  z <- rle(x)
+  rows_at <- cumsum(z$lengths) - z$lengths + 1
+
+  for(i in seq_along(rows_at)){
+    for(j in columns)
+      ft <- merge_at(x = ft, i = seq( rows_at[i], rows_at[i] + z$lengths[i] - 1), j = j)
+  }
+
+  ft
+}
+
+# Read primer data 
+primer_table <- read_excel("./data/tr010_primers.xlsx", sheet = 1) %>%
+  dplyr::select(target = primer_id, forward, reverse, full_name, symbol_ext) %>%
+  inner_join(primer_performance) %>%
+  mutate(performance = paste0(sprintf("%.1f", round(mean.cq,1)), " (", sprintf("%.1f",        round(sd.cq,1)), "), E = ", sprintf("%.2f", round(mean.eff,2))), 
+         forward = paste0("F: 5'-", forward, "-3'"), 
+         reverse = paste0("R: 3'-", reverse, "-5'")) %>% 
+
+  
+  
+  
+  dplyr::select(symbol_ext, full_name, forward, reverse, performance) %>%
+  pivot_longer(names_to = "primer", values_to = "seq", forward:reverse) %>%
+dplyr::select(Symbol = symbol_ext, 'Transcript name' = full_name, Sequence = seq, 'Mean Cq (SD) and efficiency' = performance) %>%
+    filter(!(Symbol %in% c("RPL32", "MYH7", "MYH2", "MYH1")))
+
+primer_table %>%
+  kable(format = "latex", 
+        caption = "Primer sequences and average performance.",
+        booktabs = TRUE) %>%
+  collapse_rows(columns = c(1, 2, 4)) %>%
+  landscape()
+  
+# 
+# flextable() %>%
+# merge_custom(x = primer_table$Symbol, columns = c(1, 2, 4)) %>%
+# add_header_lines(values = "Table 2. Primer sequences and average performance.") %>%
+#     fontsize(size = 8, part = "body") %>%
+#   fontsize(size = 10, part = "header") %>%
+# autofit()
+#
+
+```
+
+
 
 ## Immunoblotting
 Protein samples (20 &#956;g) were separated on 4-20% Tris-Glycin gels (Criterion TGX Precast Gels, Bio-Rad) at 250 V for 45 min using the recommended running buffer (25 mM Tris, 192 mM Glycin, 0.1% SDS). All samples from the same participant were run on the same gel and all samples were run in at least duplicates. Separated samples were transferred to &#956m PVDF membranes (Immun-Blot, Bio-Rad) using wet transfer (25 mM Tris, 192 Glycin, 10% vol/vol methanol) at a constant voltage of 300 mA for 3 h. Membranes were then stained to confirm transfer and enable total protein quantification using a reversible protein stain (Pierce Reversible Protein Stain, Thermo Fisher Scientiﬁc). Primary antibodies were acquired to detect UBF (F-9, sc-13125, Santa-Cruz Biotechnology, Dallas, Texas, USA) and ribosomal protein S6 (54D2, #2317, Cell Signaling Technology, Danvers, MA, USA). After blocking (Tris-buffered saline blocking buffer, 20 mM Tris, 150 mM NaCl, 5% fat-free milk, 0.1% Tween-20), membranes were incubated over-night with primary antibodies diluted in blocking buffer (UBF, 1:200; S6, 1:1000) followed by incubation with a secondary antibody conjugated to horseradish peroxidase (Anti-mouse IgG, #7076, Cell Signaling Technology, 1:10000). Membranes were washed 6 &#215; 5 min after incubation with primary antibodies and 8 &#215; 5 min after incubation with the secondary antibody. All incubation and washing steps were performed at 4&deg;C using an automatic membrane processor (BlotCycler, Precision Biosystems, Mansﬁeld, MA, USA). Chemiluminescent signals from membranes were detected after 5 min incubation in substrate (Super Signal West Femto Maximum Sensitivity Substrate, Thermo Fisher Scientiﬁc) using a documentation system. Total protein content was quantified from whole membrane images and defined as the mean gray value of the whole lane. Between-lane gray values were used as background subtracted from protein values. Total protein quantification was done using ImageJ Fiji [@RN2561]. Chemiluminescence signals were quantified using Image Studio Lite (LI-COR Biotechnology, Lincoln, NE, USA).
@@ -342,6 +488,16 @@ us_pre_detrain_approx <- paste0(sprintf("%.1f",us.h[2, 2]))
 In TRAIN, all participants successfully completed their prescribed RT on both legs, with the two volume conditions resulting in diverging volume profiles (load &#215; repetitions) over the course of the study (Figure 1B). Exercise intensities (resistance at 10RM) increased similarly in both conditions from the first to the second (`r load.inr.w2`) and third (`r load.inr.w3`) training block, with each block consisting of four training sessions.
 Concomitantly, in TRAIN, isokinetic strength and thickness of *m. vastus lateralis* increased from baseline to after Session 12 compared to CTRL (isokinetic strength $\sim$ `r isok_pre_post_aprox`%-point difference; muscle thickness $\sim$ `r us_pre_post_approx`%-point difference, Figure 1C and D), a difference that was sustained to after eight days of de-training ($\sim$ `r isok_pre_detrain_approx`%-point and $\sim$ `r us_pre_detrain_approx`%-point difference in change in isokinetic strength and muscle thickness, respectively; Figure 1C and D). Isometric strength showed the same general pattern to after Session 12 ($\sim$ `r us_pre_detrain_approx`%-point difference), though with considerably larger degrees of uncertainty, as indicated by wider 95% CI normalization compared to CTRL after de-training ($\sim$ `r isom_pre_detrain_approx`%-point; Figure 1C). No differences were observed between volume conditions for either strength or muscle thickness. 
 
+```{r figure1, fig.height=(23*0.75)/2.54, fig.width=17.8/2.54, fig.align="center", fig.cap="Study design (A) observed training loads in response to Constant and Variable volume protocols (B) and training outcomes (muscle strength, C; muscle thickness D).", echo=FALSE}
+
+figure1 <- readRDS("./Figures/rds/figure1.RDS")
+
+figure1
+
+```
+
+
+
 ```{r western-data}
 segmented_protein_results <- readRDS("./data/derivedData/western-analysis/segmented_results.RDS")
 
@@ -439,6 +595,16 @@ var_change <- paste0(sprintf("%.1f", 100 * (exp(h[1,2]) - 1)),
 For both rpS6 and UBF, protein levels increased linearly throughout the training intervention, with rpS6 showing estimated increments per session corresponding to `r s6_slope0_4` during block 1 (session 1-4), `r s6_slope4_8` during block 2 (session 5-8) and `r s6_slope8_12` during block 3 (session 9-12), and UBF showing increments corresponding to `r ubf_slope0_4`, `r ubf_slope4_8` and `r ubf_slope8_12`. This general pattern was confirmed when comparing TRAIN to CTRL where UBF and rpS6 protein levels were higher in TRAIN compared to CTRL after Session 12 and elevated after eight days of rest (Figure 2A and B), however with no differences being observed after the first training session (48 hrs). Increases did not differ between volume-conditions but for UBF, there was a tendency towards lower levels in VAR after Session 12 (`r var_s12`). After de-training, UBF-levels tended to decrease in CONST (`r const_detrain`) while levels in VAR remained at elevated level compare to after Session 12 (`r var_change`; interaction effect: `r var_const_interaction`). For rpS6, de-training affect protein levels, which remained similar between volume conditions period and remained similar between volume conditions. At the mRNA level, UBF showed robust increase from before to 48 hrs after the first session in TRAIN compared to CTRL (Figure 2D), while rpS6 showed no robust differences between TRAIN and CTRL at any time point. No differences were observed between volume conditions for either transcripts (Figure 2D and E). 
 
 
+
+```{r figure2, fig.height=(23*0.75)/2.54, fig.width=8.9/2.54, fig.align="center", fig.cap="Protein (A and B) and mRNA abundances (D and E) of rpS6 and UBF. Black points and error bars represents statistically robust results (a 95\\% CI not containing 0). C shows western-blots and total protein stains from a representative participant. mRNA data is normalized per total RNA.", echo=FALSE}
+
+figure2 <- readRDS("./Figures/rds/figure2.RDS")
+
+figure2
+
+```
+
+
 ```{r total-rna}
 
 # Segmented model analysis in text 
@@ -527,6 +693,104 @@ This general pattern of rRNA expression was reflected by total RNA expression pe
 For both rRNA expression and total RNA levels, the training-associated increases in abundances occurred predominately during the first four sessions, evident as `r slope0_4` increase per session, followed by sustained levels from sessions four to eight (`r slope4_8` increase per session) and from sessions eight to twelve `r slope8_12`, corresponding to `r fourth.session`, `r eight.session` and `r twelth.session` increases from baseline to 48 hrs after session four, eight and twelve, respectively.
 In TRAIN, the two volume conditions led to similar changes for most variables (Figure 3D and G), with 45S ETS abundance only showing differential expression, evident as robustly higher levels in VAR compared to CONST after the 12th session (Figure 3D), coinciding with the increased training volume towards the end of the intervention for this condition.
 
+
+```{r figure3, fig.height=(23*0.75)/2.54, fig.width=17.8/2.54, fig.align="center", fig.cap="Total RNA and ribosomal RNA subspecies in response to trainin. Total RNA increased compared to non-training controls to post-training (12 sessions) and tended to normalize after de-training (A). There were no robust differences between different volume conditions in the training group (A). B shows primer locations targeting different ribosomal RNA subspecies. Subsets of ribosomal RNA showed robust increases compared to control 48 h after the first session and other after the training period (C). Error bars shows 95\\% CI. Asterisk in C indicates robust differences between volume conditions (a 95\\% CI of pairwise differences not containing 0).", echo=FALSE}
+
+figure3 <- readRDS("./Figures/rds/figure3.RDS")
+
+figure3
+
+```
+
+
+```{r table3-regression-models-muscle-thickness}
+# Save model 
+
+# Model for rpS6 predicting total RNA
+comb.s6.m1 <- readRDS("./data/derivedData/ubf-tot-rna-model/comb_m1_s6.RDS")
+
+
+comb.m1 <- readRDS("./data/derivedData/ubf-tot-rna-model/comb_m1.RDS")
+
+comb.m1 <- summary(comb.m1)
+comb.s6.m1 <- summary(comb.s6.m1)
+
+
+
+reg_results <- 
+  cbind(rbind(comb.m1$fixed,
+      comb.m1$random$participant, 
+      comb.m1$random$`participant:leg`, 
+      comb.m1$spec_pars), 
+      data.frame(coef = c("Intercept", 
+                          "UBF protein levels (SD-units)", 
+                          "Session 1-4\\textsuperscript{b}",
+                          "Session 4-8\\textsuperscript{c}", 
+                          "Session 8-12\\textsuperscript{d}", 
+                          "De-training",
+                          "Between Participant variation",
+                          "Between Participant:Leg variation", 
+                          "Residual SD"))) %>%
+  remove_rownames() %>%
+  dplyr::select(coef, Estimate, Est.Error, lwr = `l-95% CI`, upr = `u-95% CI`)
+
+
+reg_results_s6 <- 
+  cbind(rbind(comb.s6.m1$fixed,
+      comb.s6.m1$random$participant, 
+      comb.s6.m1$random$`participant:leg`, 
+      comb.s6.m1$spec_pars), 
+      data.frame(coef = c("Intercept", 
+                          "rpS6 protein levels (SD-units)", 
+                          "Session 1-4\\textsuperscript{b}",
+                          "Session 4-8\\textsuperscript{c}", 
+                          "Session 8-12\\textsuperscript{d}", 
+                          "De-training",
+                          "Between Participant variation",
+                          "Between Participant:Leg variation", 
+                          "Residual SD"))) %>%
+  remove_rownames() %>%
+  dplyr::select(coef, Estimate, Est.Error, lwr = `l-95% CI`, upr = `u-95% CI`)
+
+
+
+
+
+
+  rbind(reg_results, reg_results_s6) %>%
+  
+  mutate(Estimate = round(Estimate, 2), 
+         Est.Error = round(Est.Error, 2), 
+         lwr = round(lwr, 2), 
+         upr = round(upr, 2)) %>%
+    
+    kable(col.names = c("Coefficient", 
+                        "Estimate\\textsuperscript{a}", 
+                        "SD", 
+                        "Lower 95\\% CI", 
+                        "Upper 95\\% CI"), 
+          caption = "Effect of UBF and rpS6 levels, sessions and de-training on RNA-levels.",
+          format = "latex", 
+          escape = FALSE,
+          booktabs = TRUE) %>%
+    row_spec(9, hline_after = TRUE) %>%
+    footnote(alphabet = c("The dependent variable is total RNA levels (log).",
+    "Slope in response to session 1-4.", 
+    "Change in slope in session 4-8.",
+    "Change in slope in session 8-12."), 
+             footnote_as_chunk = TRUE,
+             threeparttable = TRUE, 
+             escape = FALSE,
+             general_title = "")
+  
+ 
+
+```
+
+
+
+
+
 ```{r combined-analysis}
 
 # Save model 
@@ -546,11 +810,87 @@ ubf_cor_tot_rna <- paste0(sprintf("%.1f", 100 * (exp(comb.m1[2,1]) - 1)),
 
 ```
 
+
+```{r table4-regression-models-muscle-thickness}
+# Save model 
+
+
+
+hyp.pre.m3 <- readRDS( "./data/derivedData/ubf-tot-rna-model/hyp_pre_m3.RDS")
+
+
+
+
+m3.sum <- summary(hyp.pre.m3)
+
+# combine output from all models 
+
+
+
+reg_results <- 
+  cbind(rbind(m3.sum$fixed,
+      m3.sum$random$participant, 
+      m3.sum$random$`participant:leg`, 
+      m3.sum$spec_pars), 
+      data.frame(coef = c("Intercept", 
+                          "Sex (Male)", 
+                          "Mean Total RNA",
+                          "Mean Total RNA increase per session", 
+                          "Between Participant variation", 
+                          "Between Participant:Leg variation", 
+                          "Residual SD"))) %>%
+  remove_rownames() %>%
+  dplyr::select(coef, Estimate, Est.Error, lwr = `l-95% CI`, upr = `u-95% CI`)
+
+
+
+
+reg_results %>%
+  
+  mutate(Estimate = round(Estimate, 2), 
+         Est.Error = round(Est.Error, 2), 
+         lwr = round(lwr, 2), 
+         upr = round(upr, 2)) %>%
+  
+      kable(col.names = c("Coefficient", 
+                        "Estimate\\textsuperscript{a}", 
+                        "SD", 
+                        "Lower 95\\% CI", 
+                        "Upper 95\\% CI"), 
+          caption = "Total RNA as a predictor of muscle growth.",
+          format = "latex", 
+          escape = FALSE,
+          booktabs = TRUE) %>%
+  
+   footnote(alphabet = c("The dependent variable is $\\\\Delta$ Muscle thickness (mm)"), 
+       
+             threeparttable = TRUE, 
+             escape = FALSE,
+             general_title = "")
+  
+
+
+```
+
+
+
 In TRAIN, total RNA levels were robustly predicted by UBF levels (after controlling for time), with `r ubf_cor_tot_rna` increases in total RNA per unit tissue weight coninciding with one unit increase in UBF levels (corresponding to one standard deviation; Table 3). In contrast, no evidence was found for a relationship between total RNA and rpS6 protein levels (Table 3). 
 
 In TRAIN, there was a robust positive relationship between rates of increase in total RNA in response to training and muscle growth measured as increases in *m. vastus lateralis* thickness (Table 4, Figure 4A), with changes in total RNA over the course of the training intervention being estimated in each leg using a regression model containing number of sessions as the independent variable. Conversely, there was a tendency towards a negative relationship between average total RNA levels at Session 6 and changes in muscle thickness (Table 4, Figure 4B), with the average total RNA levels estimated as the predicted value at Session 6 (estimated as the intercept-term) from the model used to estimate the rate of total RNA increase per session. 
 
 To assess the robustness of the model for predicting muscle growth, individual relationships between sessions and total RNA levels (Figure 4C) were recalculated after removal of single data points from each participant. The model predicting muscle growth was refitted using new estimates of changes in total RNA abundances and increases thereof per session. Each refitted model resulted in slightly different estimates (displayed as means and 95% CI in Figure 4D). No single data point influenced the r4esults in any meaningful way. Next we assessed the robustness by iteratively removing one participant from the data set, similarly this showed that estimates of the effect of total RNA increase on muscle growth was robust but the effect of average total RNA estimates were more variable (Participant 8 and 3 in Figure 4D). 
+
+
+```{r figure4, fig.height=17.25/2.54, fig.width=17.8/2.54, fig.align="center", fig.cap="Predictions of muscle thickness increase based on total RNA increases (A) and total RNA abundance (B; see Table 4). Values are averaged over values from men and women. Individual plots of estimates total RNA increases over time is shown in C together with results from leave-one-out analysis (D). Leave-one-out analysis shows the effect of removing a single participant (black point and error-bars) and individual values from the total RNA per time estimates where green points represents bounds of the 95\\% CI and yellow points represents mean estimates.", echo=FALSE}
+
+figure4 <- readRDS("./Figures/rds/figure4_x.RDS")
+
+figure4
+
+```
+
+
+
 
 # Discussion
 Here, we confirm that resistance training leads to increased abundance of markers of ribosome density, measured as total RNA, ribosomal RNA subspecies and rpS6 protein in previously untrained individuals compared to a non-training control group.
@@ -687,17 +1027,3 @@ In conclusion, RT-induced ribosome accumulation reached peak values in the initi
 # References
 <div id="refs"></div>
 
-# Figure legends
-
-**Figure 1.** Study design (A) observed training loads in response to Constant and Variable volume protocols (B) and training outcomes (muscle strength, C; muscle thickness D).   
-
-**Figure 2.** Protein (A and B) and mRNA abundances (D and E) of rpS6 and UBF. Black points and error bars represents statistically robust results (a 95% CI not containing 0). C shows western-blots and total protein stains from a representative participant. mRNA data is normalized per total RNA.  
-
-**Figure 3.**  Total RNA and ribosomal RNA subspecies in response to trainin. Total RNA increased compared to non-training controls to post-training (12 sessions) and tended to normalize after de-training (A). There were no robust differences between different volume conditions in the training group (A). B shows primer locations targeting different ribosomal RNA subspecies. Subsets of ribosomal RNA showed robust increases compared to control 48 h after the first session and other after the training period (C). Error bars shows 95% CI. Asterisk in C indicates robust differences between volume conditions (a 95% CI of pairwise differences not containing 0).  
-
-**Figure 4.** 
-Predictions of muscle thickness increase based on total RNA increases (A) and total RNA abundance (B; see Table 4). Values are averaged over values from men and women. Individual plots of estimates total RNA increases over time is shown in C together with results from leave-one-out analysis (D). Leave-one-out analysis shows the effect of removing a single participant (black point and error-bars) and individual values from the total RNA per time estimates where green points represents bounds of the 95% CI and yellow points represents mean estimates.  
-
-
-
-  
