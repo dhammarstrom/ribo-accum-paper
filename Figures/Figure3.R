@@ -8,6 +8,8 @@ bayes <- TRUE
 
 
 source("./R/figure-source.R")
+library(readxl)
+library(tidybayes)
 # source("./R/libs.R")
 
 
@@ -551,23 +553,91 @@ tot_rna_fold_change <- comp_rna %>%
 
 # Time course in the intervention group #####
 
-cond_eff_rna_tc <- readRDS("./data/derivedData/total-rna-analysis/cond_eff_rna_tc.RDS")
+
+
+#### NEW PIECE-WISE FIGURE FROM POSTERIOR DISTRIBUTION ###########
+
+
+tc.m1 <- readRDS( "./data/derivedData/total-rna-analysis/tc.m1.RDS")
 
 
 
-rna_tc_fig <-  cond_eff_rna_tc %>%
-  mutate(cond = factor(cond, levels = c("const", "var"), 
-                       labels = c("Constant volume", 
-                                  "Variable volume")), 
-         cond = fct_rev(cond)) %>%
-  ggplot(aes(time.c, estimate, color = cond, fill = cond)) +
-  geom_line() + 
-   geom_ribbon(aes(ymin = lower, ymax = upper, color = NULL), alpha = 0.2) +
+tc.m1.predictions  <- tc.m1 %>%
+  spread_draws(b_Intercept, b_condvar,
+               b_time1, 
+               b_time2, 
+               b_time3,
+               `b_condvar:time1`,
+               `b_condvar:time2`,
+               `b_condvar:time3`,
+               b_detraindetrain) %>%
+  mutate(
+    s0_const  = b_Intercept, 
+    s1_const  = b_Intercept + (b_time1 * 1), 
+    s2_const  = b_Intercept + (b_time1 * 2), 
+    s3_const  = b_Intercept + (b_time1 * 3),
+    s4_const  = b_Intercept + (b_time1 * 4), 
+    s5_const  = b_Intercept + (b_time1 * 5) + (b_time2 * 1), 
+    s6_const  = b_Intercept + (b_time1 * 6) + (b_time2 * 2), 
+    s7_const  = b_Intercept + (b_time1 * 7) + (b_time2 * 3), 
+    s8_const  = b_Intercept + (b_time1 * 8) + (b_time2 * 4), 
+    s9_const  = b_Intercept + (b_time1 * 9) + (b_time2 * 5) + (b_time3 * 1),
+    s10_const = b_Intercept + (b_time1 * 10) + (b_time2 * 6) + (b_time3 * 2),
+    s11_const = b_Intercept + (b_time1 * 11) + (b_time2 * 7) + (b_time3 * 3),
+    s12_const = b_Intercept + (b_time1 * 12) + (b_time2 * 8) + (b_time3 * 4), 
+    s13_const = b_Intercept + (b_time1 * 12) + (b_time2 * 8) + (b_time3 * 4) + b_detraindetrain, 
+    
+    s0_var = s0_const  + b_condvar,
+    s1_var = s1_const  + (`b_condvar:time1` * 1) + b_condvar, 
+    s2_var = s2_const  + (`b_condvar:time1` * 2) + b_condvar, 
+    s3_var = s3_const  + (`b_condvar:time1` * 3) + b_condvar,
+    s4_var = s4_const  + (`b_condvar:time1` * 4) + b_condvar, 
+    s5_var = s5_const  + (`b_condvar:time1` * 5) + b_condvar +  (`b_condvar:time2` * 1), 
+    s6_var = s6_const  + (`b_condvar:time1` * 6) + b_condvar +  (`b_condvar:time2` * 2), 
+    s7_var = s7_const  + (`b_condvar:time1` * 7) + b_condvar +  (`b_condvar:time2` * 3), 
+    s8_var = s8_const  + (`b_condvar:time1` * 8) + b_condvar +  (`b_condvar:time2` * 4), 
+    s9_var = s9_const  + (`b_condvar:time1` * 9) + b_condvar +  (`b_condvar:time2` * 5) + (`b_condvar:time3` * 1),
+    s10_var= s10_const + (`b_condvar:time1` * 10) + b_condvar + (`b_condvar:time2` * 6) + (`b_condvar:time3` * 2),
+    s11_var= s11_const + (`b_condvar:time1` * 11) + b_condvar  + (`b_condvar:time2` * 7) + (`b_condvar:time3` * 3),
+    s12_var= s12_const + (`b_condvar:time1` * 12) + b_condvar + (`b_condvar:time2` * 8) + (`b_condvar:time3` * 4), 
+    s13_var= s13_const + (`b_condvar:time1` * 12) + b_condvar + (`b_condvar:time2` * 8) + (`b_condvar:time3` * 4) ) %>%
+  dplyr::select(.draw, s0_const:s13_var) %>%
+  pivot_longer(names_to =  "time", values_to = "prediction", 
+               cols = s0_const:s13_var) %>%
+  separate(time, into = c("time", "cond"), sep = "_") %>%
+  
+  mutate(time.c = as.numeric(gsub("s", "", time)), 
+         group = if_else(time.c == 13, paste0("detrain"), paste0("train"))) %>%
+  group_by(time.c, cond, group) %>%
+  summarise(m = median(prediction), 
+            lwr =  quantile(prediction, 0.025), 
+            upr = quantile(prediction, 0.975)) %>%
+  print()
+
+
+
+
+rna_tc_fig <-  tc.m1.predictions %>%
+  filter(time.c < 12.5) %>% 
+  ggplot(aes(time.c, exp(m), group = paste(group, cond))) + 
+  
+  geom_ribbon(aes(ymin = exp(lwr), ymax = exp(upr)), alpha = 0.15) +
+  geom_line(aes(color = cond), size = 1.5) + 
+  
+  geom_errorbar(data = filter(tc.m1.predictions, time.c > 12.5),
+                aes(time.c, exp(m), ymin = exp(lwr), ymax = exp(upr)), width = 0.2, 
+                position = position_dodge(width = 0.6)) + 
+  
+  geom_point(data = filter(tc.m1.predictions, time.c > 12.5),
+             aes(time.c, exp(m), fill = cond), size = 2.5, shape = 21, 
+             position = position_dodge(width = 0.6))  +
+
+
    
    labs(x = "Session", 
         y = bquote('Total RNA (mg'~'ng'^-1*')')) +
    
-   scale_x_continuous(limits = c(0, 12), expand = c(0,0), 
+   scale_x_continuous(limits = c(-0.5, 14), expand = c(0,0), 
                       breaks = c(0, 3, 6, 9, 12)) +
    
    scale_y_continuous(limits = c(250, 650), expand = c(0,0), 

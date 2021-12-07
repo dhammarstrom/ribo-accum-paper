@@ -13,7 +13,7 @@ output:
     latex_engine: xelatex
   word_document:
     reference_docx: resources/manuscript_word_template.docx
-csl: resources/experimental-physiology.csl
+csl: resources/acta-physiologica.csl
 bibliography: resources/bibliography.bib
 header-includes: 
   \usepackage{wasysym}

@@ -198,8 +198,8 @@ time_course <- rna_complete %>%
 # gam models fitted in brms to visualize general patterns in the data. 
 # a piecewise model is fitted to estimate slopes in different parts of the time course.   
 
-# GAM model
-tc.m1 <- brm(bf(log(rna.tissue) ~ cond  + s(time.c, by = cond, k = 7) + (1|participant)), 
+# Piecewise model "full" model
+tc.m1 <- brm(bf(log(rna.tissue) ~ cond  * (time1 + time2 + time3) + detrain + (1|participant)), 
      data = time_course, 
      warmup = 1000, # number of samples before sampling
      iter = 4000,  # number of mcmc iterations 
@@ -223,6 +223,7 @@ tc.m2 <- brm(bf(log(rna.tissue) ~ (time1 + time2 + time3) + detrain + (1|partici
              save_all_pars = TRUE, 
              control = list(adapt_delta = 0.99))
 
+
 # No interaction effect between any segment and cond. Reduce model to 
 # only containing time effects. 
 # Slopes in the different segments can be calculated through the hypothesis 
@@ -241,12 +242,18 @@ saveRDS(tc.m1, "./data/derivedData/total-rna-analysis/tc.m1.RDS")
 pp_check(tc.m2, type = "ecdf_overlay")
 summary(tc.m2)
 
-### A model for "descriptive" analysis of avaiable data points
+
+exp(0.05)
+
+### A model for "descriptive" analysis of available data points including other studies using priors
+prior_summary(tc.m3)
+prior_m3 <- set_prior("normal(0.0168, 0.0426)", class = "b", coef = "time1")
 
 
 
 tc.m3 <- brm(bf(log(rna.tissue) ~ (time1 + time2 + time3) + detrain + (1|participant)), 
              data = time_course, 
+             prior = prior_m3,
              warmup = 1000, # number of samples before sampling
              iter = 4000,  # number of mcmc iterations 
              cores = 4, # number of cores used in sampling
@@ -257,7 +264,66 @@ tc.m3 <- brm(bf(log(rna.tissue) ~ (time1 + time2 + time3) + detrain + (1|partici
 
 
 
+### Plotting the effect of prior information #####################
 
+
+preds  <- tc.m2 %>%
+  spread_draws(b_Intercept,
+               b_time1, 
+               b_time2, 
+               b_time3,
+               b_detraindetrain) %>%
+  mutate(
+    s0  = b_Intercept, 
+    s1  = b_Intercept + (b_time1 * 1), 
+    s2  = b_Intercept + (b_time1 * 2), 
+    s3  = b_Intercept + (b_time1 * 3),
+    s4  = b_Intercept + (b_time1 * 4), 
+    s5  = b_Intercept + (b_time1 * 5) + (b_time2 * 1), 
+    s6  = b_Intercept + (b_time1 * 6) + (b_time2 * 2), 
+    s7  = b_Intercept + (b_time1 * 7) + (b_time2 * 3), 
+    s8  = b_Intercept + (b_time1 * 8) + (b_time2 * 4), 
+    s9  = b_Intercept + (b_time1 * 9) + (b_time2 * 5) + (b_time3 * 1),
+    s10 = b_Intercept + (b_time1 * 10) + (b_time2 * 6) + (b_time3 * 2),
+    s11 = b_Intercept + (b_time1 * 11) + (b_time2 * 7) + (b_time3 * 3),
+    s12 = b_Intercept + (b_time1 * 12) + (b_time2 * 8) + (b_time3 * 4), 
+    s13 = b_Intercept + (b_time1 * 12) + (b_time2 * 8) + (b_time3 * 4) + b_detraindetrain) %>%
+  dplyr::select(.draw, s0:s13) %>%
+  pivot_longer(names_to =  "time", values_to = "prediction", 
+               cols = s0:s13) %>%
+  mutate(time.c = as.numeric(gsub("s", "", time)), 
+         group = if_else(time.c == 13, paste0("detrain"), paste0("train"))) %>%
+  group_by(time.c, group) %>%
+  summarise(m = median(prediction), 
+            lwr =  quantile(prediction, 0.025), 
+            upr = quantile(prediction, 0.975)) %>%
+  print()
+
+
+preds %>%
+  filter(time.c < 12.5) %>% 
+  ggplot(aes(time.c, exp(m), group = paste(group))) + 
+  
+  geom_ribbon(aes(ymin = exp(lwr), ymax = exp(upr)), alpha = 0.15) +
+  geom_line(aes(), size = 1.5) + 
+  
+  geom_errorbar(data = filter(preds, time.c > 12.5),
+                aes(time.c, exp(m), ymin = exp(lwr), ymax = exp(upr)), width = 0.2) + 
+  
+  geom_point(data = filter(preds, time.c > 12.5),
+             aes(time.c, exp(m)), size = 2.5, shape = 21) 
+
+
+
+
+
+
+
+
+summary(tc.m3)
+summary(tc.m2)
+
+pp_check(tc.m3)
 
 saveRDS(cond_eff_rna_tc, "./data/derivedData/total-rna-analysis/cond_eff_rna_tc.RDS")
 

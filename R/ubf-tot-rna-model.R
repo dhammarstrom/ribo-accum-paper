@@ -14,11 +14,11 @@
 # phosphorylation (rapamycin sensitive) increasing its activity and c-Myc induces
 # UBTF transcription increasing protein levels (rapamycin insensitive). 
 # 
-# Below we want to test if rRNA levels are assiciated with UBF levels. Both 
+# Below we want to test if rRNA levels are associated with UBF levels. Both 
 # are increasing with time and therefore, the model controls for the effect of training (time).
 #
 # This script also contain a model of muscle growth were we estimate the effect of increase in rRNA
-# on muscle growth (muscle thicknes change pre- to post training). Post training values are 
+# on muscle growth (muscle thickness change pre- to post training). Post training values are 
 # from both S12 and post 1w (de-training). rRNA transcription is estimated as the average linear increase over 
 # all sessions for each individual and leg. 
 #
@@ -29,8 +29,6 @@
 library(tidyverse)
 library(brms)
 library(bayesplot)
-library(lme4)
-library(readxl)
 
 
 
@@ -62,13 +60,17 @@ rna_complete <- rna %>%
   print()
 
 
+
+
 # Load western blot data 
 
-western_data <- readRDS("./data/derivedData/western-compile/western_data.RDS")
+western_data <- readRDS("./data/derivedData/western-compile/western_data_calibrated.RDS")
+
+
 
 
 west_cont <- western_data %>%
-  
+
   mutate(time.c = gsub("S", "", time), 
          detrain = if_else(time.c == "post1w", "detrain", "train"),
          time.c = if_else(time.c == "post1w", "12", time.c),
@@ -84,29 +86,30 @@ west_cont <- western_data %>%
          time1 = time.c,
          time2 = if_else(time %in% c("S0", "S1", "S4"), 0, time.c - 4),
          time3 = if_else(time %in% c("S0", "S1", "S4", "S5", "S8"), 0, time.c - 8) ) %>%
-  
-  group_by(target, participant, time.c, cond, time, time1, time2, time3) %>%
- # Summarise duplicate values (if any) keep scaled expression for modeling
-   summarise(expression = mean(expression), 
-            expression.scaled = mean(expression.scaled)) %>%
 
-  filter(!is.na(expression)) %>%
+  
+  group_by(target, participant, cond, time.c,  time, time1, time2, time3) %>%
+ # Summarise duplicate values (if any) keep scaled expression for modeling
+   summarise(expression.scaled = mean(expression.scaled, na.rm = TRUE)) %>%
+
+  filter(!is.na(expression.scaled)) %>%
   
   print()
+
+
 
 
 # Combined data from both Total-RNA and western blot analysis
 
 combined_df  <- west_cont %>%
   group_by(target, participant, cond, time) %>%
-  summarise(scaled = mean(expression.scaled, na.rm = TRUE), 
-            raw = mean(expression)) %>%
+  summarise(scaled = mean(expression.scaled, na.rm = TRUE)) %>%
   mutate(target = if_else(target == "t-s6", "rps6", "ubf")) %>%
   
-  pivot_wider(names_from = target, values_from = c(scaled, raw)) %>%
+  pivot_wider(names_from = target, values_from = c(scaled)) %>%
 
   ungroup() %>%
-  dplyr::select(participant, cond, time, scaled_rps6:raw_ubf) %>%
+  dplyr::select(participant, cond, time, rps6:ubf) %>%
   inner_join(rna_complete %>%
                mutate(rna.mg = rna/tissue_weight) %>%
                group_by(participant, leg, time,time.c, time1, time2, time3, cond) %>%
@@ -126,112 +129,37 @@ saveRDS(combined_df, "./data/derivedData/ubf-tot-rna-model/combined_df.RDS")
 
 # This model combines several aspects of our data. We are interested in 
 # the effect of UBF levels. UBF is scaled and should be interpreted in units of 
-# standard deviation. The time variables are used to capture three segmenst of the data 
-# session 1-4, 48, and 8-12. The detraining models the effect of detraining.
+# standard deviation. The time variables are used to capture three segments of the data 
+# session 1-4, 4-8, and 8-12. The de-training models the effect of de-training.
 
-# Preliminary model did not reveal any interaction effect between UBF and time or detraining
+# Preliminary model did not reveal any interaction effect between UBF and time or de-training
 # meaning that the effect of UBF levels are similar over the course of the study. 
 
 ### The ubf model
-comb.m1 <- brm(bf(log.rna ~ scaled_ubf + (time1 +time2 + time3) + detrain + (1|participant/leg)),
+comb.m1 <- brm(bf(log.rna ~ ubf + (time1 + time2 + time3) + detrain + (1|participant/leg)),
               
               warmup = 1000, # number of samples before sampling
               iter = 5000,  # number of mcmc iterations 
               cores = 4, # number of cores used in sampling
               chains = 4, # number of chains
               seed = 5, # seed for reproducible results
-              #    control = list(adapt_delta = 0.95), 
+              control = list(adapt_delta = 0.95), 
+              save_pars = save_pars(all = TRUE),
               data = combined_df)
 
 #### The rpS6 model
 
 
-comb.s6.m1 <- brm(bf(log.rna ~ scaled_rps6 + (time1 +time2 + time3) + detrain + (1|participant/leg)),
+comb.s6.m1 <- brm(bf(log.rna ~ rps6 + (time1 +time2 + time3) + detrain + (1|participant/leg)),
                
                warmup = 1000, # number of samples before sampling
                iter = 5000,  # number of mcmc iterations 
                cores = 4, # number of cores used in sampling
                chains = 4, # number of chains
                seed = 5, # seed for reproducible results
-               #    control = list(adapt_delta = 0.95), 
+               control = list(adapt_delta = 0.95), 
+               save_pars = save_pars(all = TRUE),
                data = combined_df)
-
-
-
-# A naive model not accounting for time 
-# comb.m1 <- brm(bf(log.rna ~ ubf.scaled + time + (1 + time1|participant)),
-#                
-#                warmup = 1000, # number of samples before sampling
-#                iter = 4000,  # number of mcmc iterations 
-#                cores = 4, # number of cores used in sampling
-#                chains = 4, # number of chains
-#                seed = 5, # seed for reproducible results
-#                #    control = list(adapt_delta = 0.95), 
-#                data = combined_df)
-# 
-
-### Check how UBF affects total RNA levels 
-
-# Models containg all participants
-# Naive model (without time)
-
-# m1 <- lmer(log.rna ~ ubf.scaled + (1|participant), 
-#      data = combined_df)
-# 
-# # Continuous time
-# m2 <- lmer(log.rna ~ ubf.scaled + (time1 + time2 + time3) + detrain + (1|participant), 
-#            data = combined_df)
-# # Time factor
-# m3 <- lmer(log.rna ~ ubf.scaled + time  + (1|participant), 
-#            data = combined_df)
-# 
-# 
-# # Models with only TRAIN group
-# m1x <- lmer(log.rna ~ ubf.scaled + (1|participant), 
-#            data = combined_df[combined_df$cond != "ctrl_leg",])
-# 
-# # Continuous time
-# m2x <- lmer(log.rna ~ ubf.scaled + (time1 + time2 + time3) + detrain + (1 + time1|participant), 
-#             data = combined_df[combined_df$cond != "ctrl_leg",])
-# # Time factor
-# m3x <- lmer(log.rna ~ ubf.scaled + time  + (1|participant), 
-#             data = combined_df[combined_df$cond != "ctrl_leg",])
-# 
-# summary(m2x)
-# 
-# 
-# 
-# # Combine estimates 
-# 
-# df <- data.frame(model = c("naive", "continuous", "factor", "naive_TRAIN", "continuous_TRAIN", "factor_TRAIN"), 
-#            est = c(summary(m1)$coef[2,1], 
-#                    summary(m2)$coef[2,1], 
-#                    summary(m3)$coef[2,1], 
-#                    summary(m1x)$coef[2,1], 
-#                    summary(m2x)$coef[2,1], 
-#                    summary(m3x)$coef[2,1]), 
-#            
-#                    lwr = c(confint(m1)[4, 1], 
-#                            confint(m2)[4, 1], 
-#                            confint(m3)[4, 1], 
-#                            confint(m1x)[4, 1], 
-#                            confint(m2x)[6, 1], 
-#                            confint(m3x)[4, 1]), 
-#                    upr = c(confint(m1)[4, 2], 
-#                            confint(m2)[4, 2], 
-#                            confint(m3)[4, 2], 
-#                            confint(m1x)[4, 2], 
-#                            confint(m2x)[6, 2], 
-#                            confint(m3x)[4, 2]))
-# 
-# df %>%
-#   ggplot(aes(x = est, y = model)) +
-#            geom_errorbarh(aes(xmin = lwr, xmax = upr)) +
-#            geom_point() 
-# 
-# plot(m2)
-# 
-
 
 
 # Model checks:
@@ -252,14 +180,14 @@ loo(comb.s6.m1)
 
 # Plot chains for convergance and RE estimates
 
-plot(comb.m1)
+# plot(comb.m1)
 
-# All effects show convergance and are interpretable (e.g. RE > 0).
 
 summary(comb.m1)
+summary(comb.s6.m1)
+# All effects show convergance and are interpretable (e.g. RE > 0).
 
 
-conditional_effects(comb.m1)
 
 
 
@@ -313,6 +241,10 @@ vif.mer <- function (fit) {
 # The dependent variable will be mm change in muscle thickness. We will use
 # estimates from both post and post1w (the model will average out/estimates potential effects).
 
+# package readxl is needed to load raw data, 
+library(readxl); library(lme4)
+
+
 us_data <- rbind(read_excel("./data/ultrasound/ultrasound_data.xlsx") %>%
                    inner_join(read_csv("./data/ultrasound/ultrasound_codekey.csv")) %>%
                    mutate(leg = gsub("VL", "", leg)) %>%
@@ -342,47 +274,27 @@ us_data <- rbind(read_excel("./data/ultrasound/ultrasound_data.xlsx") %>%
   
   print()
 
-# A exploitative plot of linear fits for each participant (RNA to number of sessions).
 
-combined_df %>%
-filter(!(time %in% c("post1w")), 
-       cond != "ctrl_leg") %>% # Removing the de-training estimate as doeas not represent training induced increase.
+### Create a combined data frame with all data (uncalibrated UBF)
 
-  
- # filter(!(participant == "P21" & time == "S12" & leg == "R")) %>%
-  
-  mutate(time.c = time.c - 6) %>% # this centers number of sessions and the intercept becomes
-  # the estimate total RNA (on log scale) in the mid of the training intervention.
-  
-  ggplot(aes(time.c, rna.mg, group = paste(participant, leg))) + geom_point() + 
-  geom_smooth(method = "lm", se = FALSE) +
-  facet_wrap(~ participant)
-
-
-## UBF 
-combined_df %>%
-  filter(!(time %in% c("post1w")), 
-         cond != "ctrl_leg") %>% # Removing the de-training estimate as doeas not represent training induced increase.
-  
-  
-  # filter(!(participant == "P21" & time == "S12" & leg == "R")) %>%
-  
-  mutate(time.c = time.c - 6) %>% # this centers number of sessions and the intercept becomes
-  # the estimate total RNA (on log scale) in the mid of the training intervention.
-  
-  ggplot(aes(time.c, ubf, group = paste(participant, leg))) + geom_point() + 
-  geom_smooth(method = "lm", se = FALSE) +
-  facet_wrap(~ participant)
+combined_df <- rna_complete %>%
+  mutate(rna.mg = rna/tissue_weight) %>%
+  group_by(participant, leg, time,time.c, time1, time2, time3, cond) %>%
+  summarise(rna.mg = mean(rna.mg, na.rm = TRUE)) %>%
+  mutate(detrain = factor(if_else(time == "post1w", "detrain", "train"), 
+                          levels = c("train", "detrain")), 
+         log.rna = log(rna.mg)) %>%
+  filter(cond != "ctrl_leg") %>%
+  print()
 
 
 
-
-
+saveRDS(combined_df, "./data/derivedData/ubf-tot-rna-model/predict_combined_df.RDS")
 
 
 predict_df <- combined_df %>%
   filter(!(time %in% c("post1w")), 
-         cond != "ctrl_leg") %>% # Removing the de-training estimate as doeas not represent training induced increase.
+         cond != "ctrl_leg") %>% # Removing the de-training estimate as does not represent training induced increase.
   
   # Change the intercept to represent average total-RNA. This gives more meaning to the intercept 
   # and it could be use for prediction. It will also remove some of the potential correlation between 
@@ -401,10 +313,9 @@ predict_df <- combined_df %>%
   do(intercept = coef(lm(log(rna.mg) ~ time.c, data = .))[1],
      slope =     coef(lm(log(rna.mg) ~ time.c, data = .))[2], 
      max.resid = max(resid(lm(log(rna.mg) ~ time.c, data = .))^2), 
-     mean.resid =mean(resid(lm(log(rna.mg) ~ time.c, data = .))^2), 
-     ubf.slope = coef(lm(log(ubf) ~ time.c, data = .))[2]) %>% 
+     mean.resid =mean(resid(lm(log(rna.mg) ~ time.c, data = .))^2)) %>% 
 
-  unnest(c(intercept, slope, max.resid, mean.resid, ubf.slope)) %>%
+  unnest(c(intercept, slope, max.resid, mean.resid)) %>%
   
   
 # Join with the ultra sound data 
@@ -438,23 +349,16 @@ saveRDS(predict_df, "./data/derivedData/ubf-tot-rna-model/predict_df.RDS")
 # Explorative plot of the relationship between slope and intercept 
 
 predict_df %>%
-  ggplot(aes(ubf.slope, slope)) + geom_point() +
+  ggplot(aes(intercept, slope)) + geom_point() +
   geom_smooth(method = "lm")
 
 # No relationship between slope and intercept (RNA). This is a good sign to avoid 
-# colinearity. But there is a tendency toward positive correlation 
-# between UBF and RNA slopes. We next check if this is a problem in the biggest model and subsequent 
+# co-linearity. We next check if this is a problem in the biggest model and subsequent 
 # simpler ones. 
 # Fitting is done in lme4 first to check potential issues. 
 
-# Find participantrs with large deviations from the linera model, do the affect 
-# estimates
-
-
-predict_df %>%
-  ggplot(aes(ubf.slope, slope, label = paste(participant, leg))) + geom_point() +
-  ggrepel::geom_text_repel() + geom_smooth(method = "lm")
-
+# Find participants with large deviations from the linear model, do the affect 
+# estimates?
 
 
 
@@ -462,7 +366,7 @@ predict_df %>%
   ggplot(aes(participant, max.resid)) + geom_point()  
 
 
-m0 <- lmer(mm_incr  ~ pre +  ubf.slope + slope +  (1|participant), 
+m0 <- lmer(mm_incr  ~ pre +  slope +  (1|participant), 
            data = predict_df, REML = FALSE)
 
 
@@ -471,17 +375,19 @@ m1 <- lmer(mm_incr  ~ pre  + (1|participant),
 
 
 summary(m0)
-anova(m0, m1)
+anova(m0, m1) 
+# Suggests slope is important, and possibly pre to control for regression to 
+# the mean
 
 
-m2 <- lmer(mm_incr  ~  pre +  intercept + slope + ubf.slope + (1|participant/leg), 
+m2 <- lmer(mm_incr  ~  pre +  intercept + slope + (1|participant/leg), 
            data = predict_df, REML = FALSE) 
-m2.2 <- lmer(mm_incr  ~ time +  sex +  intercept + slope + (1|participant/leg), 
+m2.2 <- lmer(mm_incr  ~ pre + sex + intercept + slope + (1|participant/leg), 
            data = predict_df, REML = FALSE) 
 m3 <- lmer(mm_incr  ~   intercept + slope + (1|participant/leg), 
            data = predict_df, REML = FALSE) 
 
-summary(m2)
+summary(m2.2)
 
 
 plot(m2.2)
@@ -496,15 +402,8 @@ anova(m1 ,m2, m2.2,  m3)
 
 # Preliminary models suggests that sex/pre should be included in the modeling 
 
-# Fitting with brms
-summary(m1)
 
-
-
-
-
-
-hyp.pre.m1 <- brm(bf(mm_incr  ~   sex + intercept + slope + (1|participant/leg)),
+hyp.pre.m1 <- brm(bf(mm_incr  ~ sex + intercept + slope + (1|participant)),
                   
                warmup = 4000, # number of samples before sampling
                iter = 10000,  # number of mcmc iterations 
@@ -519,7 +418,7 @@ hyp.pre.m1 <- brm(bf(mm_incr  ~   sex + intercept + slope + (1|participant/leg))
 
 summary(hyp.pre.m1)
 
-hyp.pre.m2 <- brm(bf(mm_incr  ~  time + pre  + sex +  intercept + slope + (1|participant/leg)),
+hyp.pre.m2 <- brm(bf(mm_incr  ~  pre  + intercept + slope + (1|participant)),
            
                   warmup = 4000, # number of samples before sampling
                   iter = 10000,  # number of mcmc iterations 
@@ -534,7 +433,7 @@ hyp.pre.m2 <- brm(bf(mm_incr  ~  time + pre  + sex +  intercept + slope + (1|par
 summary(hyp.pre.m2)
 
 
-hyp.pre.m3 <- brm(bf(mm_incr  ~   sex +  intercept + slope + (1|participant/leg)),
+hyp.pre.m3 <- brm(bf(mm_incr  ~   pre + sex +  intercept + slope + (1|participant)),
                   
                   warmup = 4000, # number of samples before sampling
                   iter = 10000,  # number of mcmc iterations 
@@ -551,7 +450,7 @@ hyp.pre.m3 <- brm(bf(mm_incr  ~   sex +  intercept + slope + (1|participant/leg)
 
 # Posterior predictive checks
 pp_check(hyp.pre.m1, type = "ecdf_overlay")
-pp_check(hyp.pre.m1, type = "stat", stat = "median")
+pp_check(hyp.pre.m3, type = "stat", stat = "median")
 # The data is in agreement with what the model predicts, good.
 
 
@@ -564,11 +463,11 @@ loo(hyp.pre.m3, moment_match = TRUE)
 
 
 # Plot chains for convergance and RE estimates
-plot(hyp.pre.m1)
+plot(hyp.pre.m3)
 
 # All effects show convergance and are interpretable (e.g. RE > 0).
 
-summary(hyp.pre.m1)
+summary(hyp.pre.m3)
 
 
 
@@ -632,12 +531,12 @@ for(i in 1:length(samples)) {
     # and it could be use for prediction. It will also remove some of the potential correlation between 
     # the intercept and slope.
     
-    mutate(samples = paste(sep = "_", participant, leg, time), 
+    mutate(sample = paste(sep = "_", participant, leg, time), 
            time.c = time.c - 6 ) %>% # this centers number of sessions and the intercept becomes
     # the estimate total RNA (on log scale) in the mid of the training intervention.
     
     # Filter a specific sample in the i:th permutation
-    filter(samples != samples[i]) %>%
+    filter(sample != samples[i]) %>%
 
     
     group_by(participant, leg) %>%
@@ -675,48 +574,51 @@ for(i in 1:length(samples)) {
            intercept = scale(exp(intercept))) 
   
   
-  m1 <- lmer(mm_incr  ~  slope + (1|participant/leg),
+  m1 <- lmer(mm_incr  ~  slope + (1|participant),
              data = predict_df, REML = FALSE) 
  
-  m2 <- lmer(mm_incr  ~  sex + slope + (1|participant/leg),
+  m2 <- lmer(mm_incr  ~  sex + slope + (1|participant),
              data = predict_df, REML = FALSE) 
   
-  m3 <- lmer(mm_incr  ~  sex + slope + intercept + (1|participant/leg),
+  m3 <- lmer(mm_incr  ~  pre + sex + slope + intercept + (1|participant),
              data = predict_df, REML = FALSE) 
   
   
   
-resdf <-   data.frame(model = c("m1", rep("m2", 2), rep("m3", 3)), 
+resdf <-   data.frame(model = c("m1", rep("m2", 2), rep("m3", 4)), 
              sample = samples[i], 
-             coef = c("slope", "sex", "slope", "sex", "slope", "intercept"), 
+             coef = c("slope", "sex", "slope", "sex", "slope", "intercept", "pre"), 
              estimate = c(summary(m1)$coef[2, 1], 
                           summary(m2)$coef[2, 1], 
                           summary(m2)$coef[3, 1], 
-                          summary(m3)$coef[2, 1], 
-                          summary(m3)$coef[3, 1],
-                          summary(m3)$coef[4, 1]), 
+                          summary(m3)$coef[3, 1], 
+                          summary(m3)$coef[4, 1],
+                          summary(m3)$coef[5, 1],
+                          summary(m3)$coef[2, 1]), 
              t_val =  c(summary(m1)$coef[2, 3], 
                         summary(m2)$coef[2, 3], 
                         summary(m2)$coef[3, 3],
-                        summary(m3)$coef[2, 3], 
-                        summary(m3)$coef[3, 3],
-                        summary(m3)$coef[4, 3]), 
+                        summary(m3)$coef[3, 3], 
+                        summary(m3)$coef[4, 3],
+                        summary(m3)$coef[5, 3], 
+                        summary(m3)$coef[2, 3]), 
              
              
-             lwr =  c(confint.merMod(m1, method = "Wald")[5, 1], 
+             lwr =  c(confint.merMod(m1, method = "Wald")[4, 1], 
+                      confint.merMod(m2, method = "Wald")[4, 1],
                       confint.merMod(m2, method = "Wald")[5, 1],
-                      confint.merMod(m2, method = "Wald")[6, 1],
-                      
                       confint.merMod(m3, method = "Wald")[5, 1],
                       confint.merMod(m3, method = "Wald")[6, 1],
-                      confint.merMod(m3, method = "Wald")[7, 1]),
+                      confint.merMod(m3, method = "Wald")[7, 1], 
+                      confint.merMod(m3, method = "Wald")[4, 1]),
                       
-             upr =  c(confint.merMod(m1, method = "Wald")[5, 2],
-                      confint.merMod(m2, method = "Wald")[5, 2], 
-                      confint.merMod(m2, method = "Wald")[6, 2],
+             upr =  c(confint.merMod(m1, method = "Wald")[4, 2],
+                      confint.merMod(m2, method = "Wald")[4, 2], 
+                      confint.merMod(m2, method = "Wald")[5, 2],
                       confint.merMod(m3, method = "Wald")[5, 2],
                       confint.merMod(m3, method = "Wald")[6, 2],
-                      confint.merMod(m3, method = "Wald")[7, 2]))
+                      confint.merMod(m3, method = "Wald")[7, 2],
+                      confint.merMod(m3, method = "Wald")[4, 2]))
 
   results[[i]] <- resdf
   
@@ -789,48 +691,51 @@ for(i in 1:length(participants)) {
            intercept = scale(exp(intercept))) 
   
   
-  m1 <- lmer(mm_incr  ~  slope + (1|participant/leg),
+  m1 <- lmer(mm_incr  ~  slope + (1|participant),
              data = predict_df, REML = FALSE) 
   
-  m2 <- lmer(mm_incr  ~  sex + slope + (1|participant/leg),
+  m2 <- lmer(mm_incr  ~  sex + slope + (1|participant),
              data = predict_df, REML = FALSE) 
   
-  m3 <- lmer(mm_incr  ~  sex + slope + intercept + (1|participant/leg),
+  m3 <- lmer(mm_incr  ~  pre + sex + slope + intercept + (1|participant),
              data = predict_df, REML = FALSE) 
   
   
   
-  resdf <-   data.frame(model = c("m1", rep("m2", 2), rep("m3", 3)), 
+  resdf <-   data.frame(model = c("m1", rep("m2", 2), rep("m3", 4)), 
                         participant = participants[i], 
-                        coef = c("slope", "sex", "slope", "sex", "slope", "intercept"), 
+                        coef = c("slope", "sex", "slope", "sex", "slope", "intercept", "pre"), 
                         estimate = c(summary(m1)$coef[2, 1], 
                                      summary(m2)$coef[2, 1], 
                                      summary(m2)$coef[3, 1], 
-                                     summary(m3)$coef[2, 1], 
-                                     summary(m3)$coef[3, 1],
-                                     summary(m3)$coef[4, 1]), 
+                                     summary(m3)$coef[3, 1], 
+                                     summary(m3)$coef[4, 1],
+                                     summary(m3)$coef[5, 1],
+                                     summary(m3)$coef[2, 1]), 
                         t_val =  c(summary(m1)$coef[2, 3], 
                                    summary(m2)$coef[2, 3], 
                                    summary(m2)$coef[3, 3],
-                                   summary(m3)$coef[2, 3], 
-                                   summary(m3)$coef[3, 3],
-                                   summary(m3)$coef[4, 3]), 
+                                   summary(m3)$coef[3, 3], 
+                                   summary(m3)$coef[4, 3],
+                                   summary(m3)$coef[5, 3], 
+                                   summary(m3)$coef[2, 3]), 
                         
                         
-                        lwr =  c(confint.merMod(m1, method = "Wald")[5, 1], 
+                        lwr =  c(confint.merMod(m1, method = "Wald")[4, 1], 
+                                 confint.merMod(m2, method = "Wald")[4, 1],
                                  confint.merMod(m2, method = "Wald")[5, 1],
-                                 confint.merMod(m2, method = "Wald")[6, 1],
-                                 
                                  confint.merMod(m3, method = "Wald")[5, 1],
                                  confint.merMod(m3, method = "Wald")[6, 1],
-                                 confint.merMod(m3, method = "Wald")[7, 1]),
+                                 confint.merMod(m3, method = "Wald")[7, 1], 
+                                 confint.merMod(m3, method = "Wald")[4, 1]),
                         
-                        upr =  c(confint.merMod(m1, method = "Wald")[5, 2],
-                                 confint.merMod(m2, method = "Wald")[5, 2], 
-                                 confint.merMod(m2, method = "Wald")[6, 2],
+                        upr =  c(confint.merMod(m1, method = "Wald")[4, 2],
+                                 confint.merMod(m2, method = "Wald")[4, 2], 
+                                 confint.merMod(m2, method = "Wald")[5, 2],
                                  confint.merMod(m3, method = "Wald")[5, 2],
                                  confint.merMod(m3, method = "Wald")[6, 2],
-                                 confint.merMod(m3, method = "Wald")[7, 2]))
+                                 confint.merMod(m3, method = "Wald")[7, 2],
+                                 confint.merMod(m3, method = "Wald")[4, 2]))
   
   results2[[i]] <- resdf
   
@@ -843,7 +748,7 @@ for(i in 1:length(participants)) {
 
 # m1 : mm_incr ~ slope
 # m2 : mm_incr ~ sex + slope
-# m3 : mm_incr ~ sex + slope + intercept
+# m3 : mm_incr ~ pre + sex + slope + intercept
 
 
 res <- bind_rows(results) %>%
@@ -857,26 +762,6 @@ res2 <- bind_rows(results2)
 
 saveRDS(list(loo.participant = res2 , 
              loo.sample = res), "./data/derivedData/ubf-tot-rna-model/leave-one-out.RDS")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

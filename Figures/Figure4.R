@@ -39,8 +39,8 @@ res <- loo.results$loo.sample %>%
   inner_join(leg) %>%
   
   mutate(Participant = factor(participant, 
-                              levels = paste0("P", c(seq(1:7), 19, 21, 22, 23)), 
-                              labels = paste0("P", seq(1:11))), 
+                              levels = c("Full\nmodel", paste0("P", c(seq(1:7), 19, 21, 22, 23))), 
+                              labels = c("Full\nmodel", paste0("P", seq(1:11)))), 
          Participant = fct_rev(Participant)) %>%
 
   
@@ -50,21 +50,55 @@ res <- loo.results$loo.sample %>%
 res2 <- loo.results$loo.participant %>%
   inner_join(leg) %>%
   mutate(Participant = factor(participant, 
-                              levels = paste0("P", c(seq(1:7), 19, 21, 22, 23)), 
-                              labels = paste0("P", seq(1:11))), 
+                              levels = c("Full\nmodel", paste0("P", c(seq(1:7), 19, 21, 22, 23))), 
+                              labels = c("Full\nmodel", paste0("P", seq(1:11)))), 
          Participant = fct_rev(Participant)) %>%
   
   
-  filter(model == "m3", coef != "sex") %>%
+  filter(model == "m3", !(coef %in% c("sex", "pre"))) %>%
   mutate(coef = factor(coef, levels = c("slope", "intercept"), 
                        labels = c("Total RNA increase\nper session", 
                                   "Average total RNA\n(Session 6)"))) %>%
     print()
   
 
+## Predictions from the model
+
+# get predictions from the model
+hyp.pre.m1 <- readRDS("./data/derivedData/ubf-tot-rna-model/hyp_pre_m3.RDS")
+
+m.coefs <- summary(hyp.pre.m1)
+
+full_model_estimates <- data.frame(Participant = "Full\nmodel",
+                                   stat = c("estimate", 
+                                            "lwr", 
+                                            "upr", 
+                                            "estimate", 
+                                            "lwr", 
+                                            "upr"),
+                                    coef = c(rep("slope",3), 
+                                             rep("intercept", 3)), 
+                                    estimates = c(m.coefs$fixed[5, 1], 
+                                                  m.coefs$fixed[5, 3], 
+                                                  m.coefs$fixed[5, 4], 
+                                                  m.coefs$fixed[4, 1], 
+                                                  m.coefs$fixed[4, 3], 
+                                                  m.coefs$fixed[4, 4])) %>%
+  mutate(coef = factor(coef, levels = c("slope", "intercept"),
+                       labels = c("Total RNA increase\nper session", 
+                                  "Average total RNA\n(Session 6)"))) %>%
+  pivot_wider(names_from = stat, 
+              values_from = estimates) %>%
+  mutate(Participant = factor(Participant, 
+                              levels = c("Full\nmodel", paste0("P", c(seq(1:7), 19, 21, 22, 23))), 
+                              labels = c("Full\nmodel", paste0("P", seq(1:11)))), 
+         Participant = fct_rev(Participant)) %>%
+  print()
+
+
 
 loo_panel <- res %>%
-  filter(stat != "t_val", model == "m3", coef != "sex") %>%
+  filter(stat != "t_val", model == "m3", !(coef %in% c("sex", "pre"))) %>%
   
   mutate(coef = factor(coef, levels = c("slope", "intercept"), 
                        labels = c("Total RNA increase\nper session", 
@@ -87,9 +121,28 @@ loo_panel <- res %>%
   geom_errorbarh(data = res2, aes(fill = NULL, x = estimate, y = Participant, 
                                   xmax =  upr, xmin = lwr), 
                  height = 0) + 
+  
+  
+  # Adds full model estimates
+  
+  geom_errorbarh(data = full_model_estimates, 
+                 aes(fill = NULL, x = estimate, y = Participant, 
+                     xmax =  upr, xmin = lwr), 
+                 height = 0) + 
+  
+  
+  geom_point(data = full_model_estimates, 
+             aes(estimate, Participant, fill = NULL), 
+             fill = color.scale[3], 
+             size = 3,
+             shape = 21) +
+
+  
+  
  
    labs(x = "Estimated change in muscle thickness (mm)\nper one unit change in predictor", 
         y = "Participant") +
+  scale_y_discrete(limits = c("Full\nmodel", paste0("P", seq(1:11)))) +
   
   plot_theme() + 
   theme(strip.background = element_rect(color = "white", fill = "white"),
@@ -191,13 +244,11 @@ prediction_intercept <- predict_df %>%
         legend.position = "none")
 
 
-# Combining data to show estimates of each predictor when leavining one out
+# Combining data to show estimates of each predictor when leaving one out
+combined_df <- readRDS("./data/derivedData/ubf-tot-rna-model/predict_combined_df.RDS")
 
 
-combined_df <- readRDS("./data/derivedData/ubf-tot-rna-model/combined_df.RDS")
-
-
-# A exploitative plot of linear fits for each participant (RNA to number of sessions).
+# A explorative plot of linear fits for each participant (RNA to number of sessions).
 
 rna_to_time_estimates <- combined_df %>%
   filter(!(time %in% c("post1w"))) %>% # Removing the de-training estimate as doeas not represent training induced increase.
