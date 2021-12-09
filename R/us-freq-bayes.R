@@ -171,14 +171,14 @@ m1.us_freq <- lmer(thickness ~  tx + (1|participant/leg),
 anova(m0.us_freq, m1.us_freq)
 # Favors inclusion of random intercept per leg. 
 
-em <- emmeans(m2.us_freq, specs = ~ time_pp * group  + time_pp:group:detrain)
+
 
 # Combine data for plotting 
 
 # Emmeans can be used as the contrats specified are combinations of factors. 
 # emmeans::emmeans is used to create a emmGrid object:
 
-em <- emmeans(m1.us_freq, specs =  ~ tx)
+em <- emmeans::emmeans(m1.us_freq, specs =  ~ tx)
 
 # To create contrasts, each levels can be specified by a indicator vector. 
 
