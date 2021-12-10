@@ -111,10 +111,10 @@ prot_fold_change <- tx_results_western %>%
   theme(strip.placement = "top",
         strip.background = element_rect(fill = "white", color = "white"), 
         strip.text = element_text(size = 7, hjust = 0),
-        legend.position = c(0.65, 0.5),
+        legend.position = "bottom",
         legend.text = element_text(size = 7, margin = margin(t = 0.1, b= 0.1,r = 0.1,l = 0.1, unit = "pt")),
         legend.key.size = unit(0, "cm"),
-        legend.margin = margin(-0.5, 0, -0.5, 0, "cm"),
+        legend.margin = margin(-0.5, 0, 0, 0, "cm"),
         legend.spacing.x = unit(0.1, 'cm'),
         legend.direction = "vertical",
         axis.title.x = element_blank()) 
@@ -144,7 +144,8 @@ prot_interaction <- tx_results_western %>%
   facet_wrap( ~ target, ncol = 1, strip.position = "top") +
   
   scale_color_manual(values = c("gray50", "gray10")) +
-  
+  scale_x_continuous(breaks = c(0.5, 1, 1.5, 2, 2.5, 3), 
+                     labels = c("", 1, "", 2, "", 3)) +
   plot_theme() +
   theme(strip.background = element_rect(color = "white", fill = "white"), 
 
@@ -243,7 +244,7 @@ volume_diff_mrna <-   rrna_timecourse$estimated_diff %>%
     scale_color_manual(values = c("gray50", "gray10")) +
     scale_y_continuous(limits = c(0.2, 1.8), 
                        breaks = c(0.5, 1, 1.5)) +
-  scale_x_discrete(labels = c("0", "1", "4", "5", "8", "9", "12", "\nDe-train")) +
+  scale_x_discrete(labels = c("0", "1", "4", "5", "8", "9", "12", "\nDe-\ntrain")) +
     
     plot_theme() +
     theme(strip.background = element_rect(color = "white", fill = "white"), 
@@ -270,12 +271,13 @@ figure2 <- plot_grid(
 
     
   plot_grid(prot_fold_change, prot_interaction, 
-                     ncol = 2, rel_widths = c(0.5, 0.5)), 
+                     ncol = 2, rel_widths = c(0.5, 0.5)),
+  NULL,
   reps_west,
   
   plot_grid(mrna_vs_ctrl, volume_diff_mrna, ncol = 2),
   
-  ncol = 1, rel_heights = c(0.75/2, 0.25, 0.75/2)) +
+  ncol = 1, rel_heights = c(0.75/2, 0.01, 0.25, 0.75/2)) +
   
 
   
@@ -294,7 +296,7 @@ saveRDS(figure2, "./Figures/rds/figure2.RDS")
 # height of figure = full page = 23 cm
 
 
-ggsave("figures/figure2.pdf", plot = figure2, width = 8.9, height = 23 * 0.75, 
+ggsave("figures/figure2.pdf", plot = figure2, width = 7.7, height = 23 * 0.75, 
        dpi = 600,
        units = "cm", device=cairo_pdf)
 

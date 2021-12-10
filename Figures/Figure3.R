@@ -347,7 +347,7 @@ for(i in 1:length(targets)) {
     geom_point(data = filter(dat, time == "post1w"), 
                position = position_nudge(x = 1)) +
     
-    scale_color_manual(values = c(color.scale[1], color.scale[2])) +
+    scale_color_manual(values = c(color.scale[2], color.scale[1])) +
     
     scale_y_continuous(limits = c(floor(min(dat$emmean, na.rm = TRUE)), 
                                   ceiling(max(dat$emmean, na.rm = TRUE))),
@@ -612,17 +612,20 @@ tc.m1.predictions  <- tc.m1 %>%
   summarise(m = median(prediction), 
             lwr =  quantile(prediction, 0.025), 
             upr = quantile(prediction, 0.975)) %>%
+  mutate(cond = factor(cond, levels = c("const", "var"), 
+                       labels = c("CONST", "VAR"))) %>%
   print()
 
 
 
 
 rna_tc_fig <-  tc.m1.predictions %>%
+
   filter(time.c < 12.5) %>% 
   ggplot(aes(time.c, exp(m), group = paste(group, cond))) + 
   
   geom_ribbon(aes(ymin = exp(lwr), ymax = exp(upr)), alpha = 0.15) +
-  geom_line(aes(color = cond), size = 1.5) + 
+  geom_line(aes(color = cond), size = 1.2) + 
   
   geom_errorbar(data = filter(tc.m1.predictions, time.c > 12.5),
                 aes(time.c, exp(m), ymin = exp(lwr), ymax = exp(upr)), width = 0.2, 
@@ -689,11 +692,11 @@ figure3 <- plot_grid(
 
 saveRDS(figure3, "./Figures/rds/figure3.RDS")
 
-# Width of figure = 1x columns 8.9 cm
+# Width of figure = 1x columns 7.7 cm
 # height of figure = full page = 23 cm
 
 
-ggsave("figures/figure3.pdf", plot = figure3, width = 8.9*2, height = 23 * 0.75, 
+ggsave("figures/figure3.pdf", plot = figure3, width = 7.7 * 2, height = 23 * 0.75, 
        dpi = 600,
        units = "cm", device=cairo_pdf)
 

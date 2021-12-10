@@ -587,7 +587,7 @@ saveRDS(figure1, "./Figures/rds/figure1.RDS")
 # height of figure = full page = 23 cm
 
 
-ggsave("figures/figure1.pdf", plot = figure1, width = 8.9*2, height = 23 * 0.75, 
+ggsave("figures/figure1.pdf", plot = figure1, width = 7.7*2, height = 23 * 0.75, 
        dpi = 600,
        units = "cm", device=cairo_pdf)
 
