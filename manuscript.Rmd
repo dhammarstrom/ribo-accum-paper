@@ -1104,7 +1104,7 @@ dxa_whole <- read_excel("./data/tr010_dxa_standarddefinitions.xlsx") %>%
 
 read_excel("./data/tr010_age_participant.xlsx") %>%
   inner_join(dxa_whole) %>%
-  mutate(age = difftime(recruited, dob)/365.2425, 
+  mutate(age = age, 
          bmi = weight/(height/100)^2) %>%
   dplyr::select(participant, group, height, weight,age, sex,bmi, fat_rel) %>%
 
