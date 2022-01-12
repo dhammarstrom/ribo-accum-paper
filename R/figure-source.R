@@ -10,13 +10,16 @@ library(ggridges)
 library(ggrepel)
 library(ggtext)
 # Color scale 
-color.scale <- c("#000000", "#E69F00", "#56B4E9", "#009E73", 
-                 "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+# color.scale <- c("#000000", "#E69F00", "#56B4E9", "#009E73", 
+#                  "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+# Updated colors for Acta Physiologica
+color.scale <- c("#ffffff", "#4f81bd", "#7f7f7f", "#b42a51")
 
 
 
-multiple.color <- "#636363"
-single.color <- "#bdbdbd"
+multiple.color <- "#4f81bd"
+single.color   <- "#7f7f7f"
 
 # line sizes
 line_size <- 0.3
@@ -25,8 +28,6 @@ line_size <- 0.3
 label.size <- 10
 
 text.size <- 8
-
-
 
 sequential.colors <- c("#1b9e77",
                        "#d95f02",
@@ -42,6 +43,7 @@ plot_theme <- function() {
   theme_bw() +
     theme(panel.grid = element_blank(), 
           panel.border = element_blank(), 
+          panel.background = element_rect(fill = "#fefeda"),
           axis.line = element_line(size = line_size), 
           axis.ticks = element_line(size = line_size), 
           axis.text = element_text(color = "black", size = 7), 
@@ -51,7 +53,6 @@ plot_theme <- function() {
           legend.margin = margin(t = 0, r = 1, b = 1, l = 1, unit = "pt"),
           legend.key = element_rect(fill = "white"),
           legend.position = c(0.85, 0.9)) 
-  
   
   
 }
