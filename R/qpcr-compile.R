@@ -20,13 +20,15 @@ targets <- c("UBTF F4R4",
              "rRNA18S F2R2",
              "rRNA45S F1R1",
              "RPL32 F1R1", 
+             "RPL3 F2R2",
+             "RPL3L F4R4",
              "rpS6 F2R2",
              "MyHC1 F1R1",
              "MyHC2A F5R5",
              "MyHC2X F5R5",
              "Lambda KIT")  
 
-batch.filtered<- batch %>%
+batch.filtered <- batch %>%
   filter(target %in% targets) %>%
   print()
 

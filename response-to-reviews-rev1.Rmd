@@ -1,0 +1,112 @@
+---
+title: "APH-2021-12-0652: Response to the reviewers"
+author: "Daniel Hammarström"
+date: "2022-01-17"
+output: pdf_document
+---
+
+## Referee 1
+
+
+> This manuscript investigates the induction of ribosome biogenesis and accumulation of RNA/ribosomes during the early phase of resistance training. Subjects performed unilateral RE bilaterally but with differing loading protocols. One leg trained with a constant volume whereas the other trained with variable volume. Control subjects were biopsied at relevant time points. The manuscript presents evidence in favor of that skeletal muscle in the naïve state is very responsive with respect to ribosome biogenesis following acute RE. With repeated training sessions this induction is maintained but not further stimulated. Most of the effect on total RNA was seen during the first training block. UBF levels were related to RNA accumulation and rate of total RNA accumulation predicted RT-induced muscle hypertrophy. With eight days of detraining, around 20% of total RNA was lost, indicating that the elevated RNA pool needs to be maintained not to decrease.
+The manuscript is highly interesting and ambitious in its design. I think that it adds to the published literature and could potentially be a future important reference piece. However, I have some concerns and comments that I’d like for the authors to address, as I think that they can improve the manuscript further.
+
+
+> The western blot membranes in the paper does not really translate into the presented data. In my opinion the bands look rather faint and equal in intensity across the time course. Could the authors perhaps provide raw data and membranes for RPS6 and UBF just for the reviewers?
+
+> Is pre-rRNA 47S ETS and 45S ETS per unit tissue weight a previously reported way to present qPCR data? Does the data look the same in relation to 1 or more house keeping genes?
+
+One transcribed pre-rRNA results in a single end product, one ribosome and in the context of protein synthesis the amount of ribosomes per cell or tissue mass is highly correlated with protein synthesis (Milward 1976, West 2016). In contrast to rRNA processing, mRNA transcription and translation could to some degree be seen as competitive between different mRNA. 
+
+This translates to different normalization strategies. The use of a houskeeping gene when investigating ribosomal biogenesis is not interesting as it does not 
+
+> Could the authors please comment on the apparent disconnect between increase in RNA and RPS6 protein levels?
+
+
+
+> The concept that the increase in RNA content predicts subsequent hypertrophy is very interesting. Even more intriguing is the finding that total RNA mid training negatively correlates to muscle hypertrophy is fascinating! I would encourage the authors to deepen the discussion on these key data points, especially in the light of more and more evidence in favor of ribosome specialization. Could a high percentage of new ribosomes be advantageous for growth in more ways than just contributing greater numbers?
+
+The referee raises an interesting point 
+
+> Please comment on that UBF levels where maintained at the detraining time point but total RNA decreasing. Would it be relevant to analyze UBF phosphorylation?
+
+> The fact that RNA decreased at the detraining time point is interesting and indicates the importance of actively maintaing translational capacity not to loose it. I think the discussion could benefit from including a short section of the role for ribophagy in this setting?
+
+
+> The methods in the abstract must be improved. In its current form it lacks key information such as training duration, the number of controls are states as n=7 but n=8 in the M&M section and I’d like for the authors to try and specify biopsy time points.
+
+
+> Page 3, line 48-49. I encourage the authors to consider including an additional reference (Figueiredo et al 2021 J Phys). This paper shows the specific response of ribosome biogenesis in response to RE and not Endurance type exercise.
+
+> Page 4, line 8: Please clarify “numberical lowering”. Could this be rephrased?
+
+> Page 4, line 10: Double “..”
+
+> Page 4, line 15: Double “..”
+
+> Page 4, line 26: Should “to” be removed?
+
+> Page 11, line 20: n=7 or 8? Please check abstract
+
+> Page 11, line 35: Should “a” be removed? Please double check if it’s 7 or 8 days of detraining. Abstract states 8.
+
+> Page 12, line 19: please clarify “leg being training in the rest period between sets in the first leg. Does this means that they training continuously without break?
+
+> Page 13, line 52: 2-4 passes were made with the Bard Magnum 12-14 gauge needles but only 1-2 aliquots of the samples were frozen. What happened to the other material? If I misunderstood, can the text be rewritten for clarity?
+
+> Page 14, line 8: Was the spike-in used to normalize RNA extraction efficiency? If yes, please state this clearly.
+
+> Page 14, line 49: Does “normalized” refer to denatured?
+
+> Page 15, line 15: Does the authors refer to amplicon size when they write primer sizes?
+
+> Page 31, Figure legends: I think that the figure legends could benefit from a bit more substance. For example Fig 1A, perhaps indicate bar color as black (CONST) and yellow (VAR)?
+
+
+
+## Referee: 2
+
+
+> The authors sought to perform a time course investigation of ribosome density and biogenesis markers after knee extensor training.  Phenotype variables were also assessed.  Training led to increases in muscle growth (VL thickness) as well as in total RNA, rRNA, UBF and rpS6.  Training volume did not play a role in these adaptations.  Interestingly, the rate of total RNA increases predicted hypertrophy.  Likewise, training cessation led to decrements in total RNA abundance.
+I love this study.  This continues to contribute to our knowledge regarding the role of ribosome biogenesis in muscle hypertrophy, and is delicate human work with multiple time point biopsies.
+I have minor comments in order of appearance, and congratulate the authors on their fine work.
+
+
+
+>  ABSTRACT: Reads well and concise.  Nice work, and no comments.
+
+> INTRODUCTION 
+- Line 7, minor: “promotes” should read as “promote”
+- Line 14, minor: “with subsequent repeated bouts” should read as “and subsequent repeated bouts”
+- Line 18, minor: “resting synthetic rate of muscle protein” better reads as “basal muscle protein synthesis rates”
+- Lines 48-50, minor: “bouts lead to accumulation of mature rRNA thus also total RNA and presumably functional ribosomes”…this sentence is long, and the word “thus” seems to make it a run-on.  I’d rephrase the sentence to read more coherently.
+Page 4
+- Lines 10 and 15, minor: each sentence has two stops.
+- Line 33, minor: no need to use the phrase “per se”
+RESULTS
+- Line 51 (and throughout the results), clarification: is “9.2%-point difference” the same as “9.2% difference”?  If so, adjust and remove “point” from all descriptors as this is confusing.
+- Other than this, the results, while dense and full of data, are well-written.
+DISCUSSION
+Page 7
+- Line 17, minor: again, “per se” can be removed.
+- Line 19, minor: “was not affected” better reads as “were not affected”
+- Line 39, minor: “session” should read as “sessions”
+
+
+> I urge the authors to be creative somewhere in the discussion by perhaps adding a paragraph after the one found in lines 29-56.  We’ve done a lot of work in the ribosome biogenesis area, and we’ve thought a good bit about total RNA/unit muscle with regard to what it represents.  The authors correctly articulated this as a proxy of ribosome density.  However, as muscle tissue and myofibers volumetrically increase, this will affect the metric (the same holds true with mitochondrial biogenesis and using CS activity as a proxy of mitochondrial volume density).  An easy way to interpret this is in the following example:
+o Muscle tissue increases 5% in thickness with RT (and myofibers scale accordingly as well)
+o Total RNA/unit muscle does not change in value
+Most would interpret this as ribosome biogenesis not occurring.  However, biogenesis likely occurred because, as muscle grew, ribosome biogenesis scaled with growth thus leading to no change in RNA concentration.  Our laboratory discusses this important concept with regard to RT and mitochondrial biogenesis (PMID: 32162291, PMID: 34646153).
+
+> Anyhow, this is no critique of the authors’ hard and excellent work.  However, I think the authors re-iterating this point as a stand-alone paragraph would benefit readership.  In addition, I believe taking a moment to define what the total RNA/ribosome density metric conceptually represents, and then (in this newly added paragraph) briefly walking the reader through each phase of the data, and what could be going on with biogenesis in the context of a growing muscle would be interesting to see.  For instance, in Figure 3G, my interpretation (much like the authors’) is that ribosome biogenesis is very rapid at the onset of RT where little functional growth is likely occurring.  And like the authors, I believe this likely was needed for eventual growth to occur.  However, the “no change” in RNA concentrations session 9-12 as muscle is continuing to grow may not indicate a plateau in biogenesis given that this is the time during which muscle growth is likely starting to ramp up.  Hence, biogenesis rates could be equally as ramped here compared to sessions 1-9 of RT.
+
+METHODS
+
+Page 11
+
+- Lines 9-19: Authors stated that 18 participants were recruited, but then go on to say that n=11 TRAIN and n=8 CTRL completed.  Please reconcile.
+- Line 35: Authors stated 7 days after detraining, but in the discussion (page 7, line 19) they mention after 8 days of detraining.  Please reconcile.
+Page 12
+- Line 39, minor: “restitution” should read as “rest”.  Please change accordingly, and if used throughout the paper, please alter.
+Page 15
+- Line 36, minor: “Glycin” should read as “Glycine”.  In addition, and molar unit is needed.
