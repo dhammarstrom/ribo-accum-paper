@@ -23,7 +23,7 @@ single.color   <- "#7f7f7f"
 
 # line sizes
 line_size <- 0.3
-error.size <- 0.3
+error.size <- 0.25
 # text sizes
 label.size <- 10
 
