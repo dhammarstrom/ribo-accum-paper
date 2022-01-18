@@ -9,7 +9,7 @@
 ##
 ##-------------------------------------
 ## Notes: 
-# Figure 2 contains wetsern blot data 
+# Figure 2 contains western blot data 
 # and corresponding mRNA data (rps6 and UBF)
 #
 #
@@ -88,28 +88,29 @@ prot_fold_change <- tx_results_western %>%
                         labels = c("Control", "Training", 
                                    "Training + de-training"))) %>%
 
-  ggplot(aes(time, Estimate, fill = group)) + 
+  ggplot(aes(time, Estimate, fill = group, shape = group)) + 
   
   
   geom_hline(yintercept = 1, lty = 2, color = "gray80") +
   
   geom_errorbar(aes(ymin = CI.Lower, ymax = CI.Upper), 
-                position = position_dodge(width = 0.2), 
-                width = 0) +
-  geom_point(position = position_dodge(width = 0.2), shape = 21) + 
+                position = position_dodge(width = 0.4), 
+                size = error.size,
+                width = 0.2) +
+  geom_point(position = position_dodge(width = 0.4)) + 
   
   facet_wrap(~ target , ncol = 1, strip.position = "top", scales = "free") +
  # scale_y_continuous(limits = c(0.5, 3), breaks = c(1, 2, 3), 
  #                    expand = c(0,0)) +
   
-  scale_fill_manual(values = c(color.scale[5], color.scale[6],color.scale[8])) +
-  
+  scale_fill_manual(values = c(color.scale[1], color.scale[2],color.scale[4])) +
+  scale_shape_manual(values = c(21, 22, 24)) +
   
   labs(y = "Fold change from Baseline") +
   plot_theme()  +
   theme(strip.placement = "top",
         strip.background = element_rect(fill = "white", color = "white"), 
-        strip.text = element_text(size = 7, hjust = 0),
+        strip.text = element_text(size = 7, hjust = 0, face = 2),
         legend.position = "bottom",
         legend.text = element_text(size = 7, margin = margin(t = 0.1, b= 0.1,r = 0.1,l = 0.1, unit = "pt")),
         legend.key.size = unit(0, "cm"),
@@ -133,22 +134,27 @@ prot_interaction <- tx_results_western %>%
                                         "Post-training\n+de-training")), 
          comparison = fct_rev(comparison), 
          robust = if_else(CI.Lower  > 1, "robust", "notrobust")) %>%
-  ggplot(aes(Estimate, comparison, color = robust)) + 
+  ggplot(aes(Estimate, comparison, alpha = robust)) + 
   labs(x = "Fold change\ncompared to Control") +
   
   geom_vline(xintercept = 1, color = "gray85", lty = 2) +
   
-  geom_point() +
-  geom_errorbarh(aes(xmin = CI.Lower, xmax = CI.Upper), height = 0.2) + 
+  
+  geom_errorbarh(aes(xmin = CI.Lower, xmax = CI.Upper), height = 0.2, size = error.size) + 
+  
+  geom_point(shape = 22, fill = color.scale[3]) +
+  
   facet_wrap( ~ target, ncol = 1, strip.position = "top") +
   
-  scale_color_manual(values = c("gray50", "gray10")) +
+  scale_alpha_manual(values = c(0.5, 1)) +
+  
+
   scale_x_continuous(breaks = c(0.5, 1, 1.5, 2, 2.5, 3), 
                      labels = c("", 1, "", 2, "", 3)) +
   plot_theme() +
   theme(strip.background = element_rect(color = "white", fill = "white"), 
 
-        strip.text = element_text(size = 7, hjust = 0.1),
+        strip.text = element_text(size = 7, hjust = 0, face = "bold"),
         axis.title.y = element_blank()  , 
         axis.text.y = element_text(size = 7),
         legend.position = "none")
@@ -184,16 +190,16 @@ mrna_vs_ctrl <- ctrl_vs_int %>%
   
   filter(Normalization != "Muscle weight") %>%
   
-  ggplot(aes(contrast, estimate, shape = Normalization, color = robust)) + 
+  ggplot(aes(contrast, estimate, shape = Normalization, alpha = robust)) + 
   
   geom_hline(yintercept = 1, lty = 2, color = "gray50") +
   
   geom_errorbar(aes(ymin = lower.CL, ymax = upper.CL), 
-                position = position_dodge(width = 0.2), 
-                width = 0) +
-  geom_point(position = position_dodge(width = 0.2))  +
+                size = error.size,
+                width = 0.2) +
+  geom_point(shape = 22, fill = color.scale[3])  +
   
-  scale_color_manual(values = c("gray50", "gray10"), guide = "none") +
+  scale_alpha_manual(values = c(0.5, 1), guide = "none") +
   scale_y_continuous(limits = c(0.5, 3.1), 
                      breaks = c(1, 2, 3)) +
   scale_x_discrete(guide = guide_axis(n.dodge=2)) +
@@ -202,7 +208,7 @@ mrna_vs_ctrl <- ctrl_vs_int %>%
   plot_theme() +
   theme(strip.background = element_rect(color = "white", fill = "white"), 
         
-        strip.text = element_text(size = 7, hjust = 0),
+        strip.text = element_text(size = 7, hjust = 0, face = "bold"),
         axis.title.x = element_blank(),
         axis.text.y = element_text(size = 7),
         legend.position = "none",
@@ -236,8 +242,8 @@ volume_diff_mrna <-   rrna_timecourse$estimated_diff %>%
     geom_hline(yintercept = 1, lty = 2, color = "gray50") +
     
     geom_errorbar(aes(ymin = lower.CL, ymax = upper.CL), 
-                  width = 0) +
-    geom_point() +
+                  width = 0.2, size = error.size) +
+    geom_point(shape = 21, fill = color.scale[3], size = 1.5) +
     labs(y = "Fold difference (Variable/Constant)", 
          x = "Session") +
     scale_color_manual(values = c("gray50", "gray10")) +
@@ -257,7 +263,7 @@ volume_diff_mrna <-   rrna_timecourse$estimated_diff %>%
 
 ## Import representative plot  
     
-reps_west <-  ggdraw() + draw_image("./data/wetlab/western/representative_img/round2_gel4_annotated.png") 
+reps_west <-  ggdraw() + draw_image("./data/wetlab/western/representative_img/round1_gel7_annotated.png") 
   
   
   

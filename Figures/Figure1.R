@@ -18,7 +18,7 @@ bayes <- TRUE
 
 source("./R/figure-source.R")
 source("./R/libs.R")
-
+library(grid)
 
 
 
@@ -26,9 +26,8 @@ source("./R/libs.R")
 
 
 
-control_color <- "white"
-
-experiment_color <- "#4abdcb"
+control_color <- "#b42a51"
+experiment_color <- "#4f81bd"
 
 
 
@@ -51,7 +50,10 @@ design_exp <- expand.grid(cond = c("Variable volume", "Constant volume"),
                         if_else(cond == "Variable volume" & session %in% c(9, 10, 11, 12), 9, sets))) %>%
   ggplot(aes(session, sets, fill = cond)) +
   
-  annotate("text", x = -2, y = 11.0, label = c("Experimental group"), size = textsize + 0.5) +  
+  annotate("text", x = -2, y = 11.2, 
+           label = c("Experimental group"), 
+           size = textsize + 0.5, 
+           fontface = 2) +  
   
   geom_bar(stat = "identity", position = position_dodge(width = 0.55),
                  
@@ -64,9 +66,9 @@ design_exp <- expand.grid(cond = c("Variable volume", "Constant volume"),
   
   scale_y_continuous(breaks = c(0, 3, 6, 9, 12), limits = c(0,12), expand = c(0,0), 
                      labels = c("", "3", "6", "9", "")) +
-  scale_fill_manual(values = c(color.scale[2], color.scale[1])) +
+  scale_fill_manual(values = c(color.scale[4], color.scale[2])) +
 
-  annotate("text", x = c(0, 0, -2), y = c(9.1, 8.2, 6), 
+  annotate("text", x = c(0, 0, -1.8), y = c(9.1, 8.2, 6), 
            label = c("Muscle biopsy", "Muscle thickness", "Strength tests"), 
            vjust = 0, hjust = 1, alpha = 0.8, size = textsize) + 
   
@@ -137,6 +139,13 @@ design_exp <- expand.grid(cond = c("Variable volume", "Constant volume"),
 
 ### Design graph: Control group #####
 
+
+# Rounded corners can be achieved by a hack
+
+# devtools::install_github("teunbrand/elementalist")
+library(elementalist)
+
+
 design_ctrl <- expand.grid(cond = c("Variable volume", "Constant volume"),
                                     session = seq(1:12), 
                                     sets = rep(6)) %>%
@@ -144,9 +153,12 @@ design_ctrl <- expand.grid(cond = c("Variable volume", "Constant volume"),
                         if_else(cond == "Variable volume" & session %in% c(9, 10, 11, 12), 9, sets))) %>%
   ggplot(aes(session, sets, fill = cond)) +
   
-  annotate("text", x = -1.85, y = 11.2, label = c("Control group"), size = textsize + 0.5) +  
+  annotate("text", x = -2.2, y = 11.2, 
+           label = c("Control group"),
+           fontface = 2,
+           size = textsize + 0.5) +  
   
-  annotate("text", x = c(0, 0, -2), y = c(9.1, 8.2, 6), 
+  annotate("text", x = c(0, 0, -1.8), y = c(9.1, 8.2, 6), 
            label = c("Muscle biopsy", "Muscle thickness", "Strength tests"), 
            vjust = 0, hjust = 1, alpha = 0.8, size = textsize) + 
   
@@ -199,6 +211,10 @@ design_ctrl <- expand.grid(cond = c("Variable volume", "Constant volume"),
   
   
   theme(legend.position = "none", 
+        plot.background = element_rect_round(color = "black", 
+                                             size = 0.25, 
+                                             radius = unit(0.25, "cm"),
+                                             fill = "#fefeda"),
         axis.title = element_blank(), 
         axis.text = element_blank(), 
         axis.line = element_blank(), 
@@ -208,10 +224,13 @@ design_ctrl <- expand.grid(cond = c("Variable volume", "Constant volume"),
 
 
 
+
+
 design_full_biopsies <- plot_grid(design_exp, 
-                                  design_ctrl, 
+                                  plot_grid(NULL, design_ctrl, NULL, rel_widths = c(0.05, 1, 0.05), ncol = 3),
+                                  NULL,
                                   ncol = 1, 
-                                  rel_heights = c(1, 0.6)) 
+                                  rel_heights = c(1, 0.6, 0.1)) 
 
 
 # Panel X. Training data plot ##########################
@@ -243,15 +262,17 @@ training_load <- read_excel("./data/tr010_training.xlsx", sheet = 1, na = "NA") 
   geom_line(data = training_sum, 
             aes(session, total.load, group = cond, color = cond), 
             size = 1.5) +
-  scale_color_manual(values = c(color.scale[1], color.scale[2], color.scale[4])) +
-  geom_text(data = data.frame(session = c(1, 1),
-                              total.load = c(5000, 5000), 
+  scale_color_manual(values = c(color.scale[2], color.scale[4])) +
+  geom_text(data = data.frame(session = c(0, 0),
+                              total.load = c(5500, 5500), 
                               
                               lab = c("Constant\nvolume","Variable\nvolume"),
                               cond = factor(c("const", "var"), 
                                             levels = c("const", "var"))), 
             aes(label = lab, group = NULL, color = NULL), 
             size = textsize + 0.5, 
+            lineheight = 0.8,
+            fontface = 2,
             hjust = 0) +
   
   scale_y_continuous(limits = c(0, 6000), breaks = c(0, 2000, 4000, 6000), expand = c(0, 0)) +
@@ -321,30 +342,33 @@ strength <- read_excel("./data/tr010_humac.xlsx") %>%
 
 
 raw_scores <- strength %>%
-  ggplot(aes(time_group, change, fill = type)) + 
+  ggplot(aes(time_group, change, fill = time_group, shape = type)) + 
   
   geom_hline(yintercept = 0, color = "gray90") +
   
-  geom_point(position = position_jitterdodge(jitter.width = 0.05, dodge.width = 0.25), 
-             shape = 21, size = 1.2, alpha = 0.4) + 
+  geom_point(position = position_jitterdodge(jitter.width = 0.05, dodge.width = 0.32), 
+             size = 1, alpha = 1) + 
   
   # Isokinetic strength
   geom_errorbar(data = comp_strength[1:3,], 
                 aes(time_group, estimate, ymin = lower.CL, ymax = upper.CL, fill = NULL), 
-                position = position_nudge(x = - 0.25), width = 0) +
+                position = position_nudge(x = - 0.3), width = 0.2) +
  
    geom_point(data = comp_strength[1:3,], 
-              aes(time_group, estimate, fill = NULL), 
-             position = position_nudge(x = -0.25), color = "white", size = 0.5, shape = 15) + 
+              aes(time_group, estimate), 
+             position = position_nudge(x = -0.3), color = "black", size = 1.5, shape = 22) + 
   # Isometric strength
   geom_errorbar(data = comp_strength[6:8,], 
                 aes(time_group, estimate, ymin = lower.CL, ymax = upper.CL,  fill = NULL), 
-                position = position_nudge(x =  0.25), width = 0) +
+                position = position_nudge(x =  0.3), width = 0.2) +
   
   geom_point(data = comp_strength[6:8,], 
-             aes(time_group, estimate, fill = NULL), 
-             position = position_nudge(x = 0.25), color = "white", size = 0.5, shape = 15) + 
+             aes(time_group, estimate), 
+             position = position_nudge(x = 0.3), color = "black", size = 1.5, shape = 24) + 
   
+  
+scale_shape_manual(values = c(22, 24)) +
+  scale_fill_manual(values = c(color.scale[1], color.scale[3], color.scale[3])) +
   
   
   labs(y = "\U0394 Torque (Nm)") +
@@ -383,15 +407,18 @@ comp_panel <- comp_strength %>%
                        labels = c("Isokinetic",
                                   "Isometric"))) %>%
   
-  ggplot(aes(time_group, estimate, fill = type)) + 
+  ggplot(aes(time_group, estimate, shape = type)) + 
   
   geom_hline(yintercept = 0, color = "gray90") +
   
-  geom_errorbar(aes(ymin = lower.CL, ymax = upper.CL, color = type), width = 0.1, 
-                position = position_dodge(width = 0.25)) + 
+  geom_errorbar(aes(ymin = lower.CL, ymax = upper.CL), width = 0.2, 
+                position = position_dodge(width = 0.35)) + 
   geom_point(size = 1.5, 
-             shape = 21,
-             position = position_dodge(width = 0.25)) + 
+             fill = color.scale[3],
+             position = position_dodge(width = 0.35)) + 
+  
+  
+  scale_shape_manual(values = c(22, 24)) +
   
   scale_y_continuous(limits = c(-20, 40), 
                      breaks = c(-20, -10, 0, 10, 20, 30, 40), 
@@ -403,10 +430,12 @@ comp_panel <- comp_strength %>%
   plot_theme() +
   
   theme(axis.title.x = element_blank(), 
-        legend.position = c(0.25, 0.85), 
+        legend.position = c(0.3, 1), 
+        legend.background = element_rect(fill = "white"),
         legend.spacing.y = unit(-0.5, 'cm'),
         legend.key.size = unit(0.2, "cm"),
-        legend.text = element_text(margin = margin(t = 0, r = 0, b = 0, l = 0.3), size = 7))
+        legend.margin = margin(t = 15, r = 1, b = 0, l = 1, unit = "pt"),
+        legend.text = element_text(margin = margin(t = 0, r = 0, b = 0, l = 0), size = 7))
 
 
 
@@ -490,17 +519,22 @@ us_data <- rbind(read_excel("./data/ultrasound/ultrasound_data.xlsx") %>%
 # 
 # 
 raw_scores <- us_temp %>%
-  ggplot(aes(time_group, change)) + 
+  ggplot(aes(time_group, change, fill = time_group)) + 
   
   geom_hline(yintercept = 0, color = "gray90") +
   
-  geom_jitter(width = 0.05, size = 1.2, alpha = 0.4) + 
+  geom_jitter(width = 0.05, size = 1.2, alpha = 1, shape = 21) + 
   geom_errorbar(data = comp_us[1:3,], 
                 aes(time_group, estimate, ymin = lower.CL, ymax = upper.CL), 
-                position = position_nudge(x = 0.25), width = 0) +
+                position = position_nudge(x = 0.25), width = 0.2) +
   geom_point(data = comp_us[1:3,], 
-             aes(time_group, estimate), 
-             position = position_nudge(x = 0.25), color = "white", size = 0.5, shape = 15) + 
+             aes(time_group, estimate, shape = time_group), 
+             position = position_nudge(x = 0.25), color = "black", size = 1.5) + 
+  
+  
+  scale_shape_manual(values = c(22, 22, 22)) +
+  scale_fill_manual(values = c(color.scale[1], color.scale[3], color.scale[3])) +
+  
   
   labs(y = "\U0394 Muscle thickness (mm)") +
   
@@ -508,7 +542,8 @@ raw_scores <- us_temp %>%
   theme(axis.line.x = element_blank(), 
         axis.text.x = element_blank(), 
         axis.title.x = element_blank(), 
-        axis.ticks.x = element_blank())
+        axis.ticks.x = element_blank(), 
+        legend.position = "none")
 
 # scale_y_continuous(limits = c(-8, 8), 
 #                    breaks = c(-2.5, 0, 2.5, 5), 
@@ -536,8 +571,8 @@ comp_panel <- comp_us %>%
   
   geom_hline(yintercept = 0, color = "gray90") +
   
-  geom_errorbar(aes(ymin = lower.CL, ymax = upper.CL), width = 0.1) + 
-  geom_point(size = 2, shape = 21, fill = "white") + 
+  geom_errorbar(aes(ymin = lower.CL, ymax = upper.CL), width = 0.2) + 
+  geom_point(size = 1.5, shape = 24, fill = color.scale[3]) + 
   
   scale_y_continuous(limits = c(-0.5, 2.5), 
                      breaks = c(-0.5, 0, 0.5, 1, 1.5, 2, 2.5), 
@@ -565,7 +600,7 @@ ul_results <- plot_grid(raw_scores, comp_panel, nrow = 2, align = "v")
 
 figure1 <- plot_grid(design_full_biopsies,
                      plot_grid(training_load, strength_results,  ul_results, ncol = 3, rel_widths = c(0.5, 0.25, 0.25)), 
-                     rel_heights = c(2, 1),
+                     rel_heights = c(1.8, 1),
                      ncol = 1) +
   
   

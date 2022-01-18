@@ -33,6 +33,10 @@ primers <- read_excel("./data/tr010_primers.xlsx") %>%
 
 
 
+# Rounded corners can be achieved by a hack
+
+# devtools::install_github("teunbrand/elementalist")
+library(elementalist)
 
 
 
@@ -49,12 +53,12 @@ primers_fig <- data.frame(x = c(1, 13500),
   # 28S segment
   annotate("segment", x = 7925, xend = 12990, y = 1.5, yend = 1.5, size = 2.5) +
   
-  geom_segment(data = primers, aes(y = c(1.54, 1.52, 1.528, 1.54, 1.55, 1.56), 
-                                   yend = c(1.54, 1.52, 1.528, 1.54, 1.55, 1.56), 
+  geom_segment(data = primers, aes(y = c(1.55, 1.52, 1.528, 1.55, 1.55, 1.575), 
+                                   yend = c(1.55, 1.52, 1.528, 1.55, 1.55, 1.575), 
                                    x= on45S_start, xend = on45S_end), 
                size = 4) +
   
-  geom_text(data = primers, aes(y = c(1.54, 1.52, 1.528, 1.544, 1.55, 1.56),
+  geom_text(data = primers, aes(y = c(1.55, 1.52, 1.528, 1.552, 1.55, 1.575),
                                       x= on45S_end, label = symbol_ext), 
                   size = 2.2, 
           hjust = 0,
@@ -76,6 +80,10 @@ primers_fig <- data.frame(x = c(1, 13500),
   scale_y_continuous(limits = c(1.46, 1.58)) +
   plot_theme() + 
   theme(axis.title = element_blank(), 
+        plot.background = element_rect_round(color = "black", 
+                                             size = 0.25, 
+                                             radius = unit(0.25, "cm"),
+                                             fill = "#fefeda"),
         axis.text = element_blank(), 
         axis.line = element_blank(),
         axis.ticks = element_blank())
@@ -115,7 +123,7 @@ anno.df <- data.frame(target = unique(complete_rrna_comp$target),
                      "rRNA 5.8S",
                      "rRNA 5S" ), 
            time = factor("S1", levels = c("S1", "post")), 
-           estimate = 3.5) %>%
+           estimate = 3.85) %>%
   mutate(target = factor(target, levels = c("rRNA18S F2R2",
                                             "rRNA5.8S F2R2",
                                             "rRNA28S F2R2",
@@ -156,7 +164,7 @@ interaction_effects <- complete_rrna_comp %>%
          robust = if_else(lower.CL  > 1, "robust", "notrobust")) %>%
   
   ggplot(aes(estimate, 
-             target, color = robust)) + 
+             target, alpha = robust)) + 
   
   geom_text(data = anno.df %>%
               mutate(target = factor(target, levels = c("rRNA18S F2R2",
@@ -166,21 +174,26 @@ interaction_effects <- complete_rrna_comp %>%
                                                         "rRNA45SITS F12R12",
                                                         "rRNA45S F5R5",     
                                                         "rRNA47S F1R1"))),
-            aes(estimate - 2, target,  label = label, color = NULL), 
+            aes(estimate - 2, target,  label = label, alpha = NULL), 
             position = position_nudge(y = 0.25), 
             hjust = 0,
-            size = 2.2) +
+      
+            size = 2.1) +
   
   
   labs(x = "Fold change compared to Control") +
   
   geom_vline(xintercept = 1, color = "gray85", lty = 2) +
   
-  geom_point() +
-  geom_errorbarh(aes(xmin = lower.CL, xmax = upper.CL), height = 0.2) + 
+  geom_errorbarh(aes(xmin = lower.CL, xmax = upper.CL),
+                 size = error.size,
+                 height = 0.2) + 
+  
+  geom_point(shape = 22, fill = color.scale[3]) +
+
   facet_wrap(  comparison ~ .) +
   
-  scale_color_manual(values = c("gray50", "gray10")) +
+  scale_alpha_manual(values = c(0.5, 1)) +
   
   plot_theme() +
   theme(strip.background = element_rect(color = "white", fill = "white"), 
@@ -220,26 +233,28 @@ fold_changes <- complete_rrna_comp %>%
          time = if_else(time == "post1w", "post", time),
          time = factor(time, levels = c("S1", "post"))) %>%
   
-  ggplot(aes(time, estimate, fill = group)) + 
+  ggplot(aes(time, estimate, fill = group, shape = group)) + 
   
-  geom_text(data = anno.df, aes(time, estimate, label = label, fill = NULL), 
+  geom_text(data = anno.df, aes(time, estimate, label = label, shape = NULL, fill = NULL), 
             position = position_nudge(x = -0.5), 
             hjust = 0,
-            size = 2.2) +
+            size = 2.1) +
   geom_hline(yintercept = 1, lty = 2, color = "gray80") +
 
   # geom_bar(stat = "identity", position = position_dodge(width = 0.3), width = 0.15) + 
   geom_errorbar(aes(ymin = lower.CL, 
                     ymax = upper.CL), 
                 position = position_dodge(width = 0.3), 
-                width = 0) + 
+                size = error.size,
+                width = 0.2) + 
   
-  geom_point(position = position_dodge(width = 0.3), shape = 21) +
+  geom_point(position = position_dodge(width = 0.3)) +
   
-  scale_y_continuous(limits = c(0.5, 3.8), breaks = c(1, 2, 3)) +
+  scale_y_continuous(limits = c(0.5, 4), breaks = c(1, 2, 3)) +
   scale_x_discrete(limits = c( "S1", "post"), labels = c("Session 1", "Post-\ntraining")) +
   
-  scale_fill_manual(values = c(color.scale[5], color.scale[6],color.scale[8])) +
+  scale_fill_manual(values = c(color.scale[1], color.scale[2],color.scale[4])) +
+  scale_shape_manual(values = c(21, 22, 24)) + 
   
   
   labs(y = "Fold change from Baseline") +
@@ -347,7 +362,7 @@ for(i in 1:length(targets)) {
     geom_point(data = filter(dat, time == "post1w"), 
                position = position_nudge(x = 1)) +
     
-    scale_color_manual(values = c(color.scale[2], color.scale[1])) +
+    scale_color_manual(values = c(color.scale[2], color.scale[4])) +
     
     scale_y_continuous(limits = c(floor(min(dat$emmean, na.rm = TRUE)), 
                                   ceiling(max(dat$emmean, na.rm = TRUE))),
@@ -473,18 +488,26 @@ tot_rna_interaction <- comp_rna %>%
     robust = if_else(lower.CL  > 1, "robust", "notrobust")) %>%
   
   ggplot(aes(estimate, 
-             target, color = robust)) + 
+             target, alpha = robust)) + 
   
   
   labs(x = "Fold change compared to Control") +
   
   geom_vline(xintercept = 1, color = "gray85", lty = 2) +
   
-  geom_point() +
-  geom_errorbarh(aes(xmin = lower.CL, xmax = upper.CL), height = 0.2) + 
+  geom_errorbarh(aes(xmin = lower.CL, xmax = upper.CL, 
+                     fill = NULL, 
+                     shape = NULL),
+                 size = error.size,
+                 height = 0.1) + 
+  
+  geom_point(shape = 22, fill = color.scale[3]) +
+
   facet_wrap(  comparison ~ .) +
   
-  scale_color_manual(values = c("gray50", "gray10")) +
+  scale_alpha_manual(values = c(0.5, 1)) +
+  
+  
   scale_x_continuous(limits = c(0.8, 2), 
                      expand = c(0, 0), 
                      breaks = c(0.8, 1, 1.2, 1.4, 1.6, 1.8, 2), 
@@ -515,24 +538,27 @@ tot_rna_fold_change <- comp_rna %>%
     time = if_else(time == "post1w", "post", time),
     time = factor(time, levels = c("S1", "post"))) %>%
   
-  ggplot(aes(time, estimate, fill = group)) + 
+  ggplot(aes(time, estimate, fill = group, shape = group)) + 
   
   geom_hline(yintercept = 1, lty = 2, color = "gray80") +
   
   # geom_bar(stat = "identity", position = position_dodge(width = 0.3), width = 0.15) + 
   geom_errorbar(aes(ymin = lower.CL, 
                     ymax = upper.CL), 
+                size = error.size,
                 position = position_dodge(width = 0.3), 
-                width = 0) + 
+                width = 0.2) + 
   
-  geom_point(position = position_dodge(width = 0.3), shape = 21) +
+  geom_point(position = position_dodge(width = 0.3)) +
   
   scale_x_discrete(limits = c( "S1", "post"), labels = c("Session 1", "Post-\ntraining")) +
   scale_y_continuous(limits = c(0.8, 2), breaks = c(1, 1.2, 1.4, 1.6, 1.8, 2), 
                    labels = c(1, 1.2, 1.4, 1.6, 1.8, 2), 
                    expand = c(0, 0)) +
   
-  scale_fill_manual(values = c(color.scale[5], color.scale[6],color.scale[8])) +
+  scale_fill_manual(values = c(color.scale[1], color.scale[2],color.scale[4])) +
+  scale_shape_manual(values = c(21, 22, 24)) +
+  
   labs(y = "Fold change from Baseline") +
   plot_theme() +
   
@@ -628,12 +654,13 @@ rna_tc_fig <-  tc.m1.predictions %>%
   geom_line(aes(color = cond), size = 1.2) + 
   
   geom_errorbar(data = filter(tc.m1.predictions, time.c > 12.5),
-                aes(time.c, exp(m), ymin = exp(lwr), ymax = exp(upr)), width = 0.2, 
-                position = position_dodge(width = 0.6)) + 
+                aes(time.c, exp(m), ymin = exp(lwr), ymax = exp(upr)), width = 2,
+                size = error.size,
+                position = position_dodge(width = 1)) + 
   
   geom_point(data = filter(tc.m1.predictions, time.c > 12.5),
              aes(time.c, exp(m), fill = cond), size = 2.5, shape = 21, 
-             position = position_dodge(width = 0.6))  +
+             position = position_dodge(width = 1))  +
 
 
    
@@ -647,14 +674,17 @@ rna_tc_fig <-  tc.m1.predictions %>%
                       breaks = c(250, 300, 350, 400, 450, 500, 550, 600, 650), 
                       labels = c("",  300, "",  400, "",  500, "" , 600, "")) +
   
-  scale_color_manual(values = c(color.scale[2], color.scale[1]), guide = NULL) +
-  scale_fill_manual(values = c(color.scale[2], color.scale[1])) +
+  scale_color_manual(values = c(color.scale[2], color.scale[4]), guide = NULL) +
+  scale_fill_manual(values = c(color.scale[2], color.scale[4])) +
    
    plot_theme() +
-   theme(legend.position = c(0.7, 0.15), 
+   theme(legend.position = c(0.6, 0.18), 
+         legend.margin = margin(t = 1, r = 1, b = 2, l = 1, unit = "pt"),
+         legend.text = element_text(margin = margin(t = 0, r = 0, b = 0, l = 0), size = 7),
          legend.key.size = unit(0.3, "cm"), 
-         axis.title.y = element_text() ) 
+         axis.title.y = element_text()) 
    
+
 
    
 tot_rna_fig <- plot_grid(tot_rna_fold_change, 
@@ -673,7 +703,9 @@ tot_rna_fig <- plot_grid(tot_rna_fold_change,
 figure3 <- plot_grid( 
               plot_grid(
                 plot_grid(
-                    plot_grid(NULL, primers_fig,NULL,ncol = 3, rel_widths = c(0.2, 2, 0.2)),
+                   plot_grid(NULL, 
+                             plot_grid(NULL, primers_fig,NULL,ncol = 3, rel_widths = c(0.2, 2, 0.2)),
+                             NULL, ncol = 1, rel_heights = c(0.05, 1, 0.05)),
                     rnra_ctrl_vs_int, ncol = 1, rel_heights = c(0.2, 1)), 
               time_traces, ncol = 2, rel_widths = c(0.7, 0.3)),
               

@@ -14,6 +14,42 @@ The manuscript is highly interesting and ambitious in its design. I think that i
 
 > The western blot membranes in the paper does not really translate into the presented data. In my opinion the bands look rather faint and equal in intensity across the time course. Could the authors perhaps provide raw data and membranes for RPS6 and UBF just for the reviewers?
 
+```{r}
+## Raw data of western blot membranes
+
+
+western_data <- readRDS("./data/derivedData/western-compile/western_data.RDS")
+# Save data 
+western_data <- readRDS("./data/derivedData/western-compile/western_data_calibrated.RDS")
+
+
+
+
+western_data %>%
+  mutate(detrain = if_else(time == "post1w", "detrain", "train"), 
+         time = if_else(time %in% c("post1w", "postctrl"), "12", 
+                        if_else(time == "S1c", "1", 
+                                gsub("S", "", time))), 
+         group = if_else(cond == "ctrl_leg", "ctrl", "train"), 
+         time = as.numeric(time), 
+         time.fact = as.factor(time)) %>%
+  
+  group_by(target, participant, group, time.fact, detrain) %>%
+  summarise(expression = mean(expression)) %>%
+
+  ggplot(aes(time.fact, expression, color = group)) + 
+  geom_violin() + 
+  geom_jitter(height = 0, width = 0.1) +
+  facet_wrap(~ target)
+
+
+
+
+```
+
+
+
+
 > Is pre-rRNA 47S ETS and 45S ETS per unit tissue weight a previously reported way to present qPCR data? Does the data look the same in relation to 1 or more house keeping genes?
 
 One transcribed pre-rRNA results in a single end product, one ribosome and in the context of protein synthesis the amount of ribosomes per cell or tissue mass is highly correlated with protein synthesis (Milward 1976, West 2016). In contrast to rRNA processing, mRNA transcription and translation could to some degree be seen as competitive between different mRNA. 

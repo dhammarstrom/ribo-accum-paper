@@ -111,16 +111,22 @@ loo_panel <- res %>%
     
 #  geom_density_ridges(color = "white") +
   
-  geom_point(position = position_nudge(y = 0.2), shape = 21, alpha = 0.4) +
+  geom_point(position = position_nudge(y = 0.2),
+             size = 1.2,
+             shape = 21, 
+             alpha = 0.4) +
   
   facet_wrap( ~ coef, scales = "free") +
   
   scale_fill_manual(values = c(color.scale[5], color.scale[4], color.scale[4])) +
 
-  geom_point(data = res2, aes(estimate, Participant, fill = NULL)) +
+
   geom_errorbarh(data = res2, aes(fill = NULL, x = estimate, y = Participant, 
                                   xmax =  upr, xmin = lwr), 
                  height = 0) + 
+  
+  geom_point(data = res2, aes(estimate, Participant), 
+             fill = color.scale[3], shape = 22) +
   
   
   # Adds full model estimates
@@ -146,7 +152,8 @@ loo_panel <- res %>%
   
   plot_theme() + 
   theme(strip.background = element_rect(color = "white", fill = "white"),
-        strip.text = element_text(size = 8, hjust = 0),
+        
+        strip.text = element_text(size = 7, hjust = 0),
         axis.title.y = element_text(size = 7), 
         legend.position = "none")
 
@@ -170,8 +177,8 @@ prediction_slope <- predict_df %>%
   
   inner_join(leg) %>%
   mutate(cond = factor(cond, levels = c("const", "var"), 
-                       labels = c("Constant volume", 
-                                  "Variable volume")))  %>%
+                       labels = c("CONST", 
+                                  "VAR")))  %>%
 
   group_by(participant, leg, cond) %>%
   summarise(slope = mean(slope), 
@@ -196,13 +203,15 @@ prediction_slope <- predict_df %>%
                      breaks = c(-3, -2, -1, 0, 1, 2, 3, 4, 5), 
                      labels = c("", -2, "", 0, "", 2, "", 4, "")) +
   
-  scale_fill_manual(values = c(color.scale[1], color.scale[2])) +
+  scale_fill_manual(values = c(color.scale[2], color.scale[4])) +
   labs(x = "Total RNA increase per session (%)", 
        y = "Muscle thickness change (mm)") +
   plot_theme() + 
   theme(axis.title.y = element_text(size = 7), 
-        legend.position = c(0.2, 0.90), 
-        legend.text = element_text(size = 7))
+        legend.margin = margin(t = 1, r = 1, b = 2, l = 1, unit = "pt"),
+        legend.text = element_text(margin = margin(t = 0, r = 0, b = 0, l = 0), size = 7),
+        legend.key.size = unit(0.3, "cm"), 
+        legend.position = c(0.15, 0.90))
 
 
 
@@ -232,7 +241,7 @@ prediction_intercept <- predict_df %>%
   geom_point(shape = 21, size = 2) + 
   geom_text_repel(aes(label = Participant), 
                   size = 2.5) +
-  scale_fill_manual(values = c(color.scale[1], color.scale[2])) +
+  scale_fill_manual(values = c(color.scale[2], color.scale[4])) +
   labs(x = "Average Total RNA at Session 6\n(Standard deviations from the mean)", 
        y = "Muscle thickness change (mm)") +
   
@@ -277,8 +286,8 @@ rna_to_time_estimates <- combined_df %>%
                      breaks = c(0, 3, 6, 9, 12), 
                      labels = c(0, "", 6, "", 12)) +
   
-  scale_fill_manual(values = c(color.scale[1], color.scale[2])) +
-  scale_color_manual(values = c(color.scale[1], color.scale[2])) +
+  scale_fill_manual(values = c(color.scale[2], color.scale[4])) +
+  scale_color_manual(values = c(color.scale[2], color.scale[4])) +
   
   
   labs(y = bquote('Total RNA (mg'~'ng'^-1*')'), 

@@ -23,7 +23,7 @@ single.color   <- "#7f7f7f"
 
 # line sizes
 line_size <- 0.3
-
+error.size <- 0.3
 # text sizes
 label.size <- 10
 
@@ -36,7 +36,14 @@ sequential.colors <- c("#1b9e77",
                        "#66a61e",
                        "#e6ab02")
 
+
+# Set Font to Arial 
+
+windowsFonts()
+
+
 # Functions for plotting  #####
+
 
 plot_theme <- function() {
   
@@ -50,8 +57,8 @@ plot_theme <- function() {
           axis.title = element_text(color = "black", size = 7),
           legend.title = element_blank(), 
           legend.background = element_rect(fill = "white"),
-          legend.margin = margin(t = 0, r = 1, b = 1, l = 1, unit = "pt"),
-          legend.key = element_rect(fill = "white"),
+       #   legend.margin = margin(t = 0, r = 1, b = 1, l = 1, unit = "pt"),
+          legend.key = element_rect(fill = "white", color = "white"),
           legend.position = c(0.85, 0.9)) 
   
   
