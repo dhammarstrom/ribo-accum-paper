@@ -16,6 +16,8 @@ source("./R/libs.R")
 
 ### Load data  round 1 ####
 
+
+
 western_data_round1 <- read_excel("./data/wetlab/western/tr010_western_round1.xlsx", na = "NA", sheet = "total_protein") %>%
   filter(participant != "LADDER") %>%
   dplyr::select(participant, ExtractionNR, round, gel, well, mean.gray1:total.protein2) %>%

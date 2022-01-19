@@ -3,6 +3,8 @@ title: "APH-2021-12-0652: Response to the reviewers"
 author: "Daniel Hammarström"
 date: "2022-01-17"
 output: pdf_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ## Referee 1
@@ -14,13 +16,53 @@ The manuscript is highly interesting and ambitious in its design. I think that i
 
 > The western blot membranes in the paper does not really translate into the presented data. In my opinion the bands look rather faint and equal in intensity across the time course. Could the authors perhaps provide raw data and membranes for RPS6 and UBF just for the reviewers?
 
+We agree with the referee that the blots presented in Figure 2 were faint, especially for UBF. The selected blot was made for illustrative purposes as we had ordered the samples according to sampling time and condition in that particular blot. Unfortunately this blot was in the "fainter end" of the spectrum. We have replaced the blot with one that we feel is more representative.
+
+The raw aggregated data (averaged over replicates per samples) does show a clear increase in signal over the time course (Figure 1). We acknowledge that the western blot technique is associated with considerable technical variation.  
+
+
+
+
 ```{r}
 ## Raw data of western blot membranes
-
+library(tidyverse)
 
 western_data <- readRDS("./data/derivedData/western-compile/western_data.RDS")
-# Save data 
-western_data <- readRDS("./data/derivedData/western-compile/western_data_calibrated.RDS")
+
+
+
+
+western_data %>%
+  group_by(sample, target) %>%
+  summarise(n = n(), 
+            m = mean(expression, na.rm = TRUE), 
+            s = sd(expression, na.rm = TRUE), 
+            cv = s/m) %>%
+
+
+  group_by(target) %>%
+  summarise(cv = mean(cv, na.rm = TRUE)) %>%
+  print()
+   
+
+
+## ICC
+library(lme4)
+ubf <-   lmer(expression ~ gel + (1|sample), 
+            data = western_data[western_data$target == "t-UBF",])
+
+s6 <-   lmer(expression ~ gel + (1|sample), 
+            data = western_data[western_data$target == "t-s6",])
+
+
+
+data.frame(VarCorr(ubf))[1, 4] / sum(data.frame(VarCorr(ubf))[, 4])
+
+data.frame(VarCorr(s6))[1, 4] / sum(data.frame(VarCorr(s6))[, 4])
+
+  
+  ggplot(aes(sample, n)) + geom_point()
+  print()
 
 
 
@@ -30,6 +72,7 @@ western_data %>%
          time = if_else(time %in% c("post1w", "postctrl"), "12", 
                         if_else(time == "S1c", "1", 
                                 gsub("S", "", time))), 
+         time = if_else(detrain == "detrain", "13", time),
          group = if_else(cond == "ctrl_leg", "ctrl", "train"), 
          time = as.numeric(time), 
          time.fact = as.factor(time)) %>%
