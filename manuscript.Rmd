@@ -6,7 +6,9 @@ output:
   officedown::rdocx_document:
     reference_docx: resources/manuscript_word_template.docx
 csl: resources/acta-physiologica.csl
-bibliography: resources/bibliography.bib
+bibliography:
+  - resources/bibliography.bib
+  - references.bib
 header-includes: 
   \usepackage{wasysym}
 editor_options:
@@ -222,7 +224,7 @@ rna_hypertrophy <- paste0(sprintf("%.1f", summary(hyp.pre.m3)$fixed[5,1]),
 
 **Aim:** To describe the time course of ribosome accumulation during resistance training, its relation to training volume, UBF protein levels, and muscle growth.
 
-**Methods:** A training group (n=11) performed unilateral knee extension with constant and variable volume (6 and 3-9 sets per session respectively) allocated to either leg. Vastus lateralis biopsies obtained at rest and 48 hrs after selected training sessions and after eight days of de-training and from a non-training control group (n=7) were assayed for ribosome abundance and biogenesis markers. In addition, muscle thickness was measured before and after training and control periods.
+**Methods:** A training group (n = 11) performed <span custom-style="CHANGE">12 sessions (3-4 sessions per week) of</span> unilateral knee extension with constant and variable volume (6 and 3-9 sets per session respectively) allocated to either leg. <span custom-style="CHANGE">Ribosome abundance and biogenesis markers were assessed from</span> vastus lateralis biopsies obtained at<span custom-style="CHANGE"> baseline and 48 hrs after sessions 1, 4, 5, 8, 9, 12</span> and after eight days of de-training and from a non-training control group (n = 8). In addition, muscle thickness was measured before and after training and control periods.
 
 **Results:** Training led to muscle growth (`r hypertrophy` vs. control) with concomitant increases in total RNA, rRNA, UBF, and rpS6 with no differences between volume conditions. Total RNA increased most rapidly in response to the first four sessions (`r slope0_4` per session), followed by a plateau and peak values after session 8 (`r eight.session` above baseline). After controlling for time, total RNA abundance was associated with UBF protein levels (`r ubf_model` per unit UBF), and the rate of increase in total RNA levels predicted hypertrophy (`r rna_hypertrophy` per %-point increase in total RNA per session). After de-training, total RNA decreased (`r detrain_rna`) without muscle mass changes indicating halted biosynthesis of ribosomes.
 
@@ -688,6 +690,7 @@ they show reduced changes in total RNA levels in response to RT
 [@RN1809],<!-- Brook 2016 increase in RNA per mg not seen in old, data at baseline collected at different timepoints? -->
 potentially explaining their alleged poorer overall hypertrophic responses [@RN1809].
 Whether these cellular characteristics are related to e.g. differences in fiber type distributions [@RN1707] remains to be determined.
+<span custom-style="CHANGE">Furthermore, in light of accumulating evidence of tissue specific and heterogeneous ribosomal populations [@chaillou2019; @chaillou2015; @gupta2014], our results suggests a potential role of specialized newly synthesized ribosomes in muscle hypertrophy. Our results are however limited in terms of probing any such heterogeneity. </span>
 Together, these results and perspectives emphasizes on the potentially crucial role of RT-induced ribosomal synthesis for adaptations to training, making ribosomal responses to RT an interesting biomarker in relation to manipulation of training loads for specific populations.
 
 <!-- rpS6 dissconect from total RNA levels. -->
@@ -742,9 +745,9 @@ The CONST protocol in the present study corresponded to volumes used in the mode
 There, higher levels of total RNA were observed after four sessions in the moderate compared to a low volume protocol [@RN2358].
 Interestingly, using a progressive volume protocol in well-trained participants, increases in total RNA have been reported throughout six weeks of training
 [@RN2225].<!-- Haun total RNA increase througout a 6 week intervention -->
-Altough this observation was done in well-trained participants performing a high volume protocol without a control condition with constant volume, compared to constant volume protocols
+Although this observation was done in well-trained participants performing a high volume protocol without a control condition with constant volume, compared to constant volume protocols
 [@RN1809;<!-- Brook 2016 -->
-@RN2358; and the present study],<!-- Hammarström 2020 -->
+@RN2358],<!-- Hammarström 2020 -->
 progressive volume may thus increase ribosomal abundance to a higher degree and provide a measure to avoid the plateau phase seen in the present study.
 
 In conclusion, RT-induced ribosome accumulation reached peak values in the initial phase of RT (8 sessions) and was interconnected with increases in UBF protein levels. The rate of total RNA accumulation predicted RT-induced muscle hypertrophy. Fluctuations in training volume did not transfer to fluctuations in ribosomal biogenesis, but training cessation led to decreased ribosomal content.  
@@ -791,7 +794,7 @@ After completion of each session participants were given a standardized drink to
 
 
 ## Muscle strength, body composition and muscle thickness assessments
-Muscle strength was assessed as maximal voluntary isokinetic (90&deg; sec<sup>-1</sup>) and isometric (60&deg; angle, fully extended leg 0&deg;) knee extension torque. After a brief warm-up (5-min cycling, RPE 12-14), participants were seated and secured in the individually adjusted dynamometer. Participants were instructed to gradually increase their effort during three warm-up repetitions (50, 60 and, 70% of subjective maximal effort). After a 30-sec restitution period participants were instructed to perform three repetitions with maximal effort in the concentric phase. Sixty seconds after the isokinetic test the lever automatically moved to a 60&deg; angle and participants were instructed to push against the lever enough to see feedback from the visual feedback system. After an additional 15-sec restitution period, participants were instructed to push against the lever with maximal effort. Within the same assessment session, participants remained seated in the dynamometer for measurement perfomed on both legs. The first measurement was alternated between legs every other session. For statistical treatment of the data, all successful attempts were used. The last strength assessment at baseline was performed at least seven days prior to the first biopsy sampling. At least one of the baseline strength tests was performed on separate day with two sessions allowed to be perform on the same day with a short rest between assessments. Post training assessments were performed 48 hours and eight days after the last session.
+Muscle strength was assessed as maximal voluntary isokinetic (90&deg; sec<sup>-1</sup>) and isometric (60&deg; angle, fully extended leg 0&deg;) knee extension torque. After a brief warm-up (5-min cycling, RPE 12-14), participants were seated and secured in the individually adjusted dynamometer. Participants were instructed to gradually increase their effort during three warm-up repetitions (50, 60 and, 70% of subjective maximal effort). After a 30-sec restitution period participants were instructed to perform three repetitions with maximal effort in the concentric phase. Sixty seconds after the isokinetic test the lever automatically moved to a 60&deg; angle and participants were instructed to push against the lever enough to see feedback from the visual feedback system. After an additional 15-sec restitution period, participants were instructed to push against the lever with maximal effort. Within the same assessment session, participants remained seated in the dynamometer for measurement performed on both legs. The first measurement was alternated between legs every other session. For statistical treatment of the data, all successful attempts were used. The last strength assessment at baseline was performed at least seven days prior to the first biopsy sampling. At least one of the baseline strength tests was performed on separate day with two sessions allowed to be perform on the same day with a short rest between assessments. Post training assessments were performed 48 hours and eight days after the last session.
 
 For determination of body composition participants were scanned using DXA (Lunar Prodigy densitometer, GE Healthcare, Madison, WI, USA) with the standard scanning mode (13-25 cm). Participants were lying supine within the scanning bed reference lines, with a strap secured around the ankles to ensure a standardized body position in each scan. The scans were conducted with participants in a fasted state between 07.00-10.00 AM, with empty bladder and wearing only under-wear. Prior to each scan, a phantom scan was run to prevent baseline drifting from affecting analyses. The same technician was used at each time point. Analyses was performed using GE enCORE version 17.0 software (GE Healthcare). Region of interest was customized for covering upper thigh, marked with a sqaure from pubic symphysis to lateral part of tuberculum major, and distal to art. genu.
 
@@ -852,7 +855,30 @@ Raw fluorescence data was exported from the QuantStudio software and estimates o
 
 
 ## Immunoblotting
-Protein samples (20 &#956;g) were separated on 4-20% Tris-Glycin gels (Criterion TGX Precast Gels, Bio-Rad) at 250 V for 45 min using the recommended running buffer (25 mM Tris, 192 mM Glycin, 0.1% SDS). All samples from the same participant were run on the same gel and all samples were run in at least duplicates. When samples were compared between participants, signals were expressed per a calibrator sample from each participant that in turn was measured on a separate gel with all calibrator samples. Separated samples were transferred to &#956m PVDF membranes (Immun-Blot, Bio-Rad) using wet transfer (25 mM Tris, 192 Glycin, 10% vol/vol methanol) at a constant voltage of 300 mA for 3 h. Membranes were then stained to confirm transfer and enable total protein quantification using a reversible protein stain (Pierce Reversible Protein Stain, Thermo Fisher Scientiﬁc). Primary antibodies were acquired to detect UBF (F-9, sc-13125, Santa-Cruz Biotechnology, Dallas, Texas, USA) and ribosomal protein S6 (54D2, #2317, Cell Signaling Technology, Danvers, MA, USA). After blocking (Tris-buffered saline blocking buffer, 20 mM Tris, 150 mM NaCl, 5% fat-free milk, 0.1% Tween-20), membranes were incubated over-night with primary antibodies diluted in blocking buffer (UBF, 1:200; S6, 1:1000) followed by incubation with a secondary antibody conjugated to horseradish peroxidase (Anti-mouse IgG, #7076, Cell Signaling Technology, 1:10000). Membranes were washed 6 &#215; 5 min after incubation with primary antibodies and 8 &#215; 5 min after incubation with the secondary antibody. All incubation and washing steps were performed at 4&deg;C using an automatic membrane processor (BlotCycler, Precision Biosystems, Mansﬁeld, MA, USA). Chemiluminescent signals from membranes were detected after 5 min incubation in substrate (Super Signal West Femto Maximum Sensitivity Substrate, Thermo Fisher Scientiﬁc) using a documentation system. Total protein content was quantified from whole membrane images and defined as the mean gray value of the whole lane. Between-lane gray values were used as background subtracted from protein values. Total protein quantification was done using ImageJ Fiji [@RN2561]. Chemiluminescence signals were quantified using Image Studio Lite (LI-COR Biotechnology, Lincoln, NE, USA). 
+Protein samples (20 &#956;g) were separated on 4-20% Tris-Glycin gels (Criterion TGX Precast Gels, Bio-Rad) at 250 V for 45 min using the recommended running buffer (25 mM Tris, 192 mM Glycin, 0.1% SDS). All samples from the same participant were run on the same gel and all samples were run in at least duplicates. When samples were compared between participants, signals were expressed per a calibrator sample from each participant that in turn was measured on a separate gel with all calibrator samples. Separated samples were transferred to &#956m PVDF membranes (Immun-Blot, Bio-Rad) using wet transfer (25 mM Tris, 192 Glycin, 10% vol/vol methanol) at a constant voltage of 300 mA for 3 h. Membranes were then stained to confirm transfer and enable total protein quantification using a reversible protein stain (Pierce Reversible Protein Stain, Thermo Fisher Scientiﬁc). Primary antibodies were acquired to detect UBF (F-9, sc-13125, Santa-Cruz Biotechnology, Dallas, Texas, USA) and ribosomal protein S6 (54D2, #2317, Cell Signaling Technology, Danvers, MA, USA). After blocking (Tris-buffered saline blocking buffer, 20 mM Tris, 150 mM NaCl, 5% fat-free milk, 0.1% Tween-20), membranes were incubated over-night with primary antibodies diluted in blocking buffer (UBF, 1:200; S6, 1:1000) followed by incubation with a secondary antibody conjugated to horseradish peroxidase (Anti-mouse IgG, #7076, Cell Signaling Technology, 1:10000). Membranes were washed 6 &#215; 5 min after incubation with primary antibodies and 8 &#215; 5 min after incubation with the secondary antibody. All incubation and washing steps were performed at 4&deg;C using an automatic membrane processor (BlotCycler, Precision Biosystems, Mansﬁeld, MA, USA). Chemiluminescent signals from membranes were detected after 5 min incubation in substrate (Super Signal West Femto Maximum Sensitivity Substrate, Thermo Fisher Scientiﬁc) using a documentation system. Total protein content was quantified from whole membrane images and defined as the mean gray value of the whole lane. Between-lane gray values were used as background subtracted from protein values. Total protein quantification was done using ImageJ Fiji [@RN2561]. Chemiluminescence signals were quantified using Image Studio Lite (LI-COR Biotechnology, Lincoln, NE, USA).
+```{r}
+library(tidyverse)
+
+western_data <- readRDS("./data/derivedData/western-compile/western_data.RDS")
+
+
+### CV of duplicate measurements
+
+western_cv <- western_data %>%
+  group_by(sample, target) %>%
+  summarise(n = n(), 
+            m = mean(expression, na.rm = TRUE), 
+            s = sd(expression, na.rm = TRUE), 
+            cv = s/m) %>%
+
+
+  group_by(target) %>%
+  summarise(cv = mean(cv, na.rm = TRUE)) %>%
+  pull(cv)
+
+cvs <- paste0(round(min(western_cv) * 100, 1), " and ", round(max(western_cv) * 100, 1), "%")
+```
+<span custom-style="CHANGE">The average coefficient of variation across replicates were `r cvs`, for RPS6 and UBF, respectively.</span> 
 
 ## Statistics and data analysis
 Descriptive data are presented as mean and standard deviation (SD). The effect of training on muscle strength, muscle thickness, UBF/rpS6 protein, total RNA and gene abundances were assessed using mixed effects regression models. Time and group (TRAIN vs. CTRL) were treated as population (fixed) effects and leg nested within participant included as group level (random) effects. These analyses were performed on data with matching time points between TRAIN and CTRL with the exception that all post-training data from TRAIN were included (post-training and de-training). Relative interactions between groups were estimated as $\Delta$ TRAIN - $\Delta$ CTRL. The effects of different volume conditions and general time-course patterns were assessed using all pairwise observations from the TRAIN group. For protein and total RNA data, segmented regression models were used to estimate changes over sessions in three segments (session 1-4, 4-8 and 8-12; corresponding to blocks of different volume prescription in TRAIN). When no robust effects of volume conditions were detected, group averages are presented. Segmented models were fitted with time and volume condition as population effects and legs nested within participants as group level effects. Muscle strength, muscle thickness, protein and total RNA data was modeled after log transformation.

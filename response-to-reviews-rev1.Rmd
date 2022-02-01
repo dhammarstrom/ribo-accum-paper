@@ -5,23 +5,61 @@ date: "2022-01-17"
 output: pdf_document
 editor_options: 
   chunk_output_type: console
+  markdown: 
+    wrap: 72
+bibliography: references.bib
 ---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+```
+
 
 ## Referee 1
 
+> This manuscript investigates the induction of ribosome biogenesis and
+> accumulation of RNA/ribosomes during the early phase of resistance
+> training. Subjects performed unilateral RE bilaterally but with
+> differing loading protocols. One leg trained with a constant volume
+> whereas the other trained with variable volume. Control subjects were
+> biopsied at relevant time points. The manuscript presents evidence in
+> favor of that skeletal muscle in the naïve state is very responsive
+> with respect to ribosome biogenesis following acute RE. With repeated
+> training sessions this induction is maintained but not further
+> stimulated. Most of the effect on total RNA was seen during the first
+> training block. UBF levels were related to RNA accumulation and rate
+> of total RNA accumulation predicted RT-induced muscle hypertrophy.
+> With eight days of detraining, around 20% of total RNA was lost,
+> indicating that the elevated RNA pool needs to be maintained not to
+> decrease. The manuscript is highly interesting and ambitious in its
+> design. I think that it adds to the published literature and could
+> potentially be a future important reference piece. However, I have
+> some concerns and comments that I'd like for the authors to address,
+> as I think that they can improve the manuscript further.
 
-> This manuscript investigates the induction of ribosome biogenesis and accumulation of RNA/ribosomes during the early phase of resistance training. Subjects performed unilateral RE bilaterally but with differing loading protocols. One leg trained with a constant volume whereas the other trained with variable volume. Control subjects were biopsied at relevant time points. The manuscript presents evidence in favor of that skeletal muscle in the naïve state is very responsive with respect to ribosome biogenesis following acute RE. With repeated training sessions this induction is maintained but not further stimulated. Most of the effect on total RNA was seen during the first training block. UBF levels were related to RNA accumulation and rate of total RNA accumulation predicted RT-induced muscle hypertrophy. With eight days of detraining, around 20% of total RNA was lost, indicating that the elevated RNA pool needs to be maintained not to decrease.
-The manuscript is highly interesting and ambitious in its design. I think that it adds to the published literature and could potentially be a future important reference piece. However, I have some concerns and comments that I’d like for the authors to address, as I think that they can improve the manuscript further.
+> The western blot membranes in the paper does not really translate into
+> the presented data. In my opinion the bands look rather faint and
+> equal in intensity across the time course. Could the authors perhaps
+> provide raw data and membranes for RPS6 and UBF just for the
+> reviewers?
 
+We agree with the referee that the blots presented in Figure 2 were
+faint, especially for UBF. The selected blot was made for illustrative
+purposes as we had ordered the samples according to sampling time and
+condition in that particular blot. Unfortunately this blot was in the
+"fainter end" of the spectrum. We have replaced the blot with one that
+we feel is more representative. We are providing the quantified blots in
+a separate document for the reviewers.
 
-> The western blot membranes in the paper does not really translate into the presented data. In my opinion the bands look rather faint and equal in intensity across the time course. Could the authors perhaps provide raw data and membranes for RPS6 and UBF just for the reviewers?
-
-We agree with the referee that the blots presented in Figure 2 were faint, especially for UBF. The selected blot was made for illustrative purposes as we had ordered the samples according to sampling time and condition in that particular blot. Unfortunately this blot was in the "fainter end" of the spectrum. We have replaced the blot with one that we feel is more representative.
-
-The raw aggregated data (averaged over replicates per samples) does show a clear increase in signal over the time course (Figure 1). We acknowledge that the western blot technique is associated with considerable technical variation.  
-
-
-
+The protein samples were extracted from Trizol preparations, something
+that has been proven difficult but possible (see e.g. [@wen2020;
+@kopec2]). Some of our samples were also difficult to dissolve after
+precipitation and this sometimes gave unsatisfactory results during the
+western blot procedure. Problematic samples were re-extracted and
+re-run. Importantly, assessment of sample quality and any re-extraction
+was performed on samples given a random sample id. De-coding of the
+random sample id was performed only at data analysis, and to create runs
+with ordered samples.
 
 ```{r}
 ## Raw data of western blot membranes
@@ -30,9 +68,9 @@ library(tidyverse)
 western_data <- readRDS("./data/derivedData/western-compile/western_data.RDS")
 
 
+### CV of duplicate measurements
 
-
-western_data %>%
+western_cv <- western_data %>%
   group_by(sample, target) %>%
   summarise(n = n(), 
             m = mean(expression, na.rm = TRUE), 
@@ -42,150 +80,265 @@ western_data %>%
 
   group_by(target) %>%
   summarise(cv = mean(cv, na.rm = TRUE)) %>%
-  print()
+  pull(cv)
+
+cvs <- paste0(round(min(western_cv) * 100, 1), " and ", round(max(western_cv) * 100, 1), "%")
    
+```
 
+The raw aggregated data (averaged over replicates per samples) does show
+a clear increase in signal over the time course (\@ref(fig:western-fig)). We acknowledge that the western blot technique is associated with
+considerable technical variation. The average coefficient of variation
+(CV) in replicates were `r cvs` for RPS6 and UBF respectively, both within the
+expected range of CV from western blot data [@degasperi2014].
 
-## ICC
-library(lme4)
-ubf <-   lmer(expression ~ gel + (1|sample), 
-            data = western_data[western_data$target == "t-UBF",])
+For transparency, we have included assay performance in the the revised version of the manuscript. 
 
-s6 <-   lmer(expression ~ gel + (1|sample), 
-            data = western_data[western_data$target == "t-s6",])
+```{r western-fig, fig.cap = "Raw data on arbitrary unit scale and normalized to baseline samples.", fig.width = 7, fig.height = 8}
 
+color.scale <- c("#ffffff", "#4f81bd", "#7f7f7f", "#b42a51")
 
+library(lme4) ; library(cowplot)
 
-data.frame(VarCorr(ubf))[1, 4] / sum(data.frame(VarCorr(ubf))[, 4])
-
-data.frame(VarCorr(s6))[1, 4] / sum(data.frame(VarCorr(s6))[, 4])
-
-  
-  ggplot(aes(sample, n)) + geom_point()
-  print()
-
-
-
-
-western_data %>%
+absolute_data <- western_data %>%
   mutate(detrain = if_else(time == "post1w", "detrain", "train"), 
-         time = if_else(time %in% c("post1w", "postctrl"), "12", 
-                        if_else(time == "S1c", "1", 
-                                gsub("S", "", time))), 
-         time = if_else(detrain == "detrain", "13", time),
+         time = if_else(time %in% c("post1w", "postctrl"), "12",
+                        if_else(time == "S1c", "1", gsub("S", "", time))), 
+         time = if_else(detrain == "detrain", "13", time), 
          group = if_else(cond == "ctrl_leg", "ctrl", "train"), 
          time = as.numeric(time), 
-         time.fact = as.factor(time)) %>%
+         time.fact = as.factor(time), 
+         group = factor(group, levels = c("ctrl", "train"), 
+                        labels = c("Control group", 
+                                   "Intervention group"))) %>%
+
+  group_by(target, participant, group, time.fact, detrain) %>%
+  
+  summarise(expression = mean(expression, na.rm = TRUE)) %>%
+  
+  ungroup() %>%
+  
+  ggplot(aes(time.fact, expression, fill = group)) +
+  geom_boxplot() + 
+  geom_jitter(height = 0, width = 0.1, shape = 21) + 
+  
+  scale_fill_manual(values = c(color.scale[1], color.scale[2])) +
+  
+  facet_wrap(~ target) +
+  
+  labs(x = "Time-point", 
+       y = "Western blot signal (AU)", 
+       title = "Raw western blot data averaged over sample", 
+       fill = "Group")  +
+  
+  theme(panel.background = element_rect(fill = "#fefeda"), 
+        panel.grid.major.y = element_line(color = "gray80"), 
+        panel.grid.major.x = element_blank(), 
+        legend.position = "bottom")
+  
+  
+  
+
+relative_data <- western_data %>%
+  mutate(detrain = if_else(time == "post1w", "detrain", "train"), 
+         time = if_else(time %in% c("post1w", "postctrl"), "12",
+                        if_else(time == "S1c", "1", gsub("S", "", time))), 
+         time = if_else(detrain == "detrain", "13", time), 
+         group = if_else(cond == "ctrl_leg", "ctrl", "train"), 
+         time = as.numeric(time), 
+         time.fact = as.factor(time), 
+         group = factor(group, levels = c("ctrl", "train"), 
+                        labels = c("Control group", 
+                                   "Intervention group"))) %>%
+
+  group_by(target, participant, group, time.fact, detrain) %>%
+  mutate(baseline = ifelse(time == 0, expression,NA )) %>%
+  
+  group_by(target, participant, leg) %>% 
+  mutate(baseline = mean(baseline, na.rm = TRUE), 
+         expression = expression / baseline) %>%
   
   group_by(target, participant, group, time.fact, detrain) %>%
-  summarise(expression = mean(expression)) %>%
+  
+  summarise(expression = mean(expression, na.rm = TRUE)) %>%
+  
+  ungroup() %>%
+  
+  ggplot(aes(time.fact, expression, fill = group)) +
+  geom_boxplot() + 
+  geom_jitter(height = 0, width = 0.1, shape = 21) + 
+  
+  facet_wrap(~ target) +
+    scale_fill_manual(values = c(color.scale[1], color.scale[2])) +
+  labs(x = "Time-point", 
+       y = "Western blot signal (AU) / Baseline values", 
+       title = "Raw western blot data averaged over sample normalized to baseline", 
+       fill = "Group")  +
+  
+  theme(panel.background = element_rect(fill = "#fefeda"), 
+        panel.grid.major.y = element_line(color = "gray80"), 
+        panel.grid.major.x = element_blank(), 
+        legend.position = "none")
+  
 
-  ggplot(aes(time.fact, expression, color = group)) + 
-  geom_violin() + 
-  geom_jitter(height = 0, width = 0.1) +
-  facet_wrap(~ target)
-
-
+plot_grid(absolute_data, relative_data, 
+          ncol = 1, rel_heights = c(0.55, 0.45))
 
 
 ```
 
-
-
-
 > Is pre-rRNA 47S ETS and 45S ETS per unit tissue weight a previously reported way to present qPCR data? Does the data look the same in relation to 1 or more house keeping genes?
 
-One transcribed pre-rRNA results in a single end product, one ribosome and in the context of protein synthesis the amount of ribosomes per cell or tissue mass is highly correlated with protein synthesis (Milward 1976, West 2016). In contrast to rRNA processing, mRNA transcription and translation could to some degree be seen as competitive between different mRNA. 
-
-This translates to different normalization strategies. The use of a houskeeping gene when investigating ribosomal biogenesis is not interesting as it does not 
+One transcribed pre-rRNA results in a single end product, one ribosome, and in the context of protein synthesis, the amount of ribosomes per cell or tissue mass is highly correlated with protein synthesis [@millward1973; @west2016]. In contrast to rRNA processing, mRNA transcription and subsequent translation could, to some degree, be seen as competitive between different mRNA. This translates to different normalization strategies where we believe that the most biologically relevant perspective on rRNA is expressing it to the amount of tissue probed in the qPCR. The use of a housekeeping or reference gene in this respect could be misleading as the relative stability of the reference gene must be determined to some quantity of interest. Normalization of mRNA data using reference genes assumes that such stability has been determined as relative to the mRNA pool [@andersen2004]. We have however noted that in response to RT, relative stability is hard to determine as the whole mRNA pool is increasing [@khan2020]. This again brings us to the basic problem of normalization, what is the underlying quantity of interest? We have not attempted to determine relative stability of reference genes in the present data set because of our past experiences, therefore we are unwilling to explore the effect of using a reference gene, as the reviewer suggests. A simple alternative to determining the relative stability of a reference gene is to use an external (exogenous) reference together with the known quantity of tissue used in sample preparations. The use of exogenous reference genes has previously been used to achieve "custom normalization" to increase biological relevance (e.g. [@ellefsen2008]). We have also previously used the same approach as in the present work to conclude that RT leads to increased abundance of pre-rRNA and rRNA in muscle tissue [@hammarström2020].   
 
 > Could the authors please comment on the apparent disconnect between increase in RNA and RPS6 protein levels?
+
+We interpret the results from our analysis as affected by a time-lag between increases in synthesis of total RNA (presumably rRNA) and RPS6. The model used "controls" for both quantities being increased over the whole training period, but within a specific time-point there exists no relationship between RPS6 and total RNA. This separates our analysis from others who have shown correlations between RPS6 and rRNA without controlling for, in their case, degree of stimuli [@nakada2016] and without examining the time course of their increase. As we have already pointed to in the manuscript, our results suggests different temporal regulation or turnover rates in total RNA and RPS6 protein levels. 
 
 
 
 > The concept that the increase in RNA content predicts subsequent hypertrophy is very interesting. Even more intriguing is the finding that total RNA mid training negatively correlates to muscle hypertrophy is fascinating! I would encourage the authors to deepen the discussion on these key data points, especially in the light of more and more evidence in favor of ribosome specialization. Could a high percentage of new ribosomes be advantageous for growth in more ways than just contributing greater numbers?
 
-The referee raises an interesting point 
+The reviewer raises an interesting point, that we interpret as suggesting that newly synthesized ribosomes would be more beneficial for muscle growth in response to a new stimuli as novel ribosomes are potentially specialized for growth rather than cellular status quo. In light of recent studies and overviews highlighting ribosomal heterogoneity, our results are worth following up in relation to a specialized ribosome. 
+
+We have added a section in the discussion highlighting this aspect of the results.
 
 > Please comment on that UBF levels where maintained at the detraining time point but total RNA decreasing. Would it be relevant to analyze UBF phosphorylation?
+
+Although not robustly decreased, the overall tendency of total UBF protein was decrease in response to the de-training period. However, as the reviewer points to, we did not measure the "active" UBF nor UBF in the context of rDNA chromatin regulation. It is possible that in the de-training period a reduced stimuli (possibly through reduced mTORC1 stimulation [@nader2005]) reduced interaction between UBF and rDNA. Unfortunately, a limited amount of tissue (together with other resources) prevented us from doing more elaborate analyses, including UBF phosphorylation or UBF/rDNA interactions.
+
+
 
 > The fact that RNA decreased at the detraining time point is interesting and indicates the importance of actively maintaing translational capacity not to loose it. I think the discussion could benefit from including a short section of the role for ribophagy in this setting?
 
 
-> The methods in the abstract must be improved. In its current form it lacks key information such as training duration, the number of controls are states as n=7 but n=8 in the M&M section and I’d like for the authors to try and specify biopsy time points.
 
 
-> Page 3, line 48-49. I encourage the authors to consider including an additional reference (Figueiredo et al 2021 J Phys). This paper shows the specific response of ribosome biogenesis in response to RE and not Endurance type exercise.
+> The methods in the abstract must be improved. In its current form it lacks key information such as training duration, the number of controls are states as n=7 but n=8 in the M&M section and I'd like for the authors to try and specify biopsy time points.
 
-> Page 4, line 8: Please clarify “numberical lowering”. Could this be rephrased?
+We thank the reviewer for catching this typo. We have updated the abstract with the correct information and additional information regarding biopsy time points.
 
-> Page 4, line 10: Double “..”
+> Page 3, line 48-49. I encourage the authors to consider including an
+> additional reference (Figueiredo et al 2021 J Phys). This paper shows
+> the specific response of ribosome biogenesis in response to RE and not
+> Endurance type exercise.
 
-> Page 4, line 15: Double “..”
+> Page 4, line 8: Please clarify "numberical lowering". Could this be
+> rephrased?
 
-> Page 4, line 26: Should “to” be removed?
+> Page 4, line 10: Double ".."
+
+> Page 4, line 15: Double ".."
+
+> Page 4, line 26: Should "to" be removed?
 
 > Page 11, line 20: n=7 or 8? Please check abstract
 
-> Page 11, line 35: Should “a” be removed? Please double check if it’s 7 or 8 days of detraining. Abstract states 8.
+> Page 11, line 35: Should "a" be removed? Please double check if it's 7
+> or 8 days of detraining. Abstract states 8.
 
-> Page 12, line 19: please clarify “leg being training in the rest period between sets in the first leg. Does this means that they training continuously without break?
+> Page 12, line 19: please clarify "leg being training in the rest
+> period between sets in the first leg. Does this means that they
+> training continuously without break?
 
-> Page 13, line 52: 2-4 passes were made with the Bard Magnum 12-14 gauge needles but only 1-2 aliquots of the samples were frozen. What happened to the other material? If I misunderstood, can the text be rewritten for clarity?
+> Page 13, line 52: 2-4 passes were made with the Bard Magnum 12-14
+> gauge needles but only 1-2 aliquots of the samples were frozen. What
+> happened to the other material? If I misunderstood, can the text be
+> rewritten for clarity?
 
-> Page 14, line 8: Was the spike-in used to normalize RNA extraction efficiency? If yes, please state this clearly.
+> Page 14, line 8: Was the spike-in used to normalize RNA extraction
+> efficiency? If yes, please state this clearly.
 
-> Page 14, line 49: Does “normalized” refer to denatured?
+> Page 14, line 49: Does "normalized" refer to denatured?
 
-> Page 15, line 15: Does the authors refer to amplicon size when they write primer sizes?
+> Page 15, line 15: Does the authors refer to amplicon size when they
+> write primer sizes?
 
-> Page 31, Figure legends: I think that the figure legends could benefit from a bit more substance. For example Fig 1A, perhaps indicate bar color as black (CONST) and yellow (VAR)?
-
-
+> Page 31, Figure legends: I think that the figure legends could benefit
+> from a bit more substance. For example Fig 1A, perhaps indicate bar
+> color as black (CONST) and yellow (VAR)?
 
 ## Referee: 2
 
+> The authors sought to perform a time course investigation of ribosome
+> density and biogenesis markers after knee extensor training. Phenotype
+> variables were also assessed. Training led to increases in muscle
+> growth (VL thickness) as well as in total RNA, rRNA, UBF and rpS6.
+> Training volume did not play a role in these adaptations.
+> Interestingly, the rate of total RNA increases predicted hypertrophy.
+> Likewise, training cessation led to decrements in total RNA abundance.
+> I love this study. This continues to contribute to our knowledge
+> regarding the role of ribosome biogenesis in muscle hypertrophy, and
+> is delicate human work with multiple time point biopsies. I have minor
+> comments in order of appearance, and congratulate the authors on their
+> fine work.
 
-> The authors sought to perform a time course investigation of ribosome density and biogenesis markers after knee extensor training.  Phenotype variables were also assessed.  Training led to increases in muscle growth (VL thickness) as well as in total RNA, rRNA, UBF and rpS6.  Training volume did not play a role in these adaptations.  Interestingly, the rate of total RNA increases predicted hypertrophy.  Likewise, training cessation led to decrements in total RNA abundance.
-I love this study.  This continues to contribute to our knowledge regarding the role of ribosome biogenesis in muscle hypertrophy, and is delicate human work with multiple time point biopsies.
-I have minor comments in order of appearance, and congratulate the authors on their fine work.
+> ABSTRACT: Reads well and concise. Nice work, and no comments.
 
+> INTRODUCTION - Line 7, minor: "promotes" should read as "promote" -
+> Line 14, minor: "with subsequent repeated bouts" should read as "and
+> subsequent repeated bouts" - Line 18, minor: "resting synthetic rate
+> of muscle protein" better reads as "basal muscle protein synthesis
+> rates" - Lines 48-50, minor: "bouts lead to accumulation of mature
+> rRNA thus also total RNA and presumably functional ribosomes"...this
+> sentence is long, and the word "thus" seems to make it a run-on. I'd
+> rephrase the sentence to read more coherently. Page 4 - Lines 10 and
+> 15, minor: each sentence has two stops. - Line 33, minor: no need to
+> use the phrase "per se" RESULTS - Line 51 (and throughout the
+> results), clarification: is "9.2%-point difference" the same as "9.2%
+> difference"? If so, adjust and remove "point" from all descriptors as
+> this is confusing. - Other than this, the results, while dense and
+> full of data, are well-written. DISCUSSION Page 7 - Line 17, minor:
+> again, "per se" can be removed. - Line 19, minor: "was not affected"
+> better reads as "were not affected" - Line 39, minor: "session" should
+> read as "sessions"
 
+> I urge the authors to be creative somewhere in the discussion by
+> perhaps adding a paragraph after the one found in lines 29-56. We've
+> done a lot of work in the ribosome biogenesis area, and we've thought
+> a good bit about total RNA/unit muscle with regard to what it
+> represents. The authors correctly articulated this as a proxy of
+> ribosome density. However, as muscle tissue and myofibers
+> volumetrically increase, this will affect the metric (the same holds
+> true with mitochondrial biogenesis and using CS activity as a proxy of
+> mitochondrial volume density). An easy way to interpret this is in the
+> following example: o Muscle tissue increases 5% in thickness with RT
+> (and myofibers scale accordingly as well) o Total RNA/unit muscle does
+> not change in value Most would interpret this as ribosome biogenesis
+> not occurring. However, biogenesis likely occurred because, as muscle
+> grew, ribosome biogenesis scaled with growth thus leading to no change
+> in RNA concentration. Our laboratory discusses this important concept
+> with regard to RT and mitochondrial biogenesis (PMID: 32162291, PMID:
+> 34646153).
 
->  ABSTRACT: Reads well and concise.  Nice work, and no comments.
-
-> INTRODUCTION 
-- Line 7, minor: “promotes” should read as “promote”
-- Line 14, minor: “with subsequent repeated bouts” should read as “and subsequent repeated bouts”
-- Line 18, minor: “resting synthetic rate of muscle protein” better reads as “basal muscle protein synthesis rates”
-- Lines 48-50, minor: “bouts lead to accumulation of mature rRNA thus also total RNA and presumably functional ribosomes”…this sentence is long, and the word “thus” seems to make it a run-on.  I’d rephrase the sentence to read more coherently.
-Page 4
-- Lines 10 and 15, minor: each sentence has two stops.
-- Line 33, minor: no need to use the phrase “per se”
-RESULTS
-- Line 51 (and throughout the results), clarification: is “9.2%-point difference” the same as “9.2% difference”?  If so, adjust and remove “point” from all descriptors as this is confusing.
-- Other than this, the results, while dense and full of data, are well-written.
-DISCUSSION
-Page 7
-- Line 17, minor: again, “per se” can be removed.
-- Line 19, minor: “was not affected” better reads as “were not affected”
-- Line 39, minor: “session” should read as “sessions”
-
-
-> I urge the authors to be creative somewhere in the discussion by perhaps adding a paragraph after the one found in lines 29-56.  We’ve done a lot of work in the ribosome biogenesis area, and we’ve thought a good bit about total RNA/unit muscle with regard to what it represents.  The authors correctly articulated this as a proxy of ribosome density.  However, as muscle tissue and myofibers volumetrically increase, this will affect the metric (the same holds true with mitochondrial biogenesis and using CS activity as a proxy of mitochondrial volume density).  An easy way to interpret this is in the following example:
-o Muscle tissue increases 5% in thickness with RT (and myofibers scale accordingly as well)
-o Total RNA/unit muscle does not change in value
-Most would interpret this as ribosome biogenesis not occurring.  However, biogenesis likely occurred because, as muscle grew, ribosome biogenesis scaled with growth thus leading to no change in RNA concentration.  Our laboratory discusses this important concept with regard to RT and mitochondrial biogenesis (PMID: 32162291, PMID: 34646153).
-
-> Anyhow, this is no critique of the authors’ hard and excellent work.  However, I think the authors re-iterating this point as a stand-alone paragraph would benefit readership.  In addition, I believe taking a moment to define what the total RNA/ribosome density metric conceptually represents, and then (in this newly added paragraph) briefly walking the reader through each phase of the data, and what could be going on with biogenesis in the context of a growing muscle would be interesting to see.  For instance, in Figure 3G, my interpretation (much like the authors’) is that ribosome biogenesis is very rapid at the onset of RT where little functional growth is likely occurring.  And like the authors, I believe this likely was needed for eventual growth to occur.  However, the “no change” in RNA concentrations session 9-12 as muscle is continuing to grow may not indicate a plateau in biogenesis given that this is the time during which muscle growth is likely starting to ramp up.  Hence, biogenesis rates could be equally as ramped here compared to sessions 1-9 of RT.
+> Anyhow, this is no critique of the authors' hard and excellent work.
+> However, I think the authors re-iterating this point as a stand-alone
+> paragraph would benefit readership. In addition, I believe taking a
+> moment to define what the total RNA/ribosome density metric
+> conceptually represents, and then (in this newly added paragraph)
+> briefly walking the reader through each phase of the data, and what
+> could be going on with biogenesis in the context of a growing muscle
+> would be interesting to see. For instance, in Figure 3G, my
+> interpretation (much like the authors') is that ribosome biogenesis is
+> very rapid at the onset of RT where little functional growth is likely
+> occurring. And like the authors, I believe this likely was needed for
+> eventual growth to occur. However, the "no change" in RNA
+> concentrations session 9-12 as muscle is continuing to grow may not
+> indicate a plateau in biogenesis given that this is the time during
+> which muscle growth is likely starting to ramp up. Hence, biogenesis
+> rates could be equally as ramped here compared to sessions 1-9 of RT.
 
 METHODS
 
 Page 11
 
-- Lines 9-19: Authors stated that 18 participants were recruited, but then go on to say that n=11 TRAIN and n=8 CTRL completed.  Please reconcile.
-- Line 35: Authors stated 7 days after detraining, but in the discussion (page 7, line 19) they mention after 8 days of detraining.  Please reconcile.
-Page 12
-- Line 39, minor: “restitution” should read as “rest”.  Please change accordingly, and if used throughout the paper, please alter.
-Page 15
-- Line 36, minor: “Glycin” should read as “Glycine”.  In addition, and molar unit is needed.
+-   Lines 9-19: Authors stated that 18 participants were recruited, but
+    then go on to say that n=11 TRAIN and n=8 CTRL completed. Please
+    reconcile.
+-   Line 35: Authors stated 7 days after detraining, but in the
+    discussion (page 7, line 19) they mention after 8 days of
+    detraining. Please reconcile. Page 12
+-   Line 39, minor: "restitution" should read as "rest". Please change
+    accordingly, and if used throughout the paper, please alter. Page 15
+-   Line 36, minor: "Glycin" should read as "Glycine". In addition, and
+    molar unit is needed.
