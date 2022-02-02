@@ -1,6 +1,6 @@
 ---
 title: "APH-2021-12-0652: Response to the reviewers"
-author: "Daniel Hammarström"
+author: "Daniel Hammarström, Sjur J. Øfsteng, Nicolai B. Jacobsen, Krister B. Flobergseter, Bent R. Rønnestad, Stian Ellefsen"
 date: "2022-01-17"
 output: pdf_document
 editor_options: 
@@ -92,7 +92,7 @@ considerable technical variation. The average coefficient of variation
 (CV) in replicates were `r cvs` for RPS6 and UBF respectively, both within the
 expected range of CV from western blot data [@degasperi2014].
 
-For transparency, we have included assay performance in the the revised version of the manuscript. 
+For transparency, we have included assay performance (CV) in the the revised version of the manuscript. 
 
 ```{r western-fig, fig.cap = "Raw data on arbitrary unit scale and normalized to baseline samples.", fig.width = 7, fig.height = 8}
 
@@ -189,12 +189,13 @@ plot_grid(absolute_data, relative_data,
 
 > Is pre-rRNA 47S ETS and 45S ETS per unit tissue weight a previously reported way to present qPCR data? Does the data look the same in relation to 1 or more house keeping genes?
 
-One transcribed pre-rRNA results in a single end product, one ribosome, and in the context of protein synthesis, the amount of ribosomes per cell or tissue mass is highly correlated with protein synthesis [@millward1973; @west2016]. In contrast to rRNA processing, mRNA transcription and subsequent translation could, to some degree, be seen as competitive between different mRNA. This translates to different normalization strategies where we believe that the most biologically relevant perspective on rRNA is expressing it to the amount of tissue probed in the qPCR. The use of a housekeeping or reference gene in this respect could be misleading as the relative stability of the reference gene must be determined to some quantity of interest. Normalization of mRNA data using reference genes assumes that such stability has been determined as relative to the mRNA pool [@andersen2004]. We have however noted that in response to RT, relative stability is hard to determine as the whole mRNA pool is increasing [@khan2020]. This again brings us to the basic problem of normalization, what is the underlying quantity of interest? We have not attempted to determine relative stability of reference genes in the present data set because of our past experiences, therefore we are unwilling to explore the effect of using a reference gene, as the reviewer suggests. A simple alternative to determining the relative stability of a reference gene is to use an external (exogenous) reference together with the known quantity of tissue used in sample preparations. The use of exogenous reference genes has previously been used to achieve "custom normalization" to increase biological relevance (e.g. [@ellefsen2008]). We have also previously used the same approach as in the present work to conclude that RT leads to increased abundance of pre-rRNA and rRNA in muscle tissue [@hammarström2020].   
+One transcribed pre-rRNA results in a single end product, one ribosome, and in the context of protein synthesis, the amount of ribosomes per cell or tissue mass is highly correlated with protein synthesis [@millward1973; @west2016]. In contrast to rRNA processing, mRNA transcription and subsequent translation could, to some degree, be seen as competitive between different mRNA. This translates to different normalization strategies where we believe that the most biologically relevant perspective on rRNA is expressing it to the amount of tissue probed in the qPCR. The use of a housekeeping or reference gene in this respect could be misleading as the relative stability of the reference gene must be determined to some quantity of interest. Normalization of mRNA data using reference genes assumes that such stability has been determined as relative to the mRNA pool [@andersen2004], or any other quantity. We have however noted that in response to RT, relative stability is hard to determine as the whole mRNA pool is increasing [@khan2020]. This again brings us to the basic problem of normalization, what is the underlying quantity of interest? We have not attempted to determine relative stability of reference genes in the present data set because of our past experiences with the RT model, therefore we are unwilling to explore the effect of using a reference gene, as the reviewer suggests. A simple alternative to determining the relative stability of a reference gene is to use an external (exogenous) reference together with the known quantity of tissue used in sample preparations. The use of exogenous reference genes has previously been used to achieve "custom normalization" to increase biological relevance (e.g. [@ellefsen2008]). We have also previously used the same approach as in the present work to conclude that RT leads to increased abundance of pre-rRNA and rRNA in muscle tissue [@hammarström2020].   
 
 > Could the authors please comment on the apparent disconnect between increase in RNA and RPS6 protein levels?
 
-We interpret the results from our analysis as affected by a time-lag between increases in synthesis of total RNA (presumably rRNA) and RPS6. The model used "controls" for both quantities being increased over the whole training period, but within a specific time-point there exists no relationship between RPS6 and total RNA. This separates our analysis from others who have shown correlations between RPS6 and rRNA without controlling for, in their case, degree of stimuli [@nakada2016] and without examining the time course of their increase. As we have already pointed to in the manuscript, our results suggests different temporal regulation or turnover rates in total RNA and RPS6 protein levels. 
+We thank the reviewer for raising this question as we have attempted to broaden our discussion. We interpret the results from our analysis as affected by a time-lag between increases in synthesis of total RNA (presumably rRNA) and RPS6. The model used "controls" for both quantities being increased over the whole training period, within a specific time-point there exists no relationship between RPS6 and total RNA. This separates our analysis from others who have shown correlations between RPS6 and rRNA without controlling for, in their case, degree of stimuli [@nakada2016] and without examining the time course of their increase. As we have already pointed to in the original manuscript, our results suggests different temporal regulation or turnover rates in total RNA and RPS6 protein levels. Since ribosomal proteins exists in excess (and are thus not rate limiting for ribosomal biogenesis) [@lam], it is tempting to assume constitutive expression is only indirectly related to the process of ribosomal biogensis. We have expanded the discussion by raising the point that unbound ribosomal proteins (including RPS6) may be passively increased by myonuclear accretion. Although somewhat speculative, this notion is supported by recent evidence suggesting a specific role of satellite cell fusion in increasing availability of ribosomal proteins together with increased rRNA transcription [@murach2022]. This could in part help explain our observations since an increased myonuclear pool is presumably maintained during short-term de-training but rRNA transcription is decreased (and/or ribophagy increased).     
 
+Our data are however limited to a single ribosomal protein without data supporting accretion of myonuclei. This limitation was also added to the discussion.
 
 
 > The concept that the increase in RNA content predicts subsequent hypertrophy is very interesting. Even more intriguing is the finding that total RNA mid training negatively correlates to muscle hypertrophy is fascinating! I would encourage the authors to deepen the discussion on these key data points, especially in the light of more and more evidence in favor of ribosome specialization. Could a high percentage of new ribosomes be advantageous for growth in more ways than just contributing greater numbers?
@@ -205,140 +206,118 @@ We have added a section in the discussion highlighting this aspect of the result
 
 > Please comment on that UBF levels where maintained at the detraining time point but total RNA decreasing. Would it be relevant to analyze UBF phosphorylation?
 
-Although not robustly decreased, the overall tendency of total UBF protein was decrease in response to the de-training period. However, as the reviewer points to, we did not measure the "active" UBF nor UBF in the context of rDNA chromatin regulation. It is possible that in the de-training period a reduced stimuli (possibly through reduced mTORC1 stimulation [@nader2005]) reduced interaction between UBF and rDNA. Unfortunately, a limited amount of tissue (together with other resources) prevented us from doing more elaborate analyses, including UBF phosphorylation or UBF/rDNA interactions.
+Although not robustly decreased, the overall tendency of total UBF protein was decrease in response to the de-training period. The variation presumably contributed to relationship with total RNA abundance. However, as the reviewer points to, we did not measure the "active" UBF nor UBF in the context of rDNA chromatin regulation. It is possible that in the de-training period a reduced stimuli (possibly through reduced mTORC1 stimulation [@nader2005]) reduced interaction between UBF and rDNA. Unfortunately, a limited amount of tissue (together with other resources) prevented us from doing more elaborate analyses, including UBF phosphorylation or UBF/rDNA interactions. We noted this limitation in the discussion. 
 
 
 
 > The fact that RNA decreased at the detraining time point is interesting and indicates the importance of actively maintaing translational capacity not to loose it. I think the discussion could benefit from including a short section of the role for ribophagy in this setting?
 
-
+We thank the reviewer for this suggestion, we have incorporated a section connecting our discussion to the emerging field of ribophagy.
 
 
 > The methods in the abstract must be improved. In its current form it lacks key information such as training duration, the number of controls are states as n=7 but n=8 in the M&M section and I'd like for the authors to try and specify biopsy time points.
 
 We thank the reviewer for catching this typo. We have updated the abstract with the correct information and additional information regarding biopsy time points.
 
-> Page 3, line 48-49. I encourage the authors to consider including an
-> additional reference (Figueiredo et al 2021 J Phys). This paper shows
-> the specific response of ribosome biogenesis in response to RE and not
-> Endurance type exercise.
+> Page 3, line 48-49. I encourage the authors to consider including an additional reference (Figueiredo et al 2021 J Phys). This paper shows the specific response of ribosome biogenesis in response to RE and not Endurance type exercise.
 
-> Page 4, line 8: Please clarify "numberical lowering". Could this be
-> rephrased?
+We thank the reviewer for this suggestion.
 
+
+> Page 4, line 8: Please clarify "numberical lowering". Could this be rephrased?
 > Page 4, line 10: Double ".."
-
 > Page 4, line 15: Double ".."
-
 > Page 4, line 26: Should "to" be removed?
-
 > Page 11, line 20: n=7 or 8? Please check abstract
+> Page 11, line 35: Should "a" be removed? Please double check if it's 7 or 8 days of detraining. Abstract states 8.
 
-> Page 11, line 35: Should "a" be removed? Please double check if it's 7
-> or 8 days of detraining. Abstract states 8.
+We thank the reviewer for pointing out the above typos, they have been corrected.
 
-> Page 12, line 19: please clarify "leg being training in the rest
-> period between sets in the first leg. Does this means that they
-> training continuously without break?
+> Page 12, line 19: please clarify "leg being training in the rest period between sets in the first leg. Does this means that they training continuously without break?
 
-> Page 13, line 52: 2-4 passes were made with the Bard Magnum 12-14
-> gauge needles but only 1-2 aliquots of the samples were frozen. What
-> happened to the other material? If I misunderstood, can the text be
-> rewritten for clarity?
+Yes, sets were performed with rest periods for the other leg. The protocol still allowed for complete rest between sets ($\sim$ 60 sec) and adjustment of loads if necessary. A clarification has ben added to this section.
 
-> Page 14, line 8: Was the spike-in used to normalize RNA extraction
-> efficiency? If yes, please state this clearly.
+
+> Page 13, line 52: 2-4 passes were made with the Bard Magnum 12-14 gauge needles but only 1-2 aliquots of the samples were frozen. What happened to the other material? If I misunderstood, can the text be rewritten for clarity?
+
+Muscle tissue from all passes were processed together and aliquots were weighed and frozen. The section has been updated. Unfortunately, a malfunctioning freeze-dryer destroyed a portion of the material. The second aliquot was pooled for RNA extraction when available. 
+
+> Page 14, line 8: Was the spike-in used to normalize RNA extraction efficiency? If yes, please state this clearly.
+
+The spike-in was used to for normalization of rRNA to muscle weight as previously described [hammarström2020]. The section has been updated to notify the reader of the purpose of adding the external reference.
 
 > Page 14, line 49: Does "normalized" refer to denatured?
 
-> Page 15, line 15: Does the authors refer to amplicon size when they
-> write primer sizes?
+This refers to diluting all samples to a common protein concentration. The sentence has been updated for clarity.
 
-> Page 31, Figure legends: I think that the figure legends could benefit
-> from a bit more substance. For example Fig 1A, perhaps indicate bar
-> color as black (CONST) and yellow (VAR)?
+> Page 15, line 15: Does the authors refer to amplicon size when they write primer sizes?
+
+Yes, the sentence should read amplicon sizes. This has been updated.
+
+
+> Page 31, Figure legends: I think that the figure legends could benefit from a bit more substance. For example Fig 1A, perhaps indicate bar color as black (CONST) and yellow (VAR)?
+
+The figure legends has been updated together with an overall update of figure appearances. 
 
 ## Referee: 2
 
-> The authors sought to perform a time course investigation of ribosome
-> density and biogenesis markers after knee extensor training. Phenotype
-> variables were also assessed. Training led to increases in muscle
-> growth (VL thickness) as well as in total RNA, rRNA, UBF and rpS6.
-> Training volume did not play a role in these adaptations.
-> Interestingly, the rate of total RNA increases predicted hypertrophy.
-> Likewise, training cessation led to decrements in total RNA abundance.
-> I love this study. This continues to contribute to our knowledge
-> regarding the role of ribosome biogenesis in muscle hypertrophy, and
-> is delicate human work with multiple time point biopsies. I have minor
-> comments in order of appearance, and congratulate the authors on their
-> fine work.
+> The authors sought to perform a time course investigation of ribosome density and biogenesis markers after knee extensor training. Phenotype variables were also assessed. Training led to increases in muscle growth (VL thickness) as well as in total RNA, rRNA, UBF and rpS6. Training volume did not play a role in these adaptations. Interestingly, the rate of total RNA increases predicted hypertrophy. Likewise, training cessation led to decrements in total RNA abundance. I love this study. This continues to contribute to our knowledge regarding the role of ribosome biogenesis in muscle hypertrophy, and is delicate human work with multiple time point biopsies. I have minor comments in order of appearance, and congratulate the authors on their fine work.
+
+We are greatful for the reviwers kind words.
+
 
 > ABSTRACT: Reads well and concise. Nice work, and no comments.
 
-> INTRODUCTION - Line 7, minor: "promotes" should read as "promote" -
+> INTRODUCTION 
+
+> Line 7, minor: "promotes" should read as "promote" -
 > Line 14, minor: "with subsequent repeated bouts" should read as "and
-> subsequent repeated bouts" - Line 18, minor: "resting synthetic rate
-> of muscle protein" better reads as "basal muscle protein synthesis
-> rates" - Lines 48-50, minor: "bouts lead to accumulation of mature
-> rRNA thus also total RNA and presumably functional ribosomes"...this
-> sentence is long, and the word "thus" seems to make it a run-on. I'd
-> rephrase the sentence to read more coherently. Page 4 - Lines 10 and
-> 15, minor: each sentence has two stops. - Line 33, minor: no need to
-> use the phrase "per se" RESULTS - Line 51 (and throughout the
-> results), clarification: is "9.2%-point difference" the same as "9.2%
-> difference"? If so, adjust and remove "point" from all descriptors as
-> this is confusing. - Other than this, the results, while dense and
-> full of data, are well-written. DISCUSSION Page 7 - Line 17, minor:
-> again, "per se" can be removed. - Line 19, minor: "was not affected"
-> better reads as "were not affected" - Line 39, minor: "session" should
-> read as "sessions"
+> subsequent repeated bouts" 
+Line 18, minor: "resting synthetic rate of muscle protein" better reads as "basal muscle protein synthesis rates"
+Lines 48-50, minor: "bouts lead to accumulation of mature rRNA thus also total RNA and presumably functional ribosomes"...this sentence is long, and the word "thus" seems to make it a run-on. I'd rephrase the sentence to read more coherently. 
 
-> I urge the authors to be creative somewhere in the discussion by
-> perhaps adding a paragraph after the one found in lines 29-56. We've
-> done a lot of work in the ribosome biogenesis area, and we've thought
-> a good bit about total RNA/unit muscle with regard to what it
-> represents. The authors correctly articulated this as a proxy of
-> ribosome density. However, as muscle tissue and myofibers
-> volumetrically increase, this will affect the metric (the same holds
-> true with mitochondrial biogenesis and using CS activity as a proxy of
-> mitochondrial volume density). An easy way to interpret this is in the
-> following example: o Muscle tissue increases 5% in thickness with RT
-> (and myofibers scale accordingly as well) o Total RNA/unit muscle does
-> not change in value Most would interpret this as ribosome biogenesis
-> not occurring. However, biogenesis likely occurred because, as muscle
-> grew, ribosome biogenesis scaled with growth thus leading to no change
-> in RNA concentration. Our laboratory discusses this important concept
-> with regard to RT and mitochondrial biogenesis (PMID: 32162291, PMID:
-> 34646153).
+> Page 4 - Lines 10 and
+> 15, minor: each sentence has two stops.
 
-> Anyhow, this is no critique of the authors' hard and excellent work.
-> However, I think the authors re-iterating this point as a stand-alone
-> paragraph would benefit readership. In addition, I believe taking a
-> moment to define what the total RNA/ribosome density metric
-> conceptually represents, and then (in this newly added paragraph)
-> briefly walking the reader through each phase of the data, and what
-> could be going on with biogenesis in the context of a growing muscle
-> would be interesting to see. For instance, in Figure 3G, my
-> interpretation (much like the authors') is that ribosome biogenesis is
-> very rapid at the onset of RT where little functional growth is likely
-> occurring. And like the authors, I believe this likely was needed for
-> eventual growth to occur. However, the "no change" in RNA
-> concentrations session 9-12 as muscle is continuing to grow may not
-> indicate a plateau in biogenesis given that this is the time during
-> which muscle growth is likely starting to ramp up. Hence, biogenesis
-> rates could be equally as ramped here compared to sessions 1-9 of RT.
+> Line 33, minor: no need to use the phrase "per se"
 
-METHODS
+> RESULTS - Line 51 (and throughout the results), clarification: is "9.2%-point difference" the same as "9.2% difference"? If so, adjust and remove "point" from all descriptors as
+this is confusing. 
 
-Page 11
+The "%-point difference" referes to a differences in percentage points, i.e. one condition increases in 2% the other 11.2%, the percentage-point difference is 9.2%. This is different from where percentages are stated without the "-point". Although confusing we belive that it is the correct way of reporting this such results.
 
--   Lines 9-19: Authors stated that 18 participants were recruited, but
+> Other than this, the results, while dense and full of data, are well-written. 
+
+> DISCUSSION Page 7 - Line 17, minor: again, "per se" can be removed. - 
+> Line 19, minor: "was not affected" better reads as "were not affected" 
+> Line 39, minor: "session" should read as "sessions"
+
+We thank the reviewer for spotting mistakes and suggesting improvements to the text.
+
+> I urge the authors to be creative somewhere in the discussion by perhaps adding a paragraph after the one found in lines 29-56. We've done a lot of work in the ribosome biogenesis area, and we've thought a good bit about total RNA/unit muscle with regard to what it represents. The authors correctly articulated this as a proxy of ribosome density. However, as muscle tissue and myofibers volumetrically increase, this will affect the metric (the same holds true with mitochondrial biogenesis and using CS activity as a proxy of mitochondrial volume density). An easy way to interpret this is in the following example: o Muscle tissue increases 5% in thickness with RT (and myofibers scale accordingly as well) o Total RNA/unit muscle does not change in value Most would interpret this as ribosome biogenesis not occurring. However, biogenesis likely occurred because, as muscle grew, ribosome biogenesis scaled with growth thus leading to no change in RNA concentration. Our laboratory discusses this important concept with regard to RT and mitochondrial biogenesis (PMID: 32162291, PMID: 34646153).
+
+
+> Anyhow, this is no critique of the authors' hard and excellent work. However, I think the authors re-iterating this point as a stand-alone paragraph would benefit readership. In addition, I believe taking a moment to define what the total RNA/ribosome density metric conceptually represents, and then (in this newly added paragraph) briefly walking the reader through each phase of the data, and what could be going on with biogenesis in the context of a growing muscle would be interesting to see. For instance, in Figure 3G, my interpretation (much like the authors') is that ribosome biogenesis is very rapid at the onset of RT where little functional growth is likely occurring. And like the authors, I believe this likely was needed for eventual growth to occur. However, the "no change" in RNA concentrations session 9-12 as muscle is continuing to grow may not indicate a plateau in biogenesis given that this is the time during which muscle growth is likely starting to ramp up. Hence, biogenesis rates could be equally as ramped here compared to sessions 1-9 of RT.
+
+We thank the reviewer for this suggestion. We agree with the reviwer and feel that the manuscript also communicates this message. This is an important point to underline. We felt that the section served well as part of the mentioned section and added the following:
+
+This may indicate that during the plateau phase, the ribosomal concentration is balanced by muscle growth. This balance, measured as a constant ribosomal density in a growing cell, still requires the biosynthesis of ribosomes to match the volumetric expansion of the cell. As such, indirect measures of translational capacity through the density of ribosomes in periods of marked muscle hypertrophy may mask an absolute increase in ribosomes.
+
+
+
+> METHODS
+> Page 11
+> -   Lines 9-19: Authors stated that 18 participants were recruited, but
     then go on to say that n=11 TRAIN and n=8 CTRL completed. Please
     reconcile.
--   Line 35: Authors stated 7 days after detraining, but in the
+> -   Line 35: Authors stated 7 days after detraining, but in the
     discussion (page 7, line 19) they mention after 8 days of
     detraining. Please reconcile. Page 12
--   Line 39, minor: "restitution" should read as "rest". Please change
+>   Line 39, minor: "restitution" should read as "rest". Please change
     accordingly, and if used throughout the paper, please alter. Page 15
--   Line 36, minor: "Glycin" should read as "Glycine". In addition, and
+>   Line 36, minor: "Glycin" should read as "Glycine". In addition, and
     molar unit is needed.
+
+
+The above points has been addressed in the revised manuscript.
+
