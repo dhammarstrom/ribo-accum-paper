@@ -1,7 +1,13 @@
 ---
 title: "APH-2021-12-0652: Response to the reviewers"
-author: "Daniel Hammarström, Sjur J. Øfsteng, Nicolai B. Jacobsen, Krister B. Flobergseter, Bent R. Rønnestad, Stian Ellefsen"
-date: "2022-01-17"
+author: 
+  - Daniel Hammarström
+  - Sjur J. Øfsteng
+  - Nicolai B. Jacobsen
+  - Krister B. Flobergseter
+  - Bent R. Rønnestad
+  - Stian Ellefsen
+date: "2022-02-02"
 output: pdf_document
 editor_options: 
   chunk_output_type: console
@@ -193,7 +199,7 @@ One transcribed pre-rRNA results in a single end product, one ribosome, and in t
 
 > Could the authors please comment on the apparent disconnect between increase in RNA and RPS6 protein levels?
 
-We thank the reviewer for raising this question as we have attempted to broaden our discussion. We interpret the results from our analysis as affected by a time-lag between increases in synthesis of total RNA (presumably rRNA) and RPS6. The model used "controls" for both quantities being increased over the whole training period, within a specific time-point there exists no relationship between RPS6 and total RNA. This separates our analysis from others who have shown correlations between RPS6 and rRNA without controlling for, in their case, degree of stimuli [@nakada2016] and without examining the time course of their increase. As we have already pointed to in the original manuscript, our results suggests different temporal regulation or turnover rates in total RNA and RPS6 protein levels. Since ribosomal proteins exists in excess (and are thus not rate limiting for ribosomal biogenesis) [@lam], it is tempting to assume constitutive expression is only indirectly related to the process of ribosomal biogensis. We have expanded the discussion by raising the point that unbound ribosomal proteins (including RPS6) may be passively increased by myonuclear accretion. Although somewhat speculative, this notion is supported by recent evidence suggesting a specific role of satellite cell fusion in increasing availability of ribosomal proteins together with increased rRNA transcription [@murach2022]. This could in part help explain our observations since an increased myonuclear pool is presumably maintained during short-term de-training but rRNA transcription is decreased (and/or ribophagy increased).     
+We thank the reviewer for raising this question as we have attempted to broaden our discussion. We interpret the results from our analysis as affected by a time-lag between increases in synthesis of total RNA (presumably rRNA) and RPS6. The model used "controls" for both quantities being increased over the whole training period, within a specific time-point there exists no relationship between RPS6 and total RNA. This separates our analysis from others who have shown correlations between RPS6 and rRNA without controlling for, in their case, degree of stimuli [@nakada2016] and without examining the time course of their increase. As we have already pointed to in the original manuscript, our results suggests different temporal regulation or turnover rates in total RNA and RPS6 protein levels. Since ribosomal proteins exists in excess (and are thus not rate limiting for ribosomal biogenesis) [@lam2007], it is tempting to assume constitutive expression is only indirectly related to the process of ribosomal biogensis. We have expanded the discussion by raising the point that unbound ribosomal proteins (including RPS6) may be passively increased by myonuclear accretion. Although somewhat speculative, this notion is supported by recent evidence suggesting a specific role of satellite cell fusion in increasing availability of ribosomal proteins together with increased rRNA transcription [@murach2022]. This could in part help explain our observations since an increased myonuclear pool is presumably maintained during short-term de-training but rRNA transcription is decreased (and/or ribophagy increased).     
 
 Our data are however limited to a single ribosomal protein without data supporting accretion of myonuclei. This limitation was also added to the discussion.
 
@@ -321,3 +327,5 @@ This may indicate that during the plateau phase, the ribosomal concentration is 
 
 The above points has been addressed in the revised manuscript.
 
+
+# References
