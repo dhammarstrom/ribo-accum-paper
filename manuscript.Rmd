@@ -49,7 +49,7 @@ Sjur Johansen Øfsteng, Section for Health and Exercise Physiology, Department o
 
 
 
-<div custom-style="runningtitle_style">**Running title:** Ribosome biogenesis in early phase resistance training</div>
+<div custom-style="runningtitle_style">**Short title:** Ribosome biogenesis in early phase resistance training</div>
 
 \pagebreak
 
@@ -221,17 +221,17 @@ rna_hypertrophy <- paste0(sprintf("%.1f", summary(hyp.pre.m3)$fixed[5,1]),
 
 ```
 
-**Aim:** To describe the time course of ribosome accumulation during resistance training, its relation to training volume, UBF protein levels, and muscle growth.
+**Aim:** To describe <span custom-style="CHANGE">ribosome biogenesis during resistance training, its relation to training volume and muscle growth</span>.
 
-**Methods:** A training group (n = 11) performed <span custom-style="CHANGE">12 sessions (3-4 sessions per week) of</span> unilateral knee extension with constant and variable volume (6 and 3-9 sets per session respectively) allocated to either leg. <span custom-style="CHANGE">Ribosome abundance and biogenesis markers were assessed from vastus lateralis biopsies obtained at<span custom-style="CHANGE"> baseline, 48 hrs after sessions 1, 4, 5, 8, 9 and 12</span> and after eight days of de-training, as well as</span> from a non-training control group (n = 8). In addition, muscle thickness was measured before and after training and control periods.
+**Methods:** A training group (n = 11) performed <span custom-style="CHANGE">12 sessions (3-4 sessions per week) of</span> unilateral knee extension with constant and variable volume (6 and 3-9 sets per session respectively) allocated to either leg. <span custom-style="CHANGE">Ribosome abundance and biogenesis markers were assessed from vastus lateralis biopsies obtained at<span custom-style="CHANGE"> baseline, 48 hrs after sessions 1, 4, 5, 8, 9, and 12,</span> and after eight days of de-training, and from a control group (n = 8). Muscle thickness was measured before and after the intervention</span>.
 
-**Results:** Training led to muscle growth (`r hypertrophy` vs. control) with concomitant increases in total RNA, rRNA, UBF, and RPS6 with no differences between volume conditions. Total RNA increased most rapidly in response to the first four sessions (`r slope0_4` per session), followed by a plateau and peak values after session 8 (`r eight.session` above baseline). After controlling for time, total RNA abundance was associated with UBF protein levels (`r ubf_model` per unit UBF), and the rate of increase in total RNA levels predicted hypertrophy (`r rna_hypertrophy` per %-point increase in total RNA per session). After de-training, total RNA decreased (`r detrain_rna`) without muscle mass changes indicating halted biosynthesis of ribosomes.
+**Results:** Training led to muscle growth (`r hypertrophy` vs. control) with concomitant increases in total RNA, rRNA, UBF, and rpS6 with no differences between volume conditions.<span custom-style="CHANGE"> Total RNA increased rapidly in response to the first four sessions (`r slope0_4` per session), followed by a plateau and peak values after session 8 (`r eight.session` above baseline). Total RNA abundance was associated with UBF protein levels (`r ubf_model` per unit UBF), and the rate of increase in total RNA levels predicted hypertrophy</span> (`r rna_hypertrophy` per %-point increase in total RNA per session). After de-training, total RNA decreased (`r detrain_rna`) without muscle mass changes indicating halted biosynthesis of ribosomes.
 
 **Conclusion:** Ribosomes accumulate in the initial phase of resistance training with abundances sensitive to training cessation and associated with UBF protein levels. The average accumulation rate predicts muscle training-induced hypertrophy.
 
 
 
-**Keywords:** muscle hypertrophy, resistance training, ribosome biogenesis
+**Keywords:** Muscle hypertrophy, Resistance training, Ribosome biogenesis
 
 
 </div>
@@ -245,55 +245,35 @@ Skeletal muscle is a critical target for interventions that promote health acros
 with resistance training (RT) being the advocated remedy.  
 Prolonged RT leads to changes in the balance between muscle protein breakdown and synthesis, with one bout of resistance exercise acutely increasing protein synthesis for up to 48 hrs after exercise [@RN786],<!-- Phillips 1997 -->
 <span custom-style="CHANGE">and</span> subsequent repeated bouts leading to accumulation of muscle protein over time
-[@RN1272<!-- Phillips review 2014 -->;
-@RN1642]<!-- Brook 2015 experiment -->. 
+[@RN1272;@RN1642]<!-- Phillips review 2014 --><!-- Brook 2015 experiment -->. 
 In recent years, this view has been supplemented<!-- supported? --> by evidence suggesting that chronic RT leads to increased <span custom-style="CHANGE">basal muscle protein synthesis rates</span>
-[@RN1521;<!-- Kim 2005 Fasted state skeletal muscle PS altered with training  --> 
-@RN1866;<!-- Wilkingson 2008 -->
-@RN1897],<!-- Reidy 2017 Increased rested state protein synthesis -->
+[@RN1521;@RN1866;@RN1897],<!-- Kim 2005 Fasted state skeletal muscle PS altered with training  --><!-- Wilkingson 2008 --><!-- Reidy 2017 Increased rested state protein synthesis -->
 which has been postulated to be associated with increased translational capacity, i.e. accumulation of ribosomes
-[@RN1897;<!-- Reidy 2017 -->
-@RN1912]<!-- Figueiredo 2017 Ribosome biogenesis review -->.
+[@RN1897;@RN1912]<!-- Reidy 2017 --><!-- Figueiredo 2017 Ribosome biogenesis review -->.
 This notion is supported by exercise-induced increases in total RNA, a proxy marker of ribosome abundance, which is closely connected to protein synthesis
-[@RN1754;<!-- West 2016 correlation between total RNA and protein synthesis in C2C12-->
-@RN2145]<!-- Millward 1973 relationship between RNA and protein synthesis in rat in rats in vivo constant infusion -->
+[@RN1754;@RN2145]<!-- West 2016 correlation between total RNA and protein synthesis in C2C12--><!-- Millward 1973 relationship between RNA and protein synthesis in rat in rats in vivo constant infusion -->
 and muscle hypertrophy
-[@RN1644;<!-- Figueiredo 2015 Correlation between total RNA fold change and CSA hyp -->
-@RN1755; <!-- Stec Ribosome bio higher in high responders -->
-@RN2358].<!-- Volume dependent RNA accum relates to volume depend hyper -->
+[@RN1644;@RN1755;@RN2358].<!-- Figueiredo 2015 Correlation between total RNA fold change and CSA hyp --><!-- Stec Ribosome bio higher in high responders --><!-- Volume dependent RNA accum relates to volume depend hyper -->
 Conversely, inhibition of ribosomal RNA (rRNA) transcription and inhibition of its up-stream transcription factors act to diminish muscle cell growth
-[@RN1755<!-- Stec 2016 Pol I-specific inhibition leads to GF induced myotube hypertrophty -->;
-@RN1754<!-- West 2016 Inhibition of c-Myc (through inibitor) reduces RNA and MPS-->;
-@RN1810]<!-- von Walden 2016 Inhibition of Pol 1 rDNA tracsription and myotube growth -->.  
+[@RN1755;@RN1754;@RN1810]<!-- Stec 2016 Pol I-specific inhibition leads to GF induced myotube hypertrophty --><!-- West 2016 Inhibition of c-Myc (through inibitor) reduces RNA and MPS--><!-- von Walden 2016 Inhibition of Pol 1 rDNA tracsription and myotube growth -->.  
 
 Biosynthesis of novel ribosomes is a complex, highly coordinated and energy demanding process that involves synthesis of both ribosomal proteins and the four mature rRNA transcripts
-[@RN1920;<!-- Warner review yeast -->
-@RN1820;<!-- Moss review -->
-@RN1810]<!-- Inhibition of Pol II affects trasncription at Pol I -->.
+[@RN1920;@RN1820;@RN1810]<!-- Warner review yeast --><!-- Moss review --><!-- Inhibition of Pol II affects trasncription at Pol I -->.
 Ribosomal accumulation is believed to be determined by the rates of pre-rRNA transcription by RNA polymerase I (Pol I), which in turn is regulated by coordinated assembly of a complex of transcription factors at the rDNA promoter
 [@RN1820]<!-- Moss review -->.
 Specifically, activation of the of the upstream binding factor (UBF) through phosphorylation is needed to initiate transcription
-[@RN2582; <!-- Tuan UBF phosphorylation important for SL1-UBF interaction -->
-@RN2563].<!--Lin 2007 phospho of UBF shows it has a role in recruioting SL1 to the rDNA promoter -->
+[@RN2582;@RN2563].<!-- Tuan UBF phosphorylation important for SL1-UBF interaction --><!--Lin 2007 phospho of UBF shows it has a role in recruioting SL1 to the rDNA promoter -->
 Such activation is at least partly controlled by the mechanosensitive mTOR pathway, with its inhibition being associated with blocked UBF phosphorylation and subsequent rRNA transcription
-[@RN1632; <!-- Nader rapamycin block UBF availability  -->
-@RN2564].<!-- Hannan mTOR  -->
+[@RN1632;@RN2564].<!-- Nader rapamycin block UBF availability  --><!-- Hannan mTOR  -->
 Interestingly the availability of UBF *per se* has been shown to be a determinant of rRNA transcription
 [@RN2566]<!-- Hannan 1996 over expression of UBF leads to rRNA transcription in cardiomyocytes -->
 through control of rDNA gene activity
 [@RN2556].<!-- Sanij, UBF depleting leads to inactivation of rDNA genes -->
 
 Resistance exercise is a potent <span custom-style="CHANGE">and specific [@figueiredo2021]</span> stimuli for rRNA transcription as a single session leads to increases in pre-rRNA
-[@RN1656<!-- A single session upregulates 45 S 24 h post ex -->;
-@RN1037<!-- Nader 2014 45S up in response to 4 h after acute exercise -->].
+[@RN1656;@RN1037].<!-- A single session upregulates 45 S 24 h post ex --><!-- Nader 2014 45S up in response to 4 h after acute exercise -->
 Repeated bouts lead to the accumulation of mature rRNA reflected in total RNA and presumably functional ribosomes
-[@RN1656;<!-- Stec2015 A single session ns ~ 9% increase in young, -4% in old -->
-@RN1520;<!-- Bickel 2005 Two bouts electric stimulation, young ~ 30% incr-->
-@RN2358; <!-- Four sessions ~29 and 18 % in mod vs. low volume|31 sessions 18/12% young-->
-@RN1755<!-- Stec 2016 12 sessions 26, 9 and 6% increase in high, mod and low responders OLD-->;
-@RN1644;<!-- Figuieredo 2015 16 sessions 49% increase young -->
-@RN1809; <!-- Brook 18 sessions 8 and 40% (9 sessions) and 15,22% (18 sessions) old and young-->
-@RN1897<!-- 11% 36 sessions young -->].
+[@RN1656;@RN1520;@RN2358;@RN1755;@RN1644;@RN1809;@RN1897].<!-- Stec2015 A single session ns ~ 9% increase in young, -4% in old --><!-- Bickel 2005 Two bouts electric stimulation, young ~ 30% incr--><!-- Four sessions ~29 and 18 % in mod vs. low volume|31 sessions 18/12% young--><!-- Stec 2016 12 sessions 26, 9 and 6% increase in high, mod and low responders OLD--><!-- Figuieredo 2015 16 sessions 49% increase young --><!-- Brook 18 sessions 8 and 40% (9 sessions) and 15,22% (18 sessions) old and young--><!-- 11% 36 sessions young -->
 However, the true time course of ribosomal transcription and accumulation in response to RT remains largely unstudied, with a mere few studies having investigated exercise-induced changes in rRNA over multiple time-points, all of which are either limited to a selected few time-points or a limited time frame.
 For example, two consecutive bouts of electrically evoked muscle contractions were associated with increased levels of total RNA, with peak values being observed 72 hrs after the second bout
 [@RN1520]<!-- Total RNA increase 72 h after a second bout -->. 
@@ -504,7 +484,7 @@ var_change <- paste0(sprintf("%.1f", 100 * (exp(h[1,2]) - 1)),
 
 ```
 
-For both ribosomal protein S6 (RPS6) and upstream binding factor (UBF), protein levels increased linearly throughout the training intervention, with RPS6 showing estimated increments per session corresponding to `r s6_slope0_4` during block 1 (session 1-4), `r s6_slope4_8` during block 2 (session 5-8) and `r s6_slope8_12` during block 3 (session 9-12), and UBF showing increments corresponding to `r ubf_slope0_4`, `r ubf_slope4_8` and `r ubf_slope8_12`. This general pattern was confirmed when comparing TRAIN to CTRL where UBF and RPS6 protein levels were higher in TRAIN compared to CTRL after Session 12, and remained elevated after eight days of rest (Figure 2A and B), with no robust differences being observed after the first training session (48 hrs). Increases did not differ between volume-conditions but for UBF, there was a tendency towards lower levels in VAR after Session 12 (`r var_s12`). After de-training, UBF-levels tended to decrease in CONST (`r const_detrain`) while levels in VAR remained at elevated level compare to after Session 12 (`r var_change`; interaction effect: `r var_const_interaction`). For RPS6, de-training did not affect protein levels, which remained similar between volume conditions. At the mRNA level, UBF showed robust increase from before to 48 hrs after the first session in TRAIN compared to CTRL (Figure 2D), while RPS6 showed no robust differences between TRAIN and CTRL at any time point. No differences were observed between volume conditions for either transcripts (Figure 2D and E). 
+For both ribosomal protein S6 (rpS6) and upstream binding factor (UBF), protein levels increased linearly throughout the training intervention, with rpS6 showing estimated increments per session corresponding to `r s6_slope0_4` during block 1 (session 1-4), `r s6_slope4_8` during block 2 (session 5-8) and `r s6_slope8_12` during block 3 (session 9-12), and UBF showing increments corresponding to `r ubf_slope0_4`, `r ubf_slope4_8` and `r ubf_slope8_12`. This general pattern was confirmed when comparing TRAIN to CTRL where UBF and rpS6 protein levels were higher in TRAIN compared to CTRL after Session 12, and remained elevated after eight days of rest (Figure 2A and B), with no robust differences being observed after the first training session (48 hrs). Increases did not differ between volume-conditions but for UBF, there was a tendency towards lower levels in VAR after Session 12 (`r var_s12`). After de-training, UBF-levels tended to decrease in CONST (`r const_detrain`) while levels in VAR remained at elevated level compare to after Session 12 (`r var_change`; interaction effect: `r var_const_interaction`). For rpS6, de-training did not affect protein levels, which remained similar between volume conditions. At the mRNA level, UBF showed robust increase from before to 48 hrs after the first session in TRAIN compared to CTRL (Figure 2D), while rpS6 showed no robust differences between TRAIN and CTRL at any time point. No differences were observed between volume conditions for either transcripts (Figure 2D and E). 
 
 
 ```{r total-rna}
@@ -615,7 +595,7 @@ ubf_cor_tot_rna <- paste0(sprintf("%.1f", 100 * (exp(comb.m1[2,1]) - 1)),
 
 ```
 
-In TRAIN, total RNA levels were robustly predicted by UBF levels (after controlling for time), with `r ubf_cor_tot_rna` increases in total RNA per unit tissue weight coinciding with one unit increase in UBF levels (corresponding to one standard deviation; Table 1). In contrast, no evidence was found for a relationship between total RNA and RPS6 protein levels (Table 1). 
+In TRAIN, total RNA levels were robustly predicted by UBF levels (after controlling for time), with `r ubf_cor_tot_rna` increases in total RNA per unit tissue weight coinciding with one unit increase in UBF levels (corresponding to one standard deviation; Table 1). In contrast, no evidence was found for a relationship between total RNA and rpS6 protein levels (Table 1). 
 
 In TRAIN, there was a robust positive relationship between rates of increase in total RNA in response to training and muscle growth measured as increases in *m. vastus lateralis* thickness (Table 2, Figure 4A), with changes in total RNA over the course of the training intervention being estimated in each leg using a regression model containing number of sessions as the independent variable. Conversely, there was a tendency towards a negative relationship between average total RNA levels at Session 6 and changes in muscle thickness (Table 2, Figure 4B), with the average total RNA levels estimated as the predicted value at Session 6 (estimated as the intercept-term) from the model used to estimate the rate of total RNA increase per session. 
 
@@ -624,17 +604,14 @@ To assess the robustness of the model for predicting muscle growth, individual r
 
 
 # Discussion
-Here, we confirm that resistance training leads to increased abundance of markers of ribosome density, measured as total RNA, ribosomal RNA subspecies and RPS6 protein in previously untrained individuals compared to a non-training control group.
+Here, we confirm that resistance training leads to increased abundance of markers of ribosome density, measured as total RNA, ribosomal RNA subspecies and rpS6 protein in previously untrained individuals compared to a non-training control group.
 These markers accumulated progressively during the initial part of the intervention before they levelled out, establishing a plausible time course for changes in ribosomal concentration in response to RT that plateaus after $\sim$ 8 sessions.
 This increase in total RNA was interconnected with increases in UBF protein abundance, suggesting UBF levels to play a role in regulation of rRNA transcription regulation in response to RT.
 Total RNA increases <span custom-style="CHANGE">were not affected</span> by weekly fluctuations in training volume. However, eight days of de-training led to lowered levels of total RNA and rRNA content, suggesting that training cessation halts ribosome biogenesis.
 Finally, individual rates of increases in total RNA abundance predicted the magnitude of muscle growth, confirming the likely link between ribosomal biogenesis and muscle protein accretion 
-[@RN1754;<!-- West 2016 correlation between total RNA and protein synthesis in C2C12-->
-@RN2145]<!-- Millward 1973 relationship between RNA and protein synthesis in rat in rats in vivo constant infusion -->
+[@RN1754;@RN2145]<!-- West 2016 correlation between total RNA and protein synthesis in C2C12--><!-- Millward 1973 relationship between RNA and protein synthesis in rat in rats in vivo constant infusion -->
 and muscle hypertrophy
-[@RN1644;<!-- Figueiredo 2015 Correlation between total RNA fold change and CSA hyp -->
-@RN1755; <!-- Stec Ribosome bio higher in high responders -->
-@RN2358].<!-- Volume dependent RNA accum relates to volume depend hyper -->
+[@RN1644;@RN1755;@RN2358].<!-- Figueiredo 2015 Correlation between total RNA fold change and CSA hyp --><!-- Stec Ribosome bio higher in high responders --><!-- Volume dependent RNA accum relates to volume depend hyper -->
 
 
 Total RNA seems to be a valid proxy marker of ribosomal density, as most of the RNA is assumed to be ribosomal RNA
@@ -643,24 +620,14 @@ which in turn is a valid marker of translational capacity
 [@RN2145].
 Several studies have shown that total RNA content is altered by RT
 <!--@RN2266<  Hortobagyi 2000 NO change in RNA per wet weight after immobilization or 12 weeks retraining low N-->
-[@RN2225;<!-- Haun 2019 used a progressive volume troughout a six week study study RNA increased during six weeks (12% week 3; 27% week 6 -->
-@RN2180;<!-- Haddad 2005 Unloading through limb suspension leads to lowered total RNA levels, resistance training increased --> 
-@RN1656;<!-- Stec2015 A single session ns ~ 9% increase in young, -4% in old -->
-@RN1520;<!-- Bickel 2005 Two bouts electric stimulation, young ~ 30% incr-->
-@RN2358; <!-- Four sessions ~29 and 18 % in mod vs. low volume|31 sessions 18/12% young-->
-@RN1755<!-- Stec 2016 12 sessions 26, 9 and 6% increase in high, mod and low responders OLD-->;
-@RN1644;<!-- Figuieredo 2015 16 sessions 49% increase young -->
-@RN1809; <!-- Brook 18 sessions 8 and 40% (9 sessions) and 15,22% (18 sessions) old and young-->
-@RN1897<!-- 11% 36 sessions young -->],
+[@RN2225;@RN2180;@RN1656;@RN1520;@RN2358;@RN1755;@RN1644;@RN1809;@RN1897],<!-- Haun 2019 used a progressive volume troughout a six week study study RNA increased during six weeks (12% week 3; 27% week 6 --><!-- Haddad 2005 Unloading through limb suspension leads to lowered total RNA levels, resistance training increased --><!-- Stec2015 A single session ns ~ 9% increase in young, -4% in old --> <!-- Bickel 2005 Two bouts electric stimulation, young ~ 30% incr--><!-- Four sessions ~29 and 18 % in mod vs. low volume|31 sessions 18/12% young--><!-- Stec 2016 12 sessions 26, 9 and 6% increase in high, mod and low responders OLD--><!-- Figuieredo 2015 16 sessions 49% increase young --><!-- Brook 18 sessions 8 and 40% (9 sessions) and 15,22% (18 sessions) old and young--><!-- 11% 36 sessions young -->
 as was also the case in the present data set.
 However, the time course of total RNA/rRNA changes in response to RT has so far remained speculative, with no study investigating responses to prolonged interventions with multiple sampling time points.
 In the present data, RT led to a clear session-to-session increase in total RNA per unit tissue weight in response to the first four <span custom-style="CHANGE">sessions</span>, whereupon the changes gradually leveled out before peaking after the 8^th^ session, with the peak increase from baseline being $\sim$ 50%, defining an accumulation phase.
 This corroborates well with previous suggestions of peak values being reached within four to nine sessions in young males and females
-[@RN1809;
-@RN2358], and may be essential for preparing muscle fibres for subsequent growth
-[@RN1809;<!-- Correlation between increase and muscle growth -->
-@RN1644; <!--Figueiredo correlation between incr and muscle hypertrophy -->
-@RN2358].<!-- Early accumulation of RNA predicts volume depdent growth -->
+[@RN1809;@RN2358],
+and may be essential for preparing muscle fibres for subsequent growth
+[@RN1809;@RN1644;@RN2358].<!-- Correlation between increase and muscle growth --><!--Figueiredo correlation between incr and muscle hypertrophy --><!-- Early accumulation of RNA predicts volume depdent growth -->
 After the 8^th^ session, no meaningful increase or decrease were observed for total RNA or rRNA content within the training period, suggesting a plateau phase with attenuated net synthesis of novel ribosomes. Within this last part of the intervention, synthesis of novel rRNA still seemed to be elevated *per* weight unit muscle tissue compared to baseline, as suggested by sustained elevation of pre-rRNA transcripts, coinciding with peak values of UBF protein levels. This may indicate that during the plateau phase, the ribosomal concentration is balanced by muscle growth [@RN2142].<!-- Figueiredo review details the concept of rna concentration --> <span custom-style="CHANGE">This balance, measured as a constant ribosomal density in a growing cell, still requires the biosynthesis of ribosomes to match the volumetric expansion of the cell. As such, indirect measures of translational capacity such as the concentration of total RNA may mask the absolute increase in ribosomes that occurs during periods of muscle hypertrophy.</span>
 
 The observed rates of RNA accumulation over the entirety of the intervention were found to be a determinant of changes in muscle thickness (after controlling for average total RNA levels).
@@ -688,12 +655,12 @@ Whether these cellular characteristics are related to e.g. differences in fibre 
 <span custom-style="CHANGE">Furthermore, ribosomal accumulation is unlikely to be the only ribosome-derived trait that is important for training responsiveness. Evidence suggests that mechanical loading may lead to changes in ribosome characteristics [@chaillou2015] potentially leading to heterogeneous tissue-specific ribosome populations [@chaillou2019;  @gupta2014]. Our results support a model where specialized, newly synthesized ribosomes contribute to muscle hypertrophy as the increase in ribosomal content but not absolute levels predicted muscle growth. We, however, acknowledge that the present study does not provide substantial insight into this perspective.</span>
 Together, these results and perspectives emphasizes on the potentially crucial role of RT-induced ribosomal synthesis for adaptations to training, making ribosomal responses to RT an interesting biomarker in relation to manipulation of training loads for specific populations.
 
-<!-- RPS6 dissconect from total RNA levels. -->
-In the present study, training induced increases in rRNA and total RNA coincided with increases in RPS6. Conversely, changes in total RNA levels and RPS6 in response to de-training did not correspond, as RPS6 protein levels remained elevated after the de-training period. The training induced increases in RPS6 seen in the present study are in agreement to those previously reported in young men
-[@RN1642],<!-- Brook 2015 RPS6 increase in resposne to RT over control -->
+<!-- rpS6 dissconect from total RNA levels. -->
+In the present study, training induced increases in rRNA and total RNA coincided with increases in rpS6. Conversely, changes in total RNA levels and rpS6 in response to de-training did not correspond, as rpS6 protein levels remained elevated after the de-training period. The training induced increases in rpS6 seen in the present study are in agreement to those previously reported in young men
+[@RN1642],<!-- Brook 2015 rpS6 increase in resposne to RT over control -->
 but not in elderly men and women, where a decrease was observed in response to training despite increases in total RNA and rRNA
-[@RN1755].<!-- Stec 2016 RPS6 decreased 22% after four weeks of training in older  -->
-Although increases were seen for both RPS6 and and total RNA, RPS6 did not explain variation in total RNA (after controlling for the number of sessions). Together with a disconnect after the de-training period, this suggest that regulation of RPS6 expression and ribosomal RNA transcription display differential temporal responses to RT. <span custom-style="CHANGE">Such difference in temporal regulation of ribosomal RNA and proteins has previously been deduced in cell culture experiments. Briefly, inhibition of protein degradation led to accumulation of ribosomal proteins suggesting that excess amounts of ribosomal proteins are synthesized, imported into the nucleus and rapidly degraded if not incorporated into ribosomes [@lam2007]. This inherent capacity of cells to provide sufficient access to ribosomal proteins also suggests rRNA transcription (and not synthesis of ribosomal proteins) is not rate-limiting during ribosomal biogenesis [@lam2007]. Currently, it remains unknown if RT leads to expansion of the pool of unbound ribosomal proteins in humans. Indeed, in the present study, the disconnect between RPS6 and total RNA after de-training may have been associated with increased numbers of myonuclei, rather than accumulation of RPS6 in existing myonuclei, providing an alternative explanation to the elevated RPS6 levels (which accordingly may have been distributed over a larger number of nuclei). Interestingly, in a recent study, Murach and colleagues showed that newly acquired myonuclei (from satellite cell fusion) contribute to the ribosomal pool in myofibers [@murach2022]. Importantly, the present study was not designed to investigate these perspectives, and observations are limited to one single ribosomal protein, with no investigation of RT-induced myonuclear accretion. A parallel mechanism that could futher help explain our observations is the possibility of extra-ribosomal functions in selected ribosomal proteins affecting their expression independent of ribosomal biogenesis 
+[@RN1755].<!-- Stec 2016 rpS6 decreased 22% after four weeks of training in older  -->
+Although increases were seen for both rpS6 and and total RNA, rpS6 did not explain variation in total RNA (after controlling for the number of sessions). Together with a disconnect after the de-training period, this suggest that regulation of rpS6 expression and ribosomal RNA transcription display differential temporal responses to RT. <span custom-style="CHANGE">Such difference in temporal regulation of ribosomal RNA and proteins has previously been deduced in cell culture experiments. Briefly, inhibition of protein degradation led to accumulation of ribosomal proteins suggesting that excess amounts of ribosomal proteins are synthesized, imported into the nucleus and rapidly degraded if not incorporated into ribosomes [@lam2007]. This inherent capacity of cells to provide sufficient access to ribosomal proteins also suggests rRNA transcription (and not synthesis of ribosomal proteins) is not rate-limiting during ribosomal biogenesis [@lam2007]. Currently, it remains unknown if RT leads to expansion of the pool of unbound ribosomal proteins in humans. Indeed, in the present study, the disconnect between rpS6 and total RNA after de-training may have been associated with increased numbers of myonuclei, rather than accumulation of rpS6 in existing myonuclei, providing an alternative explanation to the elevated rpS6 levels (which accordingly may have been distributed over a larger number of nuclei). Interestingly, in a recent study, Murach and colleagues showed that newly acquired myonuclei (from satellite cell fusion) contribute to the ribosomal pool in myofibers [@murach2022]. Importantly, the present study was not designed to investigate these perspectives, and observations are limited to one single ribosomal protein, with no investigation of RT-induced myonuclear accretion. A parallel mechanism that could futher help explain our observations is the possibility of extra-ribosomal functions in selected ribosomal proteins affecting their expression independent of ribosomal biogenesis 
 [@RN2588].<!-- Warner 2009 General description of   -->  
 </span>
 
@@ -701,15 +668,12 @@ UBF levels robustly explained total RNA levels over the course of the interventi
 From a mechanistic perspective, UBF is an important transcription factor for rDNA transcription as it, in its active state recruits a secondary transcription factor (SL1) to the rDNA promoter and enables transcription by RNA Pol I
 [@RN2563].<!--Lin 2007 phospho of UBF shows it has a role in recruioting SL1 to the rDNA promoter -->
 Activation of UBF is controlled by the mechanosensitive mTOR pathway, and rapamycin, a specific mTOR inhibitor, blocks UBF from recruiting SL1 and subsequent rRNA transcription
-[@RN1632; <!-- Nader rapamycin block UBF availability  -->
-@RN2564].<!-- Hannan 2003 -->
+[@RN1632; @RN2564].<!-- Nader rapamycin block UBF availability  --><!-- Hannan 2003 -->
 <!-- Hannan 2003 10.1128/MCB.23.23.8862-8877.2003 mTOR is believed to play a role in phosphorylating UBF leading to recruitment of SL-1. The effect of blockage of mTOR through rapamycin is not rescued by hypophosphorylated UBF -->
 Evidence from human exercise studies confirms training-induced activation of UBF through phosphorylation
-[@RN1746; <!-- Figueiredo 2016 cold water inhibits UBF activation and increase rRNA increase -->
-@RN1644].<!-- Figueriedo ubf increase total and active form (ser388) --> 
+[@RN1746;@RN1644].<!-- Figueiredo 2016 cold water inhibits UBF activation and increase rRNA increase --><!-- Figueriedo ubf increase total and active form (ser388) --> 
 In addition to exercise-induced activation of UBF, mechanical loading also leads to increased levels of total UBF
-[@RN1746; <!-- Figueiredo 2016 cold water inhibits UBF activation and increase rRNA increase -->
-@RN1644]. Increases in UBF was determined to be rapamycin insensitive after synergist ablation in mice
+[@RN1746;@RN1644].<!-- Figueiredo 2016 cold water inhibits UBF activation and increase rRNA increase --> Increases in UBF was determined to be rapamycin insensitive after synergist ablation in mice
 [@RN1072]<!-- Goodman 2011 UBF increase due to synergist ablation is rapamycin insensitive https://doi.org/10.1113/jphysiol.2011.218255 --> 
 pointing to an effect observed in cell models where c-Myc induces UBF mRNA transcription [@RN2565].<!-- Pootinga 2004 MAD1 and c-Myc controls UBF transcription UBF is required for c-Myc induced rDNA transcription -->
 Interestingly the availability of UBF has been shown to regulate rRNA transcription
@@ -719,21 +683,18 @@ Together with our observations, this underlines the importance of UBF as a regul
 
 After eight days of de-training, total RNA and rRNA levels per weight unit muscle tissue returned toward baseline levels, though without concomitant reversal of muscle thickness, which remained at elevate levels.
 This was likely caused by attenuated rRNA transcription, a notion that was supported by reversal of pre-rRNA abundances and possibly by lowered UBF protein levels, though this was not confirmed as statistically robust.
-<span custom-style="CHANGE">The magnitude of the detraining-associated decrease in total RNA ($\sim$ 20\%) is similar to that seen in response to unloading of untrained human muscle over a similar time frame (7-10 days) [@gamrin1998; @figueiredo2020]. This suggests that RT-induced increases in ribosomal content is easily lost, likely driven by a combination of reduced synthesis and enhanced degradation (ribophagy). While the relative contribution of these two remains to be determined, inactivity has previously been shown to induce ribophagy in rat muscle (subjected to hindlimb suspension) [@figueiredo2020]. Future studies should investigate the interrelationship between ribosome biogenesis and ribophagy in response to training and detraining. We suspect that their relative importance for ribosomal homeostasis will vary substantially between different physiological perturbations, as they are regulated by a complex interconnection of stimuli and pathways<!--REF?-->. For example, Kim et al. showed that cancer cachexia is associated with reduced rDNA transcription (and hence reduced translational capacity) [@kim2021], contrasting the inactivity-driven reduction in translational capacity which to a larger degree seems to involve ribophagy [@figueiredo2020].</span>
+<span custom-style="CHANGE">The magnitude of the detraining-associated decrease in total RNA ($\sim$ 20\%) is similar to that seen in response to unloading of untrained human muscle over a similar time frame (7-10 days) [@gamrin1998; @figueiredo2020]. This suggests that RT-induced increases in ribosomal content is easily lost, likely driven by a combination of reduced synthesis and enhanced degradation (ribophagy). While the relative contribution of these two remains to be determined, inactivity has previously been shown to induce ribophagy in rat muscle (subjected to hindlimb suspension) [@figueiredo2020]. Future studies should investigate the interrelationship between ribosome biogenesis and ribophagy in response to training and detraining. We suspect that their relative importance for ribosomal homeostasis will vary substantially between different physiological perturbations, as they are regulated by a complex interconnection of stimuli and pathways [@beese2020;@RN1920;@RN1820]. For example, Kim et al. showed that cancer cachexia is associated with reduced rDNA transcription (and hence reduced translational capacity) [@kim2021], contrasting the inactivity-driven reduction in translational capacity which to a larger degree seems to involve ribophagy [@figueiredo2020].</span>
 
 The de-training effect on total RNA and rRNA seen in the present study supports the idea that ribosomal biogenesis is a cellular activity on demand, possibly relating to its relative expense [@RN1920] also in muscle tissue.</span>
 Based on this notion, and the fact that RT volume is known to be a potent modulator of molecular mechanisms determining protein synthesis and ribosomal biogenesis including induction of c-Myc expression, mTOR activation
-[@RN2358; <!-- Hammarström volume affects ribo biogenesis and mTOR and c-myc -->
-@RN1837; <!-- Ahtianinen 2015 volume affects mTOR differently -->
-@RN791]<!-- Burd ex volume protein synthesis and anabolic [RPS6] phospho signalling-->,
+[@RN2358;@RN1837;@RN791]<!-- Hammarström volume affects ribo biogenesis and mTOR and c-myc --><!-- Ahtianinen 2015 volume affects mTOR differently --><!-- Burd ex volume protein synthesis and anabolic [rpS6] phospho signalling-->,
 subsequent total RNA increases [@RN2358] and post exercise protein synthesis [@RN791]
 and subsequent training outcomes [@RN1767; @RN2358], we hypothesized that fluctuations in training volume would be reflected in markers of ribosomal biogenesis.
 When comparing VAR to CONST in the present study we found only one part of the pre-rRNA, 45S ETS, to be differentially expressed and only so after Session 12 in favor of VAR together with a tendency towards rescued UBF levels after de-training in response to increased volume in the VAR but not CONST protocol.
 These observations do not give support to a clear effect of fluctuations in training volume on total RNA levels or rRNA expression within a relatively short and training-intensive intervention, though it should be noted that the time point with increased 45S ETS expression was preceded by a period of increased training volume, suggesting a potential interaction between time and volume. 
 Indeed, both training protocols utilized in the present study increased muscle strength and induced muscle hypertrophy to a similar degree.
 From a general perspective, albeit volume is an important determinant of increases in muscle strength and mass
-[@RN1767;<!-- schoenfeld 2016 dose response  -->
-@RN2492],<!-- Ralston 2017 Weekly sets volume on muscle strength  -->
+[@RN1767;@RN2492],<!-- schoenfeld 2016 dose response  --><!-- Ralston 2017 Weekly sets volume on muscle strength  -->
 differences in organization of training loads is likely of minor importance when training volumes are equated over time
 [@RN2572].<!-- Grgic 2017 volume equated periodization schemes led to similar muscle hyeprtrophy -->
 It is important to note that RT in the current study was performed with the same volume in the first four sessions, something that could have been more than enough to maximize rRNA transcription in previously untrained individuals.
@@ -743,8 +704,7 @@ There, higher levels of total RNA were observed after four sessions in the moder
 Interestingly, using a progressive volume protocol in well-trained participants, increases in total RNA have been reported throughout six weeks of training
 [@RN2225].<!-- Haun total RNA increase througout a 6 week intervention -->
 Although this observation was done in well-trained participants performing a high volume protocol without a control condition with constant volume, compared to constant volume protocols
-[@RN1809;<!-- Brook 2016 -->
-@RN2358],<!-- Hammarström 2020 -->
+[@RN1809;@RN2358],<!-- Brook 2016 --><!-- Hammarström 2020 -->
 progressive volume may thus increase ribosomal abundance to a higher degree and provide a measure to avoid the plateau phase seen in the present study.
 
 In conclusion, RT-induced ribosome accumulation reached peak values in the initial phase of RT (8 sessions) and was interconnected with increases in UBF protein levels. The rate of total RNA accumulation predicted RT-induced muscle hypertrophy. Fluctuations in training volume did not transfer to fluctuations in ribosomal biogenesis, but training cessation led to decreased ribosomal content.  
@@ -875,10 +835,10 @@ western_cv <- western_data %>%
 
 cvs <- paste0(round(min(western_cv) * 100, 1), " and ", round(max(western_cv) * 100, 1), "%")
 ```
-<span custom-style="CHANGE">The average coefficient of variation across replicates were `r cvs`, for RPS6 and UBF, respectively.</span> 
+<span custom-style="CHANGE">The average coefficient of variation across replicates were `r cvs`, for rpS6 and UBF, respectively.</span> 
 
 ## Statistics and data analysis
-Descriptive data are presented as mean and standard deviation (SD). The effect of training on muscle strength, muscle thickness, UBF/RPS6 protein, total RNA and gene abundances were assessed using mixed effects regression models. Time and group (TRAIN vs. CTRL) were treated as population (fixed) effects and leg nested within participant included as group level (random) effects. These analyses were performed on data with matching time points between TRAIN and CTRL with the exception that all post-training data from TRAIN were included (post-training and de-training). Relative interactions between groups were estimated as $\Delta$ TRAIN - $\Delta$ CTRL. The effects of different volume conditions and general time-course patterns were assessed using all pairwise observations from the TRAIN group. For protein and total RNA data, segmented regression models were used to estimate changes over sessions in three segments (session 1-4, 4-8 and 8-12; corresponding to blocks of different volume prescription in TRAIN). When no robust effects of volume conditions were detected, group averages are presented. Segmented models were fitted with time and volume condition as population effects and legs nested within participants as group level effects. Muscle strength, muscle thickness, protein and total RNA data was modeled after log transformation.
+Descriptive data are presented as mean and standard deviation (SD). The effect of training on muscle strength, muscle thickness, UBF/rpS6 protein, total RNA and gene abundances were assessed using mixed effects regression models. Time and group (TRAIN vs. CTRL) were treated as population (fixed) effects and leg nested within participant included as group level (random) effects. These analyses were performed on data with matching time points between TRAIN and CTRL with the exception that all post-training data from TRAIN were included (post-training and de-training). Relative interactions between groups were estimated as $\Delta$ TRAIN - $\Delta$ CTRL. The effects of different volume conditions and general time-course patterns were assessed using all pairwise observations from the TRAIN group. For protein and total RNA data, segmented regression models were used to estimate changes over sessions in three segments (session 1-4, 4-8 and 8-12; corresponding to blocks of different volume prescription in TRAIN). When no robust effects of volume conditions were detected, group averages are presented. Segmented models were fitted with time and volume condition as population effects and legs nested within participants as group level effects. Muscle strength, muscle thickness, protein and total RNA data was modeled after log transformation.
 
 Gene abundance data were fitted with number of sessions as a categorical variable in comparisons of volume conditions, and Cq values converted to counts as suggested by Matz et al[@RN1964]. A Poisson-lognormal model was used to fit these count data, using data from all genes and including group level effects for each technical duplicate, controlling for technical errors during sample preparation. An offset consisting of a normalization factor proportional to the amount of muscle used to prepare cDNA was used to model gene abundance per tissue weight. The external reference gene was used to calculate the normalization factor (External reference counts $\times$ muscle weight (mg) in each Trizol preparation). The offset was specified as a predictor with the coefficient fixed to 1.
 
@@ -923,7 +883,7 @@ library(flextable); library(officer)
 ```{r table1-regression-models-muscle-thickness}
 # Save model 
 
-# Model for RPS6 predicting total RNA
+# Model for rpS6 predicting total RNA
 comb.s6.m1 <- readRDS("./data/derivedData/ubf-tot-rna-model/comb_m1_s6.RDS")
 
 
@@ -958,7 +918,7 @@ reg_results_s6 <-
       comb.s6.m1$random$`participant:leg`, 
       comb.s6.m1$spec_pars), 
       data.frame(coef = c("Intercept", 
-                          "RPS6 protein levels (SD-units)", 
+                          "rpS6 protein levels (SD-units)", 
                           "Session 1-4",
                           "Session 4-8", 
                           "Session 8-12", 
@@ -988,7 +948,7 @@ std_border = fp_border(color="black", width = 2)
                     Est.Error = "SD", 
                     lwr = "Lower 95% CI", 
                     upr = "Upper 95% CI") %>%
-    add_header_lines(values = "Table 1. Effect of UBF and RPS6 levels, sessions and de-training on RNA-levels.") %>%
+    add_header_lines(values = "Table 1. Effect of UBF and rpS6 levels, sessions and de-training on RNA-levels.") %>%
   
  # bold(i = c(5, 6, 13, 14, 20, 21), j = c(2:6), bold = TRUE) %>%
   
@@ -1244,7 +1204,7 @@ primer_table %>%
 <span custom-style="CHANGE">
 **Figure 1.**  (A) Study design showing muscle biopsy sampling, thickness and strength assessments time points together with number of sets per session (CONST blue bars, VAR red bars). Assessments time points in the negative control group is shown in the lower panel. (B) Observed training loads in response to CONST and VAR volume protocols. Training outcomes are shown as within condition changes and in comparison to the control group (muscle strength, C; muscle thickness D). Intervals in C and D indicate 95% CI.
 
-**Figure 2.** Protein (A and B) and mRNA abundances (D and E) of RPS6 and UBF. Non-transparent gray points and error bars represent statistically robust results (a 95\% CI not containing 0). C shows western blots and total protein stains from a representative participant. mRNA data are normalized per total RNA. Intervals in A, B, D, and E indicate 95% CI.
+**Figure 2.** Protein (A and B) and mRNA abundances (D and E) of rpS6 and UBF. Non-transparent gray points and error bars represent statistically robust results (a 95\% CI not containing 0). C shows western blots and total protein stains from a representative participant. mRNA data are normalized per total RNA. Intervals in A, B, D, and E indicate 95% CI.
 
 
 **Figure 3.** Total RNA and ribosomal RNA subspecies in response to resistance training. (A) shows primer locations targeting different ribosomal RNA subspecies in qPCR analyses. Ribosomal RNA species measured by qPCR and compared to control was affected by training (B, C), but did not show clear differences between volume conditions (D). Total RNA increased compared to non-training controls to post-training (12 sessions) and tended to normalize after de-training (E, F). Time-course analysis revealed the greatest increase during the first four sessions (G). Error bars shows 95\% CI. Asterisk in D indicates robust differences between volume conditions (a 95\% CI of pairwise differences not containing 0). Points in D and G show abundances after de-training for reference.
